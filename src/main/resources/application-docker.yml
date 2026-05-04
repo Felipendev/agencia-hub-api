@@ -1,0 +1,7 @@
+# Use with: SPRING_PROFILES_ACTIVE=docker
+# Matches docker-compose.yml (Postgres on host port 5433 to avoid clashing with a local PostgreSQL on 5432).
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:agenciahub}
+    username: ${DB_USER:agenciahub}
+    password: ${DB_PASSWORD:agenciahub}

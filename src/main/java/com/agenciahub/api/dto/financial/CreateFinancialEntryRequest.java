@@ -1,0 +1,23 @@
+package com.agenciahub.api.dto.financial;
+
+import com.agenciahub.api.domain.FinancialEntryCategory;
+import com.agenciahub.api.domain.FinancialEntryStatus;
+import com.agenciahub.api.domain.FinancialEntryType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
+
+public record CreateFinancialEntryRequest(
+        @NotBlank String description,
+        @NotNull FinancialEntryType type,
+        @NotNull FinancialEntryCategory category,
+        @NotNull BigDecimal amount,
+        @NotNull LocalDate entryDate,
+        @NotNull FinancialEntryStatus status,
+        UUID customerId,
+        String bankAccount
+) {
+}

@@ -1,0 +1,54 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  servlet:
+    context-path: /api/v1
+
+spring:
+  application:
+    name: agencia-hub-api
+  datasource:
+    # Default: PostgreSQL on localhost:5432. If auth fails, see README (wrong host vs Docker, or stale volume).
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:agenciahub}
+    username: ${DB_USER:agenciahub}
+    password: ${DB_PASSWORD:agenciahub}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+  show-actuator: false
+  packages-to-scan: com.agenciahub.api.controller
+
+# Swagger "Servers" URL for Try it out (override in prod)
+openapi:
+  server-url: ${OPENAPI_SERVER_URL:http://localhost:8080/api/v1}
+
+# JWT — override JWT_SECRET in production with a 256-bit+ random value
+jwt:
+  secret: ${JWT_SECRET:agenciahub-dev-secret-change-in-production-min32chars}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}   # 24 h
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.agenciahub: DEBUG
