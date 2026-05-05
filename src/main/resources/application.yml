@@ -43,10 +43,14 @@ springdoc:
 openapi:
   server-url: ${OPENAPI_SERVER_URL:http://localhost:8080/api/v1}
 
-# JWT — override JWT_SECRET in production with a 256-bit+ random value
+# JWT
 jwt:
   secret: ${JWT_SECRET:agenciahub-dev-secret-change-in-production-min32chars}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}   # 24 h
+
+# CORS — lista de origens separadas por virgula (ou * para dev)
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
 
 logging:
   level:
