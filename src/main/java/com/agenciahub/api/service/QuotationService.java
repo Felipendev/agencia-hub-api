@@ -56,7 +56,6 @@ public class QuotationService {
         final boolean hasSearch = !trimmed.isEmpty();
 
         return (root, query, cb) -> {
-            query.distinct(true);
             List<Predicate> predicates = new ArrayList<>();
 
             if (customerId != null) {
