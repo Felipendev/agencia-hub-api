@@ -62,6 +62,7 @@ public class AuthService {
 
     // ─── Login (Task 12.1) ───────────────────────────────────────────────────────
 
+    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email().trim().toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException("Credenciais inválidas"));
