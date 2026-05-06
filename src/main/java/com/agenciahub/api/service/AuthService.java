@@ -44,7 +44,8 @@ public class AuthService {
 
     // Whitelist: only allowed emails can register during beta
     private static final Set<String> ALLOWED_OWNER_EMAILS = Set.of(
-        "contato@agenciashub.com.br"
+        "contato@agenciashub.com.br",
+        "consultoria.andressaviagens@gmail.com"
     );
 
     private static final Set<String> ALLOWED_SELLER_EMAILS = Set.of(
@@ -375,10 +376,7 @@ public class AuthService {
         // Check email uniqueness
         String email = invitation.getEmail().trim().toLowerCase();
 
-        // Whitelist check: only allowed emails can register during beta
-        if (!ALLOWED_SELLER_EMAILS.contains(email)) {
-            throw new IllegalArgumentException("O sistema está em fase de testes. Cadastro restrito por convite.");
-        }
+        // Seller registration is authorized by the invitation itself — no whitelist needed
 
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Este e-mail já está cadastrado");
