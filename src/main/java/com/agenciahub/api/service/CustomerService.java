@@ -26,13 +26,13 @@ public class CustomerService {
         boolean hasName = name != null && !name.isBlank();
         List<Customer> rows;
         if (!hasName && status == null) {
-            rows = customerRepository.findAllByOrderByCreatedAtDesc();
+            rows = customerRepository.findByDeletedAtIsNullOrderByCreatedAtDesc();
         } else if (hasName && status == null) {
-            rows = customerRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc(name.strip());
+            rows = customerRepository.findByDeletedAtIsNullAndNameContainingIgnoreCaseOrderByCreatedAtDesc(name.strip());
         } else if (!hasName) {
-            rows = customerRepository.findByStatusOrderByCreatedAtDesc(status);
+            rows = customerRepository.findByDeletedAtIsNullAndStatusOrderByCreatedAtDesc(status);
         } else {
-            rows = customerRepository.findByNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
+            rows = customerRepository.findByDeletedAtIsNullAndNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
                     name.strip(), status);
         }
         return rows.stream().map(this::toResponse).toList();
@@ -40,7 +40,7 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public CustomerResponse getById(UUID id) {
-        return customerRepository.findById(id)
+        return customerRepository.findByIdAndDeletedAtIsNull(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
     }
@@ -102,6 +102,30 @@ public class CustomerService {
         return toResponse(entity);
     }
 
+    // ── Soft-delete operations ──────────────────────────────────────────────
+
+    @Transactional
+    public void softDelete(UUID id) {
+        Customer entity = customerRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado: " + id));
+        entity.setDeletedAt(java.time.Instant.now());
+        // NÃO faz cascata nas cotações associadas
+    }
+
+    @Transactional
+    public CustomerResponse restore(UUID id) {
+        Customer entity = customerRepository.findByIdAndDeletedAtIsNotNull(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado na lixeira: " + id));
+        entity.setDeletedAt(null);
+        return toResponse(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CustomerResponse> listDeleted() {
+        return customerRepository.findByDeletedAtIsNotNullOrderByDeletedAtDesc().stream()
+                .map(this::toResponse).toList();
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     /** Remove tudo que não for dígito. */
@@ -119,7 +143,8 @@ public class CustomerService {
                 c.getInterestDestination(),
                 c.getStatus(),
                 c.getNotes(),
-                c.getCreatedAt()
+                c.getCreatedAt(),
+                c.getDeletedAt()
         );
     }
 }

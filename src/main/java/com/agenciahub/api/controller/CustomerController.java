@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,5 +57,12 @@ public class CustomerController {
     @Operation(summary = "Partially update customer")
     public CustomerResponse patch(@PathVariable UUID id, @RequestBody UpdateCustomerRequest request) {
         return customerService.update(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Soft-delete a customer")
+    public void delete(@PathVariable UUID id) {
+        customerService.softDelete(id);
     }
 }
