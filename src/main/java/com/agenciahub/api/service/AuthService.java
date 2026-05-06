@@ -35,11 +35,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    // Whitelist: only allowed emails can register during beta
+    private static final Set<String> ALLOWED_OWNER_EMAILS = Set.of(
+        "contato@agenciashub.com.br"
+    );
+
+    private static final Set<String> ALLOWED_SELLER_EMAILS = Set.of(
+        "felipehenrique.pds@gmail.com"
+    );
 
     private final UserRepository userRepository;
     private final AgencyRepository agencyRepository;
@@ -104,6 +114,11 @@ public class AuthService {
     @Transactional
     public RegisterAgencyResponse register(RegisterAgencyRequest request, String ipAddress) {
         String email = request.email().trim().toLowerCase();
+
+        // Whitelist check: only allowed emails can register during beta
+        if (!ALLOWED_OWNER_EMAILS.contains(email)) {
+            throw new IllegalArgumentException("O sistema está em fase de testes. Cadastro restrito por convite.");
+        }
 
         // Validate email uniqueness (case-insensitive)
         if (userRepository.existsByEmail(email)) {
@@ -358,6 +373,12 @@ public class AuthService {
 
         // Check email uniqueness
         String email = invitation.getEmail().trim().toLowerCase();
+
+        // Whitelist check: only allowed emails can register during beta
+        if (!ALLOWED_SELLER_EMAILS.contains(email)) {
+            throw new IllegalArgumentException("O sistema está em fase de testes. Cadastro restrito por convite.");
+        }
+
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Este e-mail já está cadastrado");
         }
