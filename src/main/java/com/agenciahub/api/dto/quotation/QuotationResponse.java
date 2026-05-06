@@ -32,6 +32,7 @@ public record QuotationResponse(
         String assignee,
         String internalNotes,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        Instant deletedAt
 ) {
 }

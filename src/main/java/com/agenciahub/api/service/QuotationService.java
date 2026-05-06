@@ -58,6 +58,9 @@ public class QuotationService {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            // Sempre excluir registros soft-deleted
+            predicates.add(cb.isNull(root.get("deletedAt")));
+
             if (customerId != null) {
                 predicates.add(cb.equal(root.join("customer").get("id"), customerId));
             }
@@ -76,8 +79,7 @@ public class QuotationService {
                 predicates.add(cb.or(titlePred, destPred, namePred));
             }
 
-            return predicates.isEmpty() ? cb.conjunction()
-                    : cb.and(predicates.toArray(Predicate[]::new));
+            return cb.and(predicates.toArray(Predicate[]::new));
         };
     }
 
@@ -87,7 +89,7 @@ public class QuotationService {
 
     @Transactional(readOnly = true)
     public QuotationResponse getById(UUID id) {
-        return quotationRepository.findById(id)
+        return quotationRepository.findActiveById(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Quotation not found: " + id));
     }
@@ -160,6 +162,29 @@ public class QuotationService {
         return toResponse(entity);
     }
 
+    // ─── Soft-delete operations ─────────────────────────────────────────────
+
+    @Transactional
+    public void softDelete(UUID id) {
+        Quotation entity = quotationRepository.findActiveById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cotação não encontrada: " + id));
+        entity.setDeletedAt(java.time.Instant.now());
+    }
+
+    @Transactional
+    public QuotationResponse restore(UUID id) {
+        Quotation entity = quotationRepository.findDeletedById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cotação não encontrada na lixeira: " + id));
+        entity.setDeletedAt(null);
+        return toResponse(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<QuotationResponse> listDeleted() {
+        return quotationRepository.findAllDeleted().stream()
+                .map(this::toResponse).toList();
+    }
+
     // ─── Helpers ─────────────────────────────────────────────────────────────
 
     private static String blankToNull(String value) {
@@ -211,7 +236,8 @@ public class QuotationService {
                 q.getAssignee(),
                 q.getInternalNotes() != null ? q.getInternalNotes() : "",
                 q.getCreatedAt(),
-                q.getUpdatedAt()
+                q.getUpdatedAt(),
+                q.getDeletedAt()
         );
     }
 }
