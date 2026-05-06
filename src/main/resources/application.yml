@@ -53,6 +53,14 @@ jwt:
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
 
+# Email sender address
+email:
+  from: ${EMAIL_FROM:contato@agenciashub.com.br}
+
+# Application base URL (used for invite links, etc.)
+app:
+  base-url: ${APP_BASE_URL:https://agenciashub.com.br}
+
 logging:
   level:
     org.springframework.web: INFO

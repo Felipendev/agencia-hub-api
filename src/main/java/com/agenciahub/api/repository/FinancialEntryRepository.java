@@ -18,4 +18,9 @@ public interface FinancialEntryRepository extends JpaRepository<FinancialEntry, 
     @EntityGraph(attributePaths = "customer")
     @Override
     java.util.List<FinancialEntry> findAll();
+
+    // ── Multi-tenancy (agency_id filtering) ──────────────────────────────────
+
+    @EntityGraph(attributePaths = "customer")
+    java.util.List<FinancialEntry> findByAgency_IdOrderByEntryDateDesc(UUID agencyId);
 }
