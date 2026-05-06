@@ -1,6 +1,6 @@
 package com.agenciahub.api.entity;
 
-import com.agenciahub.api.domain.OpportunityStatus;
+import com.agenciahub.api.domain.VerificationCodeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,54 +19,60 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "opportunities")
+@Table(name = "verification_codes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Opportunity {
+public class VerificationCode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agency_id", nullable = false)
-    private Agency agency;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    @Column(nullable = false, length = 320)
+    private String email;
 
-    @Column(nullable = false, length = 512)
-    private String title;
-
-    @Column(nullable = false, length = 512)
-    private String destination;
-
-    @Column(name = "estimated_amount", nullable = false, precision = 19, scale = 2)
-    private BigDecimal estimatedAmount;
+    @Column(name = "code_hash", nullable = false, length = 255)
+    private String codeHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
-    private OpportunityStatus status;
+    private VerificationCodeType type;
 
-    @Column(name = "expected_travel_date", nullable = false)
-    private LocalDate expectedTravelDate;
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer attempts = 0;
 
-    @Column(nullable = false, columnDefinition = "text")
-    private String notes;
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean used = Boolean.FALSE;
+
+    @Column(name = "expires_at", nullable = false)
+    private Instant expiresAt;
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
     @PrePersist
     void prePersist() {
-        if (notes == null) {
-            notes = "";
+        if (createdAt == null) {
+            createdAt = Instant.now();
+        }
+        if (attempts == null) {
+            attempts = 0;
+        }
+        if (used == null) {
+            used = Boolean.FALSE;
         }
     }
 }

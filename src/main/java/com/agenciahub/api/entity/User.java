@@ -5,9 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -33,6 +36,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "agency_id", nullable = false)
+    private Agency agency;
+
     @Column(nullable = false, length = 255)
     private String name;
 
@@ -57,6 +64,16 @@ public class User {
     /** Commission as fixed amount per approved quotation. Mutually exclusive with commissionPct. */
     @Column(name = "commission_fixed", precision = 19, scale = 2)
     private BigDecimal commissionFixed;
+
+    @Column(length = 32)
+    private String phone;
+
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private Boolean emailVerified = Boolean.FALSE;
+
+    @Column(name = "password_changed_at")
+    private Instant passwordChangedAt;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

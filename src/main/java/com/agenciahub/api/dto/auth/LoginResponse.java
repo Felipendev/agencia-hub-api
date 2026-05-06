@@ -1,7 +1,10 @@
 package com.agenciahub.api.dto.auth;
 
+import com.agenciahub.api.domain.AgencyStatus;
+import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.UserRole;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record LoginResponse(
@@ -9,6 +12,11 @@ public record LoginResponse(
         UUID userId,
         String name,
         String email,
-        UserRole role
+        UserRole role,
+        UUID agencyId,
+        String agencyName,
+        AgencyStatus agencyStatus,
+        SubscriptionStatus subscriptionStatus,
+        Instant trialEndsAt
 ) {
 }
