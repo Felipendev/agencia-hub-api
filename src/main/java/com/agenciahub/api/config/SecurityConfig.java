@@ -39,8 +39,16 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Public: login + Swagger + public form endpoints
+                // Public: auth endpoints
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/verify-email").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/resend-code").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/forgot-password").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/reset-password").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/register-invite").permitAll()
+                .requestMatchers("/auth/invite/**").permitAll()
+                // Swagger / API docs
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",

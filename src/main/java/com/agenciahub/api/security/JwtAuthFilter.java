@@ -50,6 +50,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Validate password_changed_at: reject tokens issued before a password change
+        Long tokenPasswordChangedAt = jwtService.extractPasswordChangedAt(token);
+        if (user.getPasswordChangedAt() != null) {
+            long userPasswordChangedEpoch = user.getPasswordChangedAt().getEpochSecond();
+            if (tokenPasswordChangedAt == null || tokenPasswordChangedAt < userPasswordChangedEpoch) {
+                // Token was issued before the password was changed — reject it
+                chain.doFilter(request, response);
+                return;
+            }
+        }
+
+        // Extract agency_id from token and set TenantContext
+        UUID agencyId = jwtService.extractAgencyId(token);
+        if (agencyId != null) {
+            TenantContext.set(agencyId);
+        } else if (user.getAgency() != null) {
+            // Fallback: use agency from user entity (for legacy tokens without agency_id claim)
+            TenantContext.set(user.getAgency().getId());
+        }
+
         var auth = new UsernamePasswordAuthenticationToken(
                 user,
                 null,
