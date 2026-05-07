@@ -3,7 +3,7 @@ package com.agenciahub.api.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 
 /**
  * SMTP-based implementation of {@link EmailService}.
- * Only activated when {@code spring.mail.host} is configured.
+ * Activated when spring.mail.host is a non-empty string.
  * Sends are fire-and-forget: errors are logged but not propagated.
  */
 @Service
-@ConditionalOnProperty(name = "spring.mail.host", matchIfMissing = false)
+@ConditionalOnExpression("!'${spring.mail.host:}'.isEmpty()")
 public class SmtpEmailService implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpEmailService.class);
