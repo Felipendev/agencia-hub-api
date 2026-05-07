@@ -115,8 +115,9 @@ public class AgencyController {
 
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UUID userId = UUID.fromString(authentication.getName());
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        if (authentication.getPrincipal() instanceof User user) {
+            return user;
+        }
+        throw new ResourceNotFoundException("Usuário não encontrado");
     }
 }

@@ -114,6 +114,9 @@ public class AuthController {
         if (authentication == null || authentication.getPrincipal() == null) {
             throw new IllegalStateException("Usuário não autenticado");
         }
+        if (authentication.getPrincipal() instanceof User user) {
+            return user.getId();
+        }
         return UUID.fromString(authentication.getName());
     }
 
