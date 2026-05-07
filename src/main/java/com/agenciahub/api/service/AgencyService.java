@@ -81,6 +81,14 @@ public class AgencyService {
             agency.setCommercialEmail(request.commercialEmail());
         }
 
+        if (request.logoUrl() != null) {
+            if (!request.logoUrl().isEmpty() && !request.logoUrl().startsWith("data:image/")) {
+                throw new IllegalArgumentException("Logo deve ser uma imagem válida");
+            }
+            auditField(agency, currentUser, "logo_url", agency.getLogoUrl(), "(logo updated)");
+            agency.setLogoUrl(request.logoUrl().isEmpty() ? null : request.logoUrl());
+        }
+
         return agencyRepository.save(agency);
     }
 

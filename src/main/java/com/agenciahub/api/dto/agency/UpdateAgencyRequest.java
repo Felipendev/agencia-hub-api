@@ -7,6 +7,7 @@ public record UpdateAgencyRequest(
         @Size(max = 32) String phone,
         @Size(max = 18) String cnpj,
         String address,
-        @Size(max = 320) String commercialEmail
+        @Size(max = 320) String commercialEmail,
+        String logoUrl
 ) {
 }
