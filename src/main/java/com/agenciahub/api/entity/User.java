@@ -75,6 +75,10 @@ public class User {
     @Column(name = "password_changed_at")
     private Instant passwordChangedAt;
 
+    @Column(name = "must_change_password", nullable = false)
+    @Builder.Default
+    private Boolean mustChangePassword = Boolean.FALSE;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

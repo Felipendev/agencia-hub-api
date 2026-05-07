@@ -17,6 +17,7 @@ public record LoginResponse(
         String agencyName,
         AgencyStatus agencyStatus,
         SubscriptionStatus subscriptionStatus,
-        Instant trialEndsAt
+        Instant trialEndsAt,
+        Boolean mustChangePassword
 ) {
 }

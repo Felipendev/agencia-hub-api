@@ -1,12 +1,17 @@
 server:
   port: ${PORT:8080}
   shutdown: graceful
+  max-http-request-header-size: 64KB
   servlet:
     context-path: /api/v1
 
 spring:
   application:
     name: agencia-hub-api
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
   datasource:
     # Default: PostgreSQL on localhost:5432. If auth fails, see README (wrong host vs Docker, or stale volume).
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:agenciahub}
@@ -26,6 +31,14 @@ spring:
     enabled: true
     locations: classpath:db/migration
     repair-on-migrate: true
+  mail:
+    host: ${SMTP_HOST:smtp.zoho.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:contato@agenciashub.com.br}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 springdoc:
   api-docs:

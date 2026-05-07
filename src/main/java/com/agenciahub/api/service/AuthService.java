@@ -107,7 +107,8 @@ public class AuthService {
                 agency != null ? agency.getName() : null,
                 agency != null ? agency.getStatus() : null,
                 agency != null ? agency.getSubscriptionStatus() : null,
-                agency != null ? agency.getTrialEndsAt() : null
+                agency != null ? agency.getTrialEndsAt() : null,
+                Boolean.TRUE.equals(user.getMustChangePassword()) ? Boolean.TRUE : null
         );
     }
 
@@ -344,6 +345,7 @@ public class AuthService {
         // Update password and passwordChangedAt
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         user.setPasswordChangedAt(Instant.now());
+        user.setMustChangePassword(Boolean.FALSE);
         userRepository.save(user);
 
         return Map.of("message", "Senha alterada com sucesso");
