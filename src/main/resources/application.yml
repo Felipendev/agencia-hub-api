@@ -32,9 +32,9 @@ spring:
     locations: classpath:db/migration
     repair-on-migrate: true
   mail:
-    host: ${SMTP_HOST:}
+    host: ${SMTP_HOST:smtp.zoho.com}
     port: ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME:}
+    username: ${SMTP_USERNAME:contato@agenciashub.com.br}
     password: ${SMTP_PASSWORD:}
     properties:
       mail.smtp.auth: true

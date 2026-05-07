@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * Sends are fire-and-forget: errors are logged but not propagated.
  */
 @Service
-@ConditionalOnExpression("!'${spring.mail.host:}'.isEmpty()")
+@ConditionalOnExpression("!'${spring.mail.password:}'.isEmpty()")
 public class SmtpEmailService implements EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(SmtpEmailService.class);
