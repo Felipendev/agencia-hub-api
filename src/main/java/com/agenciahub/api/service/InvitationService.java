@@ -5,6 +5,7 @@ import com.agenciahub.api.entity.Invitation;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.InvitationRepository;
+import com.agenciahub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class InvitationService {
 
     private final InvitationRepository invitationRepository;
+    private final UserRepository userRepository;
     private final EmailService emailService;
 
     @Value("${app.base-url:http://localhost:3000}")
@@ -31,12 +33,16 @@ public class InvitationService {
      */
     @Transactional
     public Invitation createInvitation(String email, User inviter) {
+        // Reload user within transaction to access lazy-loaded agency
+        User managedInviter = userRepository.findById(inviter.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+
         String token = UUID.randomUUID().toString();
         String inviteUrl = baseUrl + "/convite/" + token;
 
         Invitation invitation = Invitation.builder()
-                .agency(inviter.getAgency())
-                .invitedBy(inviter)
+                .agency(managedInviter.getAgency())
+                .invitedBy(managedInviter)
                 .email(email.trim().toLowerCase())
                 .token(token)
                 .status(InvitationStatus.PENDING)
@@ -48,8 +54,8 @@ public class InvitationService {
         emailService.sendInvitation(
                 email.trim().toLowerCase(),
                 inviteUrl,
-                inviter.getAgency().getName(),
-                inviter.getName()
+                managedInviter.getAgency().getName(),
+                managedInviter.getName()
         );
 
         return invitation;
