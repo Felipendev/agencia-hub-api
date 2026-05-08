@@ -78,6 +78,31 @@ Tests use **H2** (in-memory) with the same Flyway migrations.
 
 JSON uses **camelCase**. Enums are **English** (e.g. `CustomerStatus`: `ACTIVE`, `INACTIVE`, `PROSPECT`).
 
+## Transactional e-mail (Resend)
+
+The stack targets **[Resend](https://resend.com)** over HTTPS (`443`). Set **`EMAIL_RESEND_API_KEY`** and **`EMAIL_FROM`** (verified sender/domain in Resend). This matches **Railway Free/Hobby/Trial**, where **outbound SMTP is disabled**; Railway documents transactional APIs (Resend, SendGrid, etc.) as the supported path.
+
+Routing lives in **`MailDispatchConfiguration`** (priority: Resend key → SMTP host+password+`JavaMailSender` → log). Copy for all mails is centralized in **`TransactionalMailBody`**; adding another HTTPS provider means implementing **`TransactionalMailChannel`** and one `if` branch.
+
+| Variable | Role |
+|----------|------|
+| `EMAIL_RESEND_API_KEY` | Resend API key (`re_...`) — **required for real sends** in production |
+| `EMAIL_FROM` | `From` header (must be allowed in Resend for your domain) |
+| `EMAIL_RESEND_CONNECT_TIMEOUT_MS` / `EMAIL_RESEND_READ_TIMEOUT_MS` | HTTP timeouts (defaults `15000` / `30000` ms) |
+
+Without `EMAIL_RESEND_API_KEY`, a **no-op channel** logs subjects and bodies (`[EMAIL-NOOP]`) instead of sending — fine for local dev.
+
+### Optional SMTP (Railway Pro+ or self-hosted)
+
+Only if you deliberately use JavaMail: set **`SMTP_HOST`**, **`SMTP_USERNAME`**, **`SMTP_PASSWORD`**, and **`EMAIL_FROM`**, and **leave `EMAIL_RESEND_API_KEY` unset** (Resend always wins when the key is present).
+
+| Variable | Role |
+|----------|------|
+| `SMTP_HOST` | e.g. `smtp.zoho.com` |
+| `SMTP_PORT` | Default `587` |
+| `SMTP_USERNAME` / `SMTP_PASSWORD` | Mailbox credentials |
+| `SMTP_CONNECTION_TIMEOUT_MS` / `SMTP_READ_TIMEOUT_MS` / `SMTP_WRITE_TIMEOUT_MS` | Socket timeouts (default `15000` ms) |
+
 ## Configuration
 
 Environment / `application.yml` overrides:
@@ -85,6 +110,8 @@ Environment / `application.yml` overrides:
 | Variable     | Default     |
 |-------------|-------------|
 | `PORT`      | `8080`      |
+| `EMAIL_FROM` | `contato@agenciashub.com.br` |
+| `EMAIL_RESEND_API_KEY` | _(empty — use for real mail)_ |
 | `DB_HOST`   | `localhost` |
 | `DB_PORT`   | `5432` (use `5433` with bundled Docker + `docker` profile) |
 | `DB_NAME`   | `agenciahub` |
