@@ -23,7 +23,8 @@ import com.agenciahub.api.service.email.TransactionalMail;
 import com.agenciahub.api.service.email.TransactionalMailChannel;
 
 /**
- * Picks one {@link TransactionalMailChannel}. To add a provider: implement the interface and add a branch here.
+ * Picks one {@link TransactionalMailChannel} by env priority (Resend -> SMTP -> log).
+ * To add a provider: implement the interface and add a selection branch here.
  */
 @Configuration
 public class MailDispatchConfiguration {
