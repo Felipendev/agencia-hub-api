@@ -78,6 +78,27 @@ Tests use **H2** (in-memory) with the same Flyway migrations.
 
 JSON uses **camelCase**. Enums are **English** (e.g. `CustomerStatus`: `ACTIVE`, `INACTIVE`, `PROSPECT`).
 
+## SMTP & outbound mail
+
+Transactional e-mail uses **`spring-boot-starter-mail`** (`SmtpEmailService`) when `SMTP_PASSWORD` is set. Defaults target **Zoho** (`smtp.zoho.com:587`, STARTTLS).
+
+| Variable | Role |
+|----------|------|
+| `SMTP_HOST` | SMTP host (default `smtp.zoho.com`) |
+| `SMTP_PORT` | Port (default `587`) |
+| `SMTP_USERNAME` / `SMTP_PASSWORD` | Mailbox credentials |
+| `EMAIL_FROM` | `From` address |
+| `SMTP_CONNECTION_TIMEOUT_MS` / `SMTP_READ_TIMEOUT_MS` / `SMTP_WRITE_TIMEOUT_MS` | Socket timeouts (default `15000` ms) |
+
+**If logs show `MailConnectException` / `Connection timed out` to `smtp.zoho.com:587`:**
+
+1. **Outgoing SMTP blocked** — Many hosts block outbound **587** (and 25/465) from containers/serverless. Check your provider’s firewall, security groups, NetworkPolicies, or “disable SMTP” policies.
+2. **Sanity check from the same runtime** — `nc -zv smtp.zoho.com 587` or TLS probe; if it hangs, the problem is network, not JavaMail credentials.
+3. **Auth vs network** — A hang at TCP connect is almost always **egress**, not wrong password (those usually fail later with an SMTP error code).
+4. **Alternative** — Use an **HTTPS API** provider (Resend, SendGrid API, SES API) if SMTP egress is not allowed.
+
+If `SMTP_PASSWORD` is empty, **`LoggingEmailService`** is used instead (no network).
+
 ## Configuration
 
 Environment / `application.yml` overrides:
