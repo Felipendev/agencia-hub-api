@@ -1,5 +1,6 @@
 package com.agenciahub.api.service;
 
+import com.agenciahub.api.dto.auth.InviteValidationResponse;
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.entity.Invitation;
 import com.agenciahub.api.entity.User;
@@ -67,26 +68,18 @@ public class InvitationService {
      */
     @Transactional(readOnly = true)
     public Invitation validateToken(String token) {
-        Invitation invitation = invitationRepository.findByToken(token)
+        Invitation invitation = invitationRepository.findWithAgencyByToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("Convite não encontrado"));
-
-        if (invitation.getStatus() == InvitationStatus.ACCEPTED) {
-            throw new IllegalStateException("Este convite já foi utilizado");
-        }
-
-        if (invitation.getStatus() == InvitationStatus.REVOKED) {
-            throw new IllegalStateException("Este convite foi cancelado");
-        }
-
-        if (Instant.now().isAfter(invitation.getExpiresAt())) {
-            throw new IllegalStateException("Este convite expirou");
-        }
-
-        if (invitation.getStatus() != InvitationStatus.PENDING) {
-            throw new IllegalStateException("Este convite não está mais disponível");
-        }
-
+        ensureTokenIsUsable(invitation);
         return invitation;
+    }
+
+    @Transactional(readOnly = true)
+    public InviteValidationResponse validateTokenDetails(String token) {
+        Invitation invitation = invitationRepository.findWithAgencyByToken(token)
+                .orElseThrow(() -> new ResourceNotFoundException("Convite não encontrado"));
+        ensureTokenIsUsable(invitation);
+        return new InviteValidationResponse(invitation.getEmail(), invitation.getAgency().getName());
     }
 
     /**
@@ -122,5 +115,23 @@ public class InvitationService {
      */
     public String buildInviteUrl(String token) {
         return baseUrl + "/convite/" + token;
+    }
+
+    private void ensureTokenIsUsable(Invitation invitation) {
+        if (invitation.getStatus() == InvitationStatus.ACCEPTED) {
+            throw new IllegalStateException("Este convite já foi utilizado");
+        }
+
+        if (invitation.getStatus() == InvitationStatus.REVOKED) {
+            throw new IllegalStateException("Este convite foi cancelado");
+        }
+
+        if (Instant.now().isAfter(invitation.getExpiresAt())) {
+            throw new IllegalStateException("Este convite expirou");
+        }
+
+        if (invitation.getStatus() != InvitationStatus.PENDING) {
+            throw new IllegalStateException("Este convite não está mais disponível");
+        }
     }
 }

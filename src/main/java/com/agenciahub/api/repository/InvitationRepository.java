@@ -2,6 +2,7 @@ package com.agenciahub.api.repository;
 
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.entity.Invitation;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,6 +12,9 @@ import java.util.UUID;
 public interface InvitationRepository extends JpaRepository<Invitation, UUID> {
 
     Optional<Invitation> findByToken(String token);
+
+    @EntityGraph(attributePaths = "agency")
+    Optional<Invitation> findWithAgencyByToken(String token);
 
     List<Invitation> findByAgency_IdOrderByCreatedAtDesc(UUID agencyId);
 
