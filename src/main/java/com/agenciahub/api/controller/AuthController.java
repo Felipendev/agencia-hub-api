@@ -2,6 +2,7 @@ package com.agenciahub.api.controller;
 
 import com.agenciahub.api.dto.auth.ChangePasswordRequest;
 import com.agenciahub.api.dto.auth.ForgotPasswordRequest;
+import com.agenciahub.api.dto.auth.InviteValidationResponse;
 import com.agenciahub.api.dto.auth.LoginRequest;
 import com.agenciahub.api.dto.auth.LoginResponse;
 import com.agenciahub.api.dto.auth.RegisterAgencyRequest;
@@ -11,7 +12,6 @@ import com.agenciahub.api.dto.auth.ResendCodeRequest;
 import com.agenciahub.api.dto.auth.ResetPasswordRequest;
 import com.agenciahub.api.dto.auth.VerifyEmailRequest;
 import com.agenciahub.api.dto.auth.VerifyEmailResponse;
-import com.agenciahub.api.entity.Invitation;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.service.AuthService;
@@ -94,12 +94,8 @@ public class AuthController {
 
     @GetMapping("/invite/{token}")
     @Operation(summary = "Validate invite token and return invitation details")
-    public Map<String, String> validateInvite(@PathVariable String token) {
-        Invitation invitation = invitationService.validateToken(token);
-        return Map.of(
-                "email", invitation.getEmail(),
-                "agencyName", invitation.getAgency().getName()
-        );
+    public InviteValidationResponse validateInvite(@PathVariable String token) {
+        return invitationService.validateTokenDetails(token);
     }
 
     @PostMapping("/register-invite")
