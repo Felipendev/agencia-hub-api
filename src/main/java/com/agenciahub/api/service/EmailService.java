@@ -1,8 +1,8 @@
 package com.agenciahub.api.service;
 
 /**
- * Abstraction for sending transactional emails.
- * Implementations may use SMTP, SES, SendGrid, or simply log (for dev/test).
+ * Transactional outbound email. Implementation: {@link com.agenciahub.api.service.email.DefaultEmailService}.
+ * Transport is selected in {@link com.agenciahub.api.config.MailDispatchConfiguration} (Resend, SMTP, or log).
  */
 public interface EmailService {
 
