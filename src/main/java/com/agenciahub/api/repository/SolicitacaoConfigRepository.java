@@ -14,4 +14,7 @@ public interface SolicitacaoConfigRepository extends JpaRepository<SolicitacaoCo
     List<SolicitacaoConfig> findByAgency_Id(UUID agencyId);
 
     Optional<SolicitacaoConfig> findFirstBySlug(String slug);
+
+    /** Última configuração alterada da agência (para o painel sem slug fixo na URL). */
+    Optional<SolicitacaoConfig> findFirstByAgency_IdOrderByUpdatedAtDesc(UUID agencyId);
 }

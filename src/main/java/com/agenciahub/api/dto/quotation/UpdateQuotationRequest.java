@@ -27,6 +27,7 @@ public record UpdateQuotationRequest(
         List<String> tags,
         Boolean priority,
         String assignee,
-        String internalNotes
+        String internalNotes,
+        Boolean unsetSeller
 ) {
 }

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -37,6 +38,29 @@ public class SolicitacaoConfigService {
                 .orElseGet(() -> createDefault(agencyId, slug));
 
         return toResponse(config);
+    }
+
+    /**
+     * Painel autenticado: se {@code slug} vier preenchido, usa esse registro; senão devolve
+     * a configuração mais recentemente atualizada da agência (evita ficar preso em "demo"
+     * após o utilizador alterar o identificador do link).
+     */
+    @Transactional
+    public SolicitacaoConfigResponse getForAuthenticatedAgency(String slug) {
+        UUID agencyId = TenantContext.get();
+        if (agencyId == null) {
+            throw new IllegalStateException("Nenhuma agência no contexto do tenant");
+        }
+
+        if (slug != null && !slug.isBlank()) {
+            return getOrCreateDefault(slug.trim());
+        }
+
+        Optional<SolicitacaoConfig> latest = repository.findFirstByAgency_IdOrderByUpdatedAtDesc(agencyId);
+        if (latest.isPresent()) {
+            return toResponse(latest.get());
+        }
+        return toResponse(createDefault(agencyId, "demo"));
     }
 
     /**
