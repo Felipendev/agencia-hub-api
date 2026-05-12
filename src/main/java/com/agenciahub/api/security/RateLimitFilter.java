@@ -159,12 +159,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String ip = clientIp(request);
 
         Rule matched = null;
-        for (Rule rule : compiledRules) {
-            if (!rule.method.equalsIgnoreCase(method)) {
+        for (Rule candidate : compiledRules) {
+            if (!candidate.method().equalsIgnoreCase(method)) {
                 continue;
             }
-            if (matcher.match(rule.pattern, path)) {
-                matched = rule;
+            if (matcher.match(candidate.pattern(), path)) {
+                matched = candidate;
                 break;
             }
         }
@@ -174,10 +174,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
 
-        String bucketKey = matched.keyPrefix + ":" + ip;
+        final Rule matchedRule = matched;
+        String bucketKey = matchedRule.keyPrefix() + ":" + ip;
         Bucket bucket = buckets.computeIfAbsent(
                 bucketKey,
-                k -> Bucket.builder().addLimit(matched.bandwidth()).build());
+                k -> Bucket.builder().addLimit(matchedRule.bandwidth()).build());
 
         ConsumptionProbe probe = bucket.tryConsumeAndReturnRemaining(1);
         if (probe.isConsumed()) {
