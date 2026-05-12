@@ -12,3 +12,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: true
+
+# Testes: sem rate limit (evita 429 em MockMvc e contextLoads).
+agenciahub:
+  ratelimit:
+    enabled: false
