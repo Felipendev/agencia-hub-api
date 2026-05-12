@@ -1,6 +1,7 @@
 package com.agenciahub.api.controller;
 
 import com.agenciahub.api.domain.QuotationCreationSource;
+import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.quotation.CreateQuotationRequest;
 import com.agenciahub.api.dto.quotation.QuotationResponse;
