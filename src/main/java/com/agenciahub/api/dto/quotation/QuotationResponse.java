@@ -1,5 +1,6 @@
 package com.agenciahub.api.dto.quotation;
 
+import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -33,6 +34,10 @@ public record QuotationResponse(
         String internalNotes,
         Instant createdAt,
         Instant updatedAt,
-        Instant deletedAt
+        Instant deletedAt,
+        QuotationCreationSource creationSource,
+        UUID createdByUserId,
+        String createdByUserName,
+        UUID publicSubmissionId
 ) {
 }

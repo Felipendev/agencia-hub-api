@@ -1,5 +1,6 @@
 package com.agenciahub.api.service;
 
+import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.quotation.CreateQuotationRequest;
@@ -8,11 +9,13 @@ import com.agenciahub.api.dto.quotation.UpdateQuotationRequest;
 import com.agenciahub.api.entity.Customer;
 import com.agenciahub.api.entity.Opportunity;
 import com.agenciahub.api.entity.Quotation;
+import com.agenciahub.api.entity.SolicitacaoSubmission;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.CustomerRepository;
 import com.agenciahub.api.repository.OpportunityRepository;
 import com.agenciahub.api.repository.QuotationRepository;
+import com.agenciahub.api.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.repository.UserRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,7 @@ public class QuotationService {
     private final CustomerRepository customerRepository;
     private final OpportunityRepository opportunityRepository;
     private final UserRepository userRepository;
+    private final SolicitacaoSubmissionRepository solicitacaoSubmissionRepository;
 
     /**
      * Search quotations.
@@ -95,12 +99,27 @@ public class QuotationService {
     }
 
     @Transactional
-    public QuotationResponse create(CreateQuotationRequest request) {
+    public QuotationResponse create(CreateQuotationRequest request, User caller) {
         Customer customer = customerRepository.findById(request.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + request.customerId()));
 
         Opportunity opportunity = resolveOpportunity(request.opportunityId(), customer.getId());
-        User seller = resolveSeller(request.sellerId());
+        UUID agencyId = customer.getAgency().getId();
+        User seller = resolveSellerInAgency(request.sellerId(), agencyId);
+
+        SolicitacaoSubmission publicSub = null;
+        if (request.publicSubmissionId() != null) {
+            publicSub = solicitacaoSubmissionRepository.findById(request.publicSubmissionId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Public submission not found: " + request.publicSubmissionId()));
+            if (publicSub.getAgency() == null || !publicSub.getAgency().getId().equals(agencyId)) {
+                throw new IllegalArgumentException("Submissão pública não pertence a esta agência.");
+            }
+        }
+
+        QuotationCreationSource source = request.creationSource() != null
+                ? request.creationSource()
+                : (publicSub != null ? QuotationCreationSource.PUBLIC_FORM : QuotationCreationSource.INTERNAL);
 
         String description   = request.description() != null ? request.description() : "";
         String currency      = (request.currency() != null && !request.currency().isBlank())
@@ -111,6 +130,7 @@ public class QuotationService {
         String notes         = request.internalNotes() != null ? request.internalNotes().strip() : "";
 
         Quotation entity = Quotation.builder()
+                .agency(customer.getAgency())
                 .customer(customer)
                 .opportunity(opportunity)
                 .seller(seller)
@@ -128,6 +148,9 @@ public class QuotationService {
                 .priority(priority)
                 .assignee(blankToNull(request.assignee()))
                 .internalNotes(notes)
+                .creationSource(source)
+                .createdByUser(caller)
+                .publicSubmission(publicSub)
                 .build();
 
         return toResponse(quotationRepository.save(entity));
@@ -141,8 +164,10 @@ public class QuotationService {
         if (request.opportunityId() != null) {
             entity.setOpportunity(resolveOpportunity(request.opportunityId(), entity.getCustomer().getId()));
         }
-        if (request.sellerId() != null) {
-            entity.setSeller(resolveSeller(request.sellerId()));
+        if (Boolean.TRUE.equals(request.unsetSeller())) {
+            entity.setSeller(null);
+        } else if (request.sellerId() != null) {
+            entity.setSeller(resolveSellerInAgency(request.sellerId(), entity.getCustomer().getAgency().getId()));
         }
         if (request.title()         != null) entity.setTitle(request.title().strip());
         if (request.destination()   != null) entity.setDestination(request.destination().strip());
@@ -203,16 +228,30 @@ public class QuotationService {
         return op;
     }
 
-    private User resolveSeller(UUID sellerId) {
-        if (sellerId == null) return null;
-        return userRepository.findById(sellerId)
+    private User resolveSellerInAgency(UUID sellerId, UUID agencyId) {
+        if (sellerId == null) {
+            return null;
+        }
+        User u = userRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller not found: " + sellerId));
+        if (u.getAgency() == null || !u.getAgency().getId().equals(agencyId)) {
+            throw new IllegalArgumentException("Vendedor não pertence à agência deste cliente.");
+        }
+        if (u.getRole() != UserRole.SELLER && u.getRole() != UserRole.OWNER) {
+            throw new IllegalArgumentException("Usuário inválido como vendedor.");
+        }
+        return u;
     }
 
     private QuotationResponse toResponse(Quotation q) {
         Customer c  = q.getCustomer();
         Opportunity o = q.getOpportunity();
         User s      = q.getSeller();
+        User createdBy = q.getCreatedByUser();
+        QuotationCreationSource src = q.getCreationSource() != null
+                ? q.getCreationSource()
+                : QuotationCreationSource.INTERNAL;
+        UUID pubId = q.getPublicSubmission() != null ? q.getPublicSubmission().getId() : null;
         return new QuotationResponse(
                 q.getId(),
                 c.getId(),
@@ -237,7 +276,11 @@ public class QuotationService {
                 q.getInternalNotes() != null ? q.getInternalNotes() : "",
                 q.getCreatedAt(),
                 q.getUpdatedAt(),
-                q.getDeletedAt()
+                q.getDeletedAt(),
+                src,
+                createdBy != null ? createdBy.getId() : null,
+                createdBy != null ? createdBy.getName() : null,
+                pubId
         );
     }
 }

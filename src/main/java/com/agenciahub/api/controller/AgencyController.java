@@ -61,6 +61,7 @@ public class AgencyController {
                 agency.getLogoUrl(),
                 agency.getCnpj(),
                 agency.getAddress(),
+                agency.getAddressDetails(),
                 agency.getCommercialEmail(),
                 agency.getStatus(),
                 agency.getSubscriptionStatus(),

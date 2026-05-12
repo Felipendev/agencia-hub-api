@@ -1,5 +1,6 @@
 package com.agenciahub.api.dto.quotation;
 
+import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,6 +36,10 @@ public record CreateQuotationRequest(
         Boolean priority,
         String assignee,
         @Schema(description = "Internal team notes (not shown to the traveller).")
-        String internalNotes
+        String internalNotes,
+        @Schema(description = "INTERNAL (default) or PUBLIC_FORM when imported from public link.")
+        QuotationCreationSource creationSource,
+        @Schema(description = "ID of solicitacao_submissions row when created from public form import.")
+        UUID publicSubmissionId
 ) {
 }

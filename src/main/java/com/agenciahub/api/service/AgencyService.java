@@ -76,6 +76,16 @@ public class AgencyService {
             agency.setAddress(request.address());
         }
 
+        if (request.addressDetails() != null) {
+            auditField(
+                    agency,
+                    currentUser,
+                    "address_details",
+                    agency.getAddressDetails() == null ? null : agency.getAddressDetails().toString(),
+                    request.addressDetails().toString());
+            agency.setAddressDetails(request.addressDetails());
+        }
+
         if (request.commercialEmail() != null) {
             auditField(agency, currentUser, "commercial_email", agency.getCommercialEmail(), request.commercialEmail());
             agency.setCommercialEmail(request.commercialEmail());

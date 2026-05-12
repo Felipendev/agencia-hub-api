@@ -83,6 +83,24 @@ email:
 app:
   base-url: ${APP_BASE_URL:https://agenciashub.com.br}
 
+# Rate limit por IP (Bucket4j em memória; por instância). Atrás de proxy confiável, ative TRUST_X_FORWARDED_FOR=true.
+agenciahub:
+  ratelimit:
+    enabled: true
+    trust-x-forwarded-for: ${TRUST_X_FORWARDED_FOR:false}
+    public-submit-per-minute: ${RATE_LIMIT_PUBLIC_SUBMIT_PER_MINUTE:15}
+    public-config-get-per-minute: ${RATE_LIMIT_PUBLIC_CONFIG_GET_PER_MINUTE:120}
+    public-terms-get-per-minute: ${RATE_LIMIT_PUBLIC_TERMS_GET_PER_MINUTE:120}
+    auth-login-per-minute: ${RATE_LIMIT_AUTH_LOGIN_PER_MINUTE:30}
+    auth-register-per-hour: ${RATE_LIMIT_AUTH_REGISTER_PER_HOUR:15}
+    auth-forgot-password-per-hour: ${RATE_LIMIT_AUTH_FORGOT_PER_HOUR:8}
+    auth-resend-code-per-hour: ${RATE_LIMIT_AUTH_RESEND_PER_HOUR:10}
+    auth-verify-email-per-minute: ${RATE_LIMIT_AUTH_VERIFY_PER_MINUTE:40}
+    auth-reset-password-per-minute: ${RATE_LIMIT_AUTH_RESET_PER_MINUTE:20}
+    auth-register-invite-per-hour: ${RATE_LIMIT_AUTH_REGISTER_INVITE_PER_HOUR:15}
+    auth-invite-get-per-minute: ${RATE_LIMIT_AUTH_INVITE_GET_PER_MINUTE:60}
+    docs-get-per-minute: ${RATE_LIMIT_DOCS_GET_PER_MINUTE:120}
+
 logging:
   level:
     org.springframework.web: INFO

@@ -25,9 +25,9 @@ public class SolicitacaoConfigController {
     private final SolicitacaoConfigService service;
 
     @GetMapping
-    @Operation(summary = "Get solicitacao config for a given slug (creates default if not exists)")
-    public SolicitacaoConfigResponse get(@RequestParam(defaultValue = "demo") String slug) {
-        return service.getOrCreateDefault(slug);
+    @Operation(summary = "Get solicitacao config: optional slug; without slug returns latest for agency")
+    public SolicitacaoConfigResponse get(@RequestParam(required = false) String slug) {
+        return service.getForAuthenticatedAgency(slug);
     }
 
     @PutMapping
