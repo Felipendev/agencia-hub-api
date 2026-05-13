@@ -57,24 +57,6 @@ public class SolicitacaoConfigService {
         return response;
     }
 
-    /**
-     * Returns config for the current agency + slug, creating a default if not found.
-     * @deprecated Use getOrCreateForCurrentAgency() instead
-     */
-    @Transactional
-    public SolicitacaoConfigResponse getOrCreateDefault(String slug) {
-        UUID agencyId = TenantContext.get();
-        if (agencyId == null) {
-            throw new IllegalStateException("Nenhuma agência no contexto do tenant");
-        }
-
-        SolicitacaoConfig config = repository.findByAgency_IdAndSlug(agencyId, slug)
-                .or(() -> repository.findFirstByAgency_Id(agencyId))
-                .orElseGet(() -> createDefault(agencyId));
-
-        return toResponse(config);
-    }
-
     @Transactional
     public SolicitacaoConfigResponse upsert(SolicitacaoConfigRequest request) {
         UUID agencyId = TenantContext.get();

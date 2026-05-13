@@ -2,6 +2,7 @@ package com.agenciahub.api.entity;
 
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +18,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -48,6 +51,10 @@ public class Agency {
 
     @Column(columnDefinition = "text")
     private String address;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "address_details", columnDefinition = "jsonb")
+    private JsonNode addressDetails;
 
     @Column(name = "commercial_email", length = 320)
     private String commercialEmail;

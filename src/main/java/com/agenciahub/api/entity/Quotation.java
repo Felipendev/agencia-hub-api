@@ -1,6 +1,6 @@
 package com.agenciahub.api.entity;
 
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
@@ -61,6 +61,19 @@ public class Quotation {
     @JoinColumn(name = "seller_id")
     private User seller;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "creation_source", nullable = false, length = 32)
+    @Builder.Default
+    private QuotationCreationSource creationSource = QuotationCreationSource.INTERNAL;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private User createdByUser;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "public_submission_id")
+    private SolicitacaoSubmission publicSubmission;
+
     @Column(nullable = false, length = 512)
     private String title;
 
@@ -102,7 +115,7 @@ public class Quotation {
     @Column(nullable = false)
     private Boolean priority;
 
-    @Column(length = 255)
+    @Column()
     private String assignee;
 
     @Column(name = "internal_notes", nullable = false, columnDefinition = "text")

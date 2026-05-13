@@ -9,7 +9,6 @@ import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyAuditLogRepository;
 import com.agenciahub.api.repository.AgencyRepository;
-import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,6 @@ public class AgencyService {
 
     private final AgencyRepository agencyRepository;
     private final AgencyAuditLogRepository auditLogRepository;
-    private final UserRepository userRepository;
-
     /**
      * Creates a new agency with the given parameters.
      */
@@ -76,6 +73,16 @@ public class AgencyService {
             agency.setAddress(request.address());
         }
 
+        if (request.addressDetails() != null) {
+            auditField(
+                    agency,
+                    currentUser,
+                    "address_details",
+                    agency.getAddressDetails() == null ? null : agency.getAddressDetails().toString(),
+                    request.addressDetails().toString());
+            agency.setAddressDetails(request.addressDetails());
+        }
+
         if (request.commercialEmail() != null) {
             auditField(agency, currentUser, "commercial_email", agency.getCommercialEmail(), request.commercialEmail());
             agency.setCommercialEmail(request.commercialEmail());
@@ -101,17 +108,6 @@ public class AgencyService {
             throw new IllegalStateException("Nenhuma agência no contexto do tenant");
         }
         return getById(agencyId);
-    }
-
-    /**
-     * Updates the agency logo URL and records an audit log entry.
-     */
-    @Transactional
-    public Agency updateLogo(UUID agencyId, String logoUrl, User currentUser) {
-        Agency agency = getById(agencyId);
-        auditField(agency, currentUser, "logo_url", agency.getLogoUrl(), logoUrl);
-        agency.setLogoUrl(logoUrl);
-        return agencyRepository.save(agency);
     }
 
     /**

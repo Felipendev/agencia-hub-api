@@ -368,7 +368,8 @@ public class AuthService {
         }
 
         // Validate phone format (optional)
-        if (request.phone() != null && !request.phone().isBlank()) {
+        boolean valid = request.phone() != null && !request.phone().isBlank();
+        if (valid) {
             if (!PhoneValidator.isValid(request.phone())) {
                 throw new IllegalArgumentException("Formato de telefone inválido. Use DDD + número");
             }
@@ -391,7 +392,7 @@ public class AuthService {
                 .publicLinkCode(publicLinkCodeService.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(UserRole.SELLER)
-                .phone(request.phone() != null && !request.phone().isBlank()
+                .phone(valid
                         ? PhoneValidator.formatForStorage(request.phone()) : null)
                 .emailVerified(false)
                 .active(true)

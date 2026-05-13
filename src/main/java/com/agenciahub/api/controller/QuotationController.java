@@ -70,10 +70,12 @@ public class QuotationController {
                     request.totalAmount(), request.currency(), request.status(),
                     request.validUntil(), request.travelStartDate(), request.travelEndDate(),
                     request.details(), request.tags(), request.priority(),
-                    request.assignee(), request.internalNotes()
+                    request.assignee(), request.internalNotes(),
+                    request.creationSource(),
+                    request.publicSubmissionId()
             );
         }
-        return quotationService.create(request);
+        return quotationService.create(request, caller);
     }
 
     @PatchMapping("/{id}")
