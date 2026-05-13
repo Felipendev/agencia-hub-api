@@ -20,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByIdWithAgency(@Param("id") UUID id);
 
     boolean existsByEmail(String email);
+
+    boolean existsByPublicLinkCode(String publicLinkCode);
+
     List<User> findByRoleAndActiveTrue(UserRole role);
     List<User> findAllByOrderByNameAsc();
 }

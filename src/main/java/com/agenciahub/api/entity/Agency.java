@@ -34,13 +34,13 @@ public class Agency {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String name;
 
     @Column(length = 32)
     private String phone;
 
-    @Column(name = "logo_url", length = 1024)
+    @Column(name = "logo_url", columnDefinition = "text")
     private String logoUrl;
 
     @Column(length = 18)

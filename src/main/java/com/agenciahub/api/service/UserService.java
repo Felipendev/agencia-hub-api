@@ -21,6 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PublicLinkCodeService publicLinkCodeService;
 
     @Transactional(readOnly = true)
     public List<UserResponse> listAll() {
@@ -55,6 +56,7 @@ public class UserService {
         User user = User.builder()
                 .name(request.name().strip())
                 .email(request.email().trim().toLowerCase())
+                .publicLinkCode(publicLinkCodeService.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(request.role())
                 .active(Boolean.TRUE)

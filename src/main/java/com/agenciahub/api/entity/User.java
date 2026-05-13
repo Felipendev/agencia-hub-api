@@ -40,13 +40,17 @@ public class User {
     @JoinColumn(name = "agency_id", nullable = false)
     private Agency agency;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false, length = 320, unique = true)
     private String email;
 
-    @Column(name = "password_hash", nullable = false, length = 255)
+    /** Código público curto para links; preenchido pela aplicação (ver PublicLinkCodeService). */
+    @Column(name = "public_link_code", length = 16)
+    private String publicLinkCode;
+
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)

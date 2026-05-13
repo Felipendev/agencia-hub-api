@@ -48,10 +48,6 @@ public class AuthService {
         "consultoria.andressaviagens@gmail.com"
     );
 
-    private static final Set<String> ALLOWED_SELLER_EMAILS = Set.of(
-        "felipehenrique.pds@gmail.com"
-    );
-
     private final UserRepository userRepository;
     private final AgencyRepository agencyRepository;
     private final TermsAcceptanceRepository termsAcceptanceRepository;
@@ -60,8 +56,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final VerificationCodeService verificationCodeService;
     private final InvitationService invitationService;
-
-    // ─── Login (Task 12.1) ───────────────────────────────────────────────────────
+    private final PublicLinkCodeService publicLinkCodeService;
 
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
@@ -90,6 +85,8 @@ public class AuthService {
             throw new ResourceNotFoundException("Credenciais inválidas");
         }
 
+        String publicLinkCode = publicLinkCodeService.ensurePersistedForUserId(user.getId());
+
         String token = jwtService.generate(
                 user.getId(),
                 user.getRole().name(),
@@ -108,7 +105,8 @@ public class AuthService {
                 agency != null ? agency.getStatus() : null,
                 agency != null ? agency.getSubscriptionStatus() : null,
                 agency != null ? agency.getTrialEndsAt() : null,
-                Boolean.TRUE.equals(user.getMustChangePassword()) ? Boolean.TRUE : null
+                Boolean.TRUE.equals(user.getMustChangePassword()) ? Boolean.TRUE : null,
+                publicLinkCode
         );
     }
 
@@ -169,6 +167,7 @@ public class AuthService {
                 .agency(agency)
                 .name(request.ownerName())
                 .email(email)
+                .publicLinkCode(publicLinkCodeService.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(UserRole.OWNER)
                 .phone(PhoneValidator.formatForStorage(request.ownerPhone()))
@@ -185,7 +184,6 @@ public class AuthService {
                 .build();
         termsAcceptanceRepository.save(termsAcceptance);
 
-        // Generate and send verification code
         verificationCodeService.generateAndSend(
                 email,
                 VerificationCodeType.EMAIL_VERIFICATION,
@@ -199,8 +197,6 @@ public class AuthService {
                 "Código de verificação enviado para " + email
         );
     }
-
-    // ─── Email Verification (Task 11.2) ──────────────────────────────────────────
 
     @Transactional
     public VerifyEmailResponse verifyEmail(VerifyEmailRequest request) {
@@ -227,6 +223,8 @@ public class AuthService {
         agencyRepository.save(agency);
 
         // Generate JWT
+        String publicLinkCode = publicLinkCodeService.ensurePersistedForUserId(user.getId());
+
         String token = jwtService.generate(
                 user.getId(),
                 user.getRole().name(),
@@ -241,7 +239,8 @@ public class AuthService {
                 user.getEmail(),
                 user.getRole(),
                 agency.getId(),
-                agency.getName()
+                agency.getName(),
+                publicLinkCode
         );
     }
 
@@ -389,6 +388,7 @@ public class AuthService {
                 .agency(invitation.getAgency())
                 .name(request.name())
                 .email(email)
+                .publicLinkCode(publicLinkCodeService.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(UserRole.SELLER)
                 .phone(request.phone() != null && !request.phone().isBlank()

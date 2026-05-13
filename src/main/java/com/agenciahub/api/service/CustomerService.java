@@ -8,11 +8,15 @@ import com.agenciahub.api.entity.Customer;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.CustomerRepository;
+import com.agenciahub.api.repository.FinancialEntryRepository;
+import com.agenciahub.api.repository.OpportunityRepository;
+import com.agenciahub.api.repository.QuotationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -20,6 +24,9 @@ import java.util.UUID;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final QuotationRepository quotationRepository;
+    private final OpportunityRepository opportunityRepository;
+    private final FinancialEntryRepository financialEntryRepository;
 
     @Transactional(readOnly = true)
     public List<CustomerResponse> search(String name, CustomerStatus status) {
@@ -45,12 +52,33 @@ public class CustomerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
     }
 
+    @Transactional(readOnly = true)
+    public Optional<CustomerResponse> lookupActiveByContact(String email, String phone) {
+        if (email != null && !email.isBlank()) {
+            Optional<Customer> byEmail =
+                    customerRepository.findFirstByDeletedAtIsNullAndEmailIgnoreCase(email.strip());
+            if (byEmail.isPresent()) {
+                return Optional.of(toResponse(byEmail.get()));
+            }
+        }
+        if (phone != null && !phone.isBlank()) {
+            String norm = normalizePhone(phone);
+            if (!norm.isEmpty()) {
+                Optional<Customer> byPhone = customerRepository.findFirstActiveByNormalizedPhone(norm);
+                if (byPhone.isPresent()) {
+                    return Optional.of(toResponse(byPhone.get()));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     @Transactional
     public CustomerResponse create(CreateCustomerRequest request) {
         String email = request.email().strip();
         String phone = normalizePhone(request.phone());
 
-        if (!email.isEmpty() && customerRepository.existsByEmailIgnoreCase(email)) {
+        if (!email.isEmpty() && customerRepository.existsByDeletedAtIsNullAndEmailIgnoreCase(email)) {
             throw new DuplicateCustomerException("e-mail", email);
         }
         if (!phone.isEmpty() && customerRepository.existsByNormalizedPhone(phone)) {
@@ -79,7 +107,7 @@ public class CustomerService {
             String email = request.email().strip();
             if (!email.isEmpty()
                     && !email.equalsIgnoreCase(entity.getEmail())
-                    && customerRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+                    && customerRepository.existsByDeletedAtIsNullAndEmailIgnoreCaseAndIdNot(email, id)) {
                 throw new DuplicateCustomerException("e-mail", email);
             }
             entity.setEmail(email);
@@ -102,14 +130,15 @@ public class CustomerService {
         return toResponse(entity);
     }
 
-    // ── Soft-delete operations ──────────────────────────────────────────────
-
     @Transactional
-    public void softDelete(UUID id) {
+    public void delete(UUID id) {
         Customer entity = customerRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado: " + id));
-        entity.setDeletedAt(java.time.Instant.now());
-        // NÃO faz cascata nas cotações associadas
+        UUID customerId = entity.getId();
+        opportunityRepository.deleteByCustomer_Id(customerId);
+        quotationRepository.deleteAll(quotationRepository.findByCustomer_IdOrderByCreatedAtDesc(customerId));
+        financialEntryRepository.unlinkCustomer(customerId);
+        customerRepository.delete(entity);
     }
 
     @Transactional
@@ -126,9 +155,6 @@ public class CustomerService {
                 .map(this::toResponse).toList();
     }
 
-    // ── helpers ──────────────────────────────────────────────────────────────
-
-    /** Remove tudo que não for dígito. */
     private static String normalizePhone(String phone) {
         if (phone == null) return "";
         return phone.replaceAll("\\D", "");
