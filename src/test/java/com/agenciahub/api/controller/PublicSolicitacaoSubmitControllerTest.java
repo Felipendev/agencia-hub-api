@@ -57,6 +57,30 @@ class PublicSolicitacaoSubmitControllerTest {
     }
 
     @Test
+    void submit_withSellerPublicCode_returns201() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(submissionService.submit(any(PublicSolicitacaoSubmitRequest.class)))
+                .thenReturn(new PublicSolicitacaoSubmitResponse(true, id));
+
+        mockMvc.perform(post("/public/solicitacao/submit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "slug": "demo",
+                                  "nome": "Maria",
+                                  "email": "m@test.com",
+                                  "telefone": "11987654321",
+                                  "detalhes": { "origem": "SP", "destinosTrechos": ["SP — RJ"] },
+                                  "observacoes": "",
+                                  "sellerPublicCode": "abc123xyz456"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.ok").value(true))
+                .andExpect(jsonPath("$.id").value(id.toString()));
+    }
+
+    @Test
     void submit_invalidBody_returns400() throws Exception {
         mockMvc.perform(post("/public/solicitacao/submit")
                         .contentType(MediaType.APPLICATION_JSON)
