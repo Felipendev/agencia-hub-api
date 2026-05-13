@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,6 +41,16 @@ public class CustomerController {
         return customerService.search(name, status);
     }
 
+    @GetMapping("/lookup")
+    @Operation(summary = "Find active customer by e-mail or phone (import flow)")
+    public ResponseEntity<CustomerResponse> lookup(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phone) {
+        return customerService.lookupActiveByContact(email, phone)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get customer by id")
     public CustomerResponse get(@PathVariable UUID id) {
@@ -61,8 +72,8 @@ public class CustomerController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Soft-delete a customer")
+    @Operation(summary = "Permanently delete customer (and related quotations/opportunities)")
     public void delete(@PathVariable UUID id) {
-        customerService.softDelete(id);
+        customerService.delete(id);
     }
 }

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,7 +47,7 @@ class RateLimitFilterTest {
         MockHttpServletResponse blocked = new MockHttpServletResponse();
         filter.doFilter(postPublicSubmit("203.0.113.10"), blocked, chain);
         assertEquals(429, blocked.getStatus());
-        assertTrue(blocked.getHeader("Retry-After") != null && !blocked.getHeader("Retry-After").isBlank());
+        assertTrue(blocked.getHeader("Retry-After") != null && !Objects.requireNonNull(blocked.getHeader("Retry-After")).isBlank());
         assertTrue(blocked.getContentAsString().contains("TOO_MANY_REQUESTS"));
     }
 

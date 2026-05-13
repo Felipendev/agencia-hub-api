@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,47 +24,39 @@ public class SolicitacaoConfigService {
     private final ObjectMapper objectMapper;
 
     /**
-     * Returns config for the current agency + slug, creating a default if not found.
+     * Returns the config for the current agency, creating a default if not found.
+     * Each agency has exactly one solicitacao config.
+     * Falls back to agency logo if config has no specific logo.
      */
     @Transactional
-    public SolicitacaoConfigResponse getOrCreateDefault(String slug) {
+    public SolicitacaoConfigResponse getOrCreateForCurrentAgency() {
         UUID agencyId = TenantContext.get();
         if (agencyId == null) {
             throw new IllegalStateException("Nenhuma agência no contexto do tenant");
         }
 
-        SolicitacaoConfig config = repository.findByAgency_IdAndSlug(agencyId, slug)
-                .orElseGet(() -> createDefault(agencyId, slug));
+        SolicitacaoConfig config = repository.findFirstByAgency_Id(agencyId)
+                .orElseGet(() -> createDefault(agencyId));
 
-        return toResponse(config);
+        SolicitacaoConfigResponse response = toResponse(config);
+        // If config has no logo, use agency logo as fallback
+        if (response.logoDataUrl() == null || response.logoDataUrl().isBlank()) {
+            Agency agency = config.getAgency();
+            if (agency == null) agency = agencyService.getById(agencyId);
+            if (agency.getLogoUrl() != null && !agency.getLogoUrl().isBlank()) {
+                return new SolicitacaoConfigResponse(
+                        response.slug(),
+                        response.tituloPagina(),
+                        response.textoIntro(),
+                        agency.getLogoUrl(),
+                        response.nomeMarca(),
+                        response.linksSociais()
+                );
+            }
+        }
+        return response;
     }
 
-    /**
-     * Painel autenticado: se {@code slug} vier preenchido, usa esse registro; senão devolve
-     * a configuração mais recentemente atualizada da agência (evita ficar preso em "demo"
-     * após o utilizador alterar o identificador do link).
-     */
-    @Transactional
-    public SolicitacaoConfigResponse getForAuthenticatedAgency(String slug) {
-        UUID agencyId = TenantContext.get();
-        if (agencyId == null) {
-            throw new IllegalStateException("Nenhuma agência no contexto do tenant");
-        }
-
-        if (slug != null && !slug.isBlank()) {
-            return getOrCreateDefault(slug.trim());
-        }
-
-        Optional<SolicitacaoConfig> latest = repository.findFirstByAgency_IdOrderByUpdatedAtDesc(agencyId);
-        if (latest.isPresent()) {
-            return toResponse(latest.get());
-        }
-        return toResponse(createDefault(agencyId, "demo"));
-    }
-
-    /**
-     * Upserts config for the current agency.
-     */
     @Transactional
     public SolicitacaoConfigResponse upsert(SolicitacaoConfigRequest request) {
         UUID agencyId = TenantContext.get();
@@ -73,7 +64,7 @@ public class SolicitacaoConfigService {
             throw new IllegalStateException("Nenhuma agência no contexto do tenant");
         }
 
-        SolicitacaoConfig config = repository.findByAgency_IdAndSlug(agencyId, request.slug())
+        SolicitacaoConfig config = repository.findFirstByAgency_Id(agencyId)
                 .orElseGet(() -> {
                     Agency agency = agencyService.getById(agencyId);
                     return SolicitacaoConfig.builder()
@@ -82,6 +73,8 @@ public class SolicitacaoConfigService {
                             .build();
                 });
 
+        // Update all fields including slug (slug can be changed)
+        config.setSlug(request.slug());
         config.setTituloPagina(request.tituloPagina());
         config.setTextoIntro(request.textoIntro() != null ? request.textoIntro() : "");
         config.setLogoDataUrl(request.logoDataUrl());
@@ -96,23 +89,47 @@ public class SolicitacaoConfigService {
 
     /**
      * Returns config by slug only (no tenant context needed) — for public access.
+     * Falls back to agency logo if config has no specific logo.
      */
     @Transactional(readOnly = true)
     public SolicitacaoConfigResponse getPublicBySlug(String slug) {
         return repository.findFirstBySlug(slug)
-                .map(this::toResponse)
+                .map(config -> {
+                    SolicitacaoConfigResponse response = toResponse(config);
+                    if (response.logoDataUrl() == null || response.logoDataUrl().isBlank()) {
+                        Agency agency = config.getAgency();
+                        if (agency != null && agency.getLogoUrl() != null && !agency.getLogoUrl().isBlank()) {
+                            return new SolicitacaoConfigResponse(
+                                    response.slug(),
+                                    response.tituloPagina(),
+                                    response.textoIntro(),
+                                    agency.getLogoUrl(),
+                                    response.nomeMarca(),
+                                    response.linksSociais()
+                            );
+                        }
+                    }
+                    return response;
+                })
                 .orElse(defaultResponse(slug));
     }
 
-    private SolicitacaoConfig createDefault(UUID agencyId, String slug) {
+    private SolicitacaoConfig createDefault(UUID agencyId) {
         Agency agency = agencyService.getById(agencyId);
+        // Generate slug from agency name
+        String defaultSlug = agency.getName() != null
+                ? agency.getName().toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "")
+                : "minha-agencia";
+        if (defaultSlug.length() < 2) defaultSlug = "minha-agencia";
+        if (defaultSlug.length() > 64) defaultSlug = defaultSlug.substring(0, 64);
+
         SolicitacaoConfig config = SolicitacaoConfig.builder()
                 .agency(agency)
-                .slug(slug)
+                .slug(defaultSlug)
                 .tituloPagina("Solicitação de Orçamento")
                 .textoIntro("Preencha os dados abaixo em poucos minutos. Nossa equipe retorna o mais rápido possível, priorizando viagens com datas mais próximas.")
                 .logoDataUrl(null)
-                .nomeMarca("AgenciaHub")
+                .nomeMarca(agency.getName() != null ? agency.getName() : "AgênciasHub")
                 .linksSociais(defaultLinks())
                 .build();
         return repository.save(config);

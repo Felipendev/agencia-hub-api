@@ -47,7 +47,7 @@ public class SolicitacaoSubmissionService {
 
         var configOpt = configRepository.findFirstBySlug(request.slug().trim());
         Agency agency = configOpt.map(SolicitacaoConfig::getAgency).orElse(null);
-        User referral = resolveReferralSeller(request.referralSellerId(), agency);
+        User referral = resolveReferral(request, agency);
 
         var submission = SolicitacaoSubmission.builder()
                 .agency(agency)
@@ -62,6 +62,30 @@ public class SolicitacaoSubmissionService {
 
         submission = submissionRepository.save(submission);
         return new PublicSolicitacaoSubmitResponse(true, submission.getId());
+    }
+
+    private User resolveReferral(PublicSolicitacaoSubmitRequest request, Agency agency) {
+        String code = request.sellerPublicCode() != null ? request.sellerPublicCode().trim() : "";
+        if (!code.isEmpty()) {
+            return resolveReferralByPublicCode(code, agency);
+        }
+        return resolveReferralSeller(request.referralSellerId(), agency);
+    }
+
+    private User resolveReferralByPublicCode(String code, Agency agency) {
+        if (agency == null) {
+            throw new IllegalArgumentException(
+                    "Não é possível atribuir vendedor sem configuração de agência para este link.");
+        }
+        User u = userRepository.findByPublicLinkCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Código de vendedor inválido ou inexistente."));
+        if (u.getAgency() == null || !u.getAgency().getId().equals(agency.getId())) {
+            throw new IllegalArgumentException("Este código de vendedor não pertence à agência deste formulário.");
+        }
+        if (u.getRole() != UserRole.SELLER && u.getRole() != UserRole.OWNER) {
+            throw new IllegalArgumentException("Apenas vendedor ou gestor podem ser indicados no link.");
+        }
+        return u;
     }
 
     private User resolveReferralSeller(UUID referralSellerId, Agency agency) {

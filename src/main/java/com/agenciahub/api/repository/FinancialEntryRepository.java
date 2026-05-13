@@ -4,6 +4,9 @@ import com.agenciahub.api.entity.FinancialEntry;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -19,8 +22,7 @@ public interface FinancialEntryRepository extends JpaRepository<FinancialEntry, 
     @Override
     java.util.List<FinancialEntry> findAll();
 
-    // ── Multi-tenancy (agency_id filtering) ──────────────────────────────────
-
-    @EntityGraph(attributePaths = "customer")
-    java.util.List<FinancialEntry> findByAgency_IdOrderByEntryDateDesc(UUID agencyId);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE FinancialEntry f SET f.customer = null WHERE f.customer.id = :customerId")
+    int unlinkCustomer(@Param("customerId") UUID customerId);
 }

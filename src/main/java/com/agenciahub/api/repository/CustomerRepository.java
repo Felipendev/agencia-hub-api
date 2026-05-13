@@ -12,17 +12,6 @@ import java.util.UUID;
 
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
-    List<Customer> findAllByOrderByCreatedAtDesc();
-
-    List<Customer> findByNameContainingIgnoreCaseOrderByCreatedAtDesc(String namePart);
-
-    List<Customer> findByStatusOrderByCreatedAtDesc(CustomerStatus status);
-
-    List<Customer> findByNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
-            String namePart, CustomerStatus status);
-
-    // ── Soft-delete queries ───────────────────────────────────────────────────
-
     List<Customer> findByDeletedAtIsNullOrderByCreatedAtDesc();
 
     List<Customer> findByDeletedAtIsNotNullOrderByDeletedAtDesc();
@@ -38,30 +27,18 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     List<Customer> findByDeletedAtIsNullAndNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
             String name, CustomerStatus status);
 
-    // ── Multi-tenancy (agency_id filtering) ──────────────────────────────────
+    boolean existsByDeletedAtIsNullAndEmailIgnoreCase(String email);
 
-    List<Customer> findByAgency_IdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID agencyId);
+    boolean existsByDeletedAtIsNullAndEmailIgnoreCaseAndIdNot(String email, UUID id);
 
-    List<Customer> findByAgency_IdAndDeletedAtIsNotNullOrderByDeletedAtDesc(UUID agencyId);
-
-    List<Customer> findByAgency_IdAndDeletedAtIsNullAndNameContainingIgnoreCaseOrderByCreatedAtDesc(
-            UUID agencyId, String name);
-
-    List<Customer> findByAgency_IdAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(
-            UUID agencyId, CustomerStatus status);
-
-    List<Customer> findByAgency_IdAndDeletedAtIsNullAndNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
-            UUID agencyId, String name, CustomerStatus status);
-
-    // ── Verificações de unicidade ─────────────────────────────────────────────
-
-    boolean existsByEmailIgnoreCase(String email);
-
-    boolean existsByEmailIgnoreCaseAndIdNot(String email, UUID id);
-
-    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
+    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE c.deletedAt IS NULL AND FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
     boolean existsByNormalizedPhone(@Param("phone") String normalizedPhone);
 
-    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone AND c.id <> :id")
+    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE c.deletedAt IS NULL AND FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone AND c.id <> :id")
     boolean existsByNormalizedPhoneAndIdNot(@Param("phone") String normalizedPhone, @Param("id") UUID id);
+
+    Optional<Customer> findFirstByDeletedAtIsNullAndEmailIgnoreCase(String email);
+
+    @Query("SELECT c FROM Customer c WHERE c.deletedAt IS NULL AND FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
+    Optional<Customer> findFirstActiveByNormalizedPhone(@Param("phone") String phone);
 }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -25,9 +24,9 @@ public class SolicitacaoConfigController {
     private final SolicitacaoConfigService service;
 
     @GetMapping
-    @Operation(summary = "Get solicitacao config: optional slug; without slug returns latest for agency")
-    public SolicitacaoConfigResponse get(@RequestParam(required = false) String slug) {
-        return service.getForAuthenticatedAgency(slug);
+    @Operation(summary = "Get solicitacao config for the current agency (creates default if not exists)")
+    public SolicitacaoConfigResponse get() {
+        return service.getOrCreateForCurrentAgency();
     }
 
     @PutMapping

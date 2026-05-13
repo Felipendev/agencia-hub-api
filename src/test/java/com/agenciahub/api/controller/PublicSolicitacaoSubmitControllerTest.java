@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -30,7 +30,7 @@ class PublicSolicitacaoSubmitControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private SolicitacaoSubmissionService submissionService;
 
     @Test
@@ -49,6 +49,30 @@ class PublicSolicitacaoSubmitControllerTest {
                                   "telefone": "11987654321",
                                   "detalhes": { "origem": "SP", "destinosTrechos": ["SP — RJ"] },
                                   "observacoes": ""
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.ok").value(true))
+                .andExpect(jsonPath("$.id").value(id.toString()));
+    }
+
+    @Test
+    void submit_withSellerPublicCode_returns201() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(submissionService.submit(any(PublicSolicitacaoSubmitRequest.class)))
+                .thenReturn(new PublicSolicitacaoSubmitResponse(true, id));
+
+        mockMvc.perform(post("/public/solicitacao/submit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "slug": "demo",
+                                  "nome": "Maria",
+                                  "email": "m@test.com",
+                                  "telefone": "11987654321",
+                                  "detalhes": { "origem": "SP", "destinosTrechos": ["SP — RJ"] },
+                                  "observacoes": "",
+                                  "sellerPublicCode": "abc123xyz456"
                                 }
                                 """))
                 .andExpect(status().isCreated())

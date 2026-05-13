@@ -20,11 +20,5 @@ public interface OpportunityRepository extends JpaRepository<Opportunity, UUID> 
     @Override
     Optional<Opportunity> findById(UUID id);
 
-    // ── Multi-tenancy (agency_id filtering) ──────────────────────────────────
-
-    @EntityGraph(attributePaths = "customer")
-    List<Opportunity> findByAgency_IdOrderByExpectedTravelDateDesc(UUID agencyId);
-
-    @EntityGraph(attributePaths = "customer")
-    List<Opportunity> findByAgency_IdAndCustomer_IdOrderByExpectedTravelDateDesc(UUID agencyId, UUID customerId);
+    void deleteByCustomer_Id(UUID customerId);
 }

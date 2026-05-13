@@ -9,6 +9,9 @@ import java.util.UUID;
 
 /**
  * Body público do formulário de solicitação de orçamento (espelha o payload do Next.js).
+ *
+ * <p>Indicação de vendedor: use {@code sellerPublicCode} (query {@code ?vendedor=}) quando possível;
+ * {@code referralSellerId} permanece para compatibilidade. Se ambos vierem preenchidos, prevalece o código.
  */
 public record PublicSolicitacaoSubmitRequest(
         @NotBlank @Size(max = 128) String slug,
@@ -17,7 +20,7 @@ public record PublicSolicitacaoSubmitRequest(
         @NotBlank @Size(max = 32) String telefone,
         @NotNull JsonNode detalhes,
         @Size(max = 20000) String observacoes,
-        /** Opcional: vendedor/dono na mesma agência — URL pública {@code ?vendedor=<uuid>}. */
-        UUID referralSellerId
+        UUID referralSellerId,
+        @Size(max = 16) String sellerPublicCode
 ) {
 }

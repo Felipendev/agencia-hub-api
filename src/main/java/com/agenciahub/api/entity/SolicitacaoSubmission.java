@@ -46,7 +46,7 @@ public class SolicitacaoSubmission {
     @Column(nullable = false, length = 128)
     private String slug;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String nome;
 
     @Column(nullable = false, length = 320)

@@ -115,7 +115,7 @@ public class Quotation {
     @Column(nullable = false)
     private Boolean priority;
 
-    @Column(length = 255)
+    @Column()
     private String assignee;
 
     @Column(name = "internal_notes", nullable = false, columnDefinition = "text")

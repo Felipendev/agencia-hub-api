@@ -11,6 +11,7 @@ public record VerifyEmailResponse(
         String email,
         UserRole role,
         UUID agencyId,
-        String agencyName
+        String agencyName,
+        String publicLinkCode
 ) {
 }

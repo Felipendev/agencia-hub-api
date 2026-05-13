@@ -18,6 +18,7 @@ public record LoginResponse(
         AgencyStatus agencyStatus,
         SubscriptionStatus subscriptionStatus,
         Instant trialEndsAt,
-        Boolean mustChangePassword
+        Boolean mustChangePassword,
+        String publicLinkCode
 ) {
 }

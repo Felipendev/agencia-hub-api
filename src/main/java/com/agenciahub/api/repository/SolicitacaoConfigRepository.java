@@ -3,7 +3,6 @@ package com.agenciahub.api.repository;
 import com.agenciahub.api.entity.SolicitacaoConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,10 +10,8 @@ public interface SolicitacaoConfigRepository extends JpaRepository<SolicitacaoCo
 
     Optional<SolicitacaoConfig> findByAgency_IdAndSlug(UUID agencyId, String slug);
 
-    List<SolicitacaoConfig> findByAgency_Id(UUID agencyId);
+    Optional<SolicitacaoConfig> findFirstByAgency_Id(UUID agencyId);
 
-    Optional<SolicitacaoConfig> findFirstBySlug(String slug);
-
-    /** Última configuração alterada da agência (para o painel sem slug fixo na URL). */
-    Optional<SolicitacaoConfig> findFirstByAgency_IdOrderByUpdatedAtDesc(UUID agencyId);
+    @org.springframework.data.jpa.repository.Query("SELECT sc FROM SolicitacaoConfig sc JOIN FETCH sc.agency WHERE sc.slug = :slug")
+    Optional<SolicitacaoConfig> findFirstBySlug(@org.springframework.data.repository.query.Param("slug") String slug);
 }

@@ -5,7 +5,6 @@ import com.agenciahub.api.dto.agency.UpdateAgencyRequest;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.service.AgencyService;
 import com.agenciahub.api.validation.PhoneValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AgencyController {
 
     private final AgencyService agencyService;
-    private final UserRepository userRepository;
 
     @GetMapping
     @Operation(summary = "Get current user's agency data")

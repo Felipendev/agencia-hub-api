@@ -30,7 +30,6 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    repair-on-migrate: true
   # SMTP opcional (ex.: Railway Pro+). Por omissão host vazio → JavaMail não é configurado.
   # Em Free/Hobby o Railway bloqueia SMTP; use Resend (email.resend.api-key) via HTTPS.
   mail:
@@ -85,6 +84,11 @@ app:
 
 # Rate limit por IP (Bucket4j em memória; por instância). Atrás de proxy confiável, ative TRUST_X_FORWARDED_FOR=true.
 agenciahub:
+  flyway:
+    # Flyway.repair() antes de migrate: corrige checksum na flyway_schema_history quando o ficheiro
+    # de uma migração já aplicada mudou (merge/renomeação). Desative com AGENCIAHUB_FLYWAY_REPAIR_BEFORE_MIGRATE=false
+    # em todos os ambientes estáveis, se quiser detetar alterações acidentais a migrações antigas.
+    repair-before-migrate: ${AGENCIAHUB_FLYWAY_REPAIR_BEFORE_MIGRATE:true}
   ratelimit:
     enabled: true
     trust-x-forwarded-for: ${TRUST_X_FORWARDED_FOR:false}
