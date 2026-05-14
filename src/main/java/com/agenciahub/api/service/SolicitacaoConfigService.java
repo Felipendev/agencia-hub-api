@@ -5,7 +5,6 @@ import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.SolicitacaoConfig;
 import com.agenciahub.api.repository.SolicitacaoConfigRepository;
-import com.agenciahub.api.security.TenantContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -29,10 +28,9 @@ public class SolicitacaoConfigService {
      * Falls back to agency logo if config has no specific logo.
      */
     @Transactional
-    public SolicitacaoConfigResponse getOrCreateForCurrentAgency() {
-        UUID agencyId = TenantContext.get();
+    public SolicitacaoConfigResponse getOrCreateForAgency(UUID agencyId) {
         if (agencyId == null) {
-            throw new IllegalStateException("Nenhuma agência no contexto do tenant");
+            throw new IllegalStateException("nenhuma agência no contexto do tenant");
         }
 
         SolicitacaoConfig config = repository.findFirstByAgency_Id(agencyId)
@@ -58,10 +56,9 @@ public class SolicitacaoConfigService {
     }
 
     @Transactional
-    public SolicitacaoConfigResponse upsert(SolicitacaoConfigRequest request) {
-        UUID agencyId = TenantContext.get();
+    public SolicitacaoConfigResponse upsertForAgency(UUID agencyId, SolicitacaoConfigRequest request) {
         if (agencyId == null) {
-            throw new IllegalStateException("Nenhuma agência no contexto do tenant");
+            throw new IllegalStateException("nenhuma agência no contexto do tenant");
         }
 
         SolicitacaoConfig config = repository.findFirstByAgency_Id(agencyId)
