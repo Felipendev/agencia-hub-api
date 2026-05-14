@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.quotation.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.dto.quotation.CreateQuotationRequest;
 import com.agenciahub.api.dto.quotation.QuotationResponse;
@@ -33,6 +34,7 @@ import java.util.UUID;
 
                 Regras de visibilidade e atribuição de vendedor ficam na camada de aplicação (casos de uso), não no controller.""")
 @RequestMapping("/quotations")
+@StandardErrorApiResponses
 public interface QuotationAPI {
 
     @GetMapping

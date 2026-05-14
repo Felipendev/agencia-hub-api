@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.solicitacao.pub.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Tag(
         name = "Solicitação pública",
         description = "Envio do formulário público de solicitação de orçamento (sem autenticação).")
+@StandardErrorApiResponses
 public interface PublicSolicitacaoSubmitAPI {
 
     @PostMapping("/submit")

@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.customer.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.domain.CustomerStatus;
 import com.agenciahub.api.dto.customer.CreateCustomerRequest;
 import com.agenciahub.api.dto.customer.CustomerResponse;
@@ -32,6 +33,7 @@ import java.util.UUID;
 
                 A exclusão é **permanente** e remove também cotações e desvincula lançamentos financeiros associados.""")
 @RequestMapping("/customers")
+@StandardErrorApiResponses
 public interface CustomerAPI {
 
     @GetMapping

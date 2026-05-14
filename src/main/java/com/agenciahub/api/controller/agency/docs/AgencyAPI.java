@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.agency.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.agency.AgencyResponse;
 import com.agenciahub.api.dto.agency.UpdateAgencyRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Tag(
         name = "Agência",
         description = "Dados e atualização da agência do tenant atual. Acesso restrito a usuários com papel **OWNER**.")
+@StandardErrorApiResponses
 public interface AgencyAPI {
 
     @GetMapping

@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.solicitacao.agency.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoSubmissionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @Tag(
         name = "Submissões do formulário público",
         description = "Listagem e exclusão de envios recebidos pelo formulário público da agência do tenant.")
+@StandardErrorApiResponses
 public interface SolicitacaoSubmissionAgencyAPI {
 
     @GetMapping
