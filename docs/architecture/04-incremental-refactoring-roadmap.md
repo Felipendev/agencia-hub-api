@@ -12,13 +12,15 @@ Princípios gerais (sempre válidos):
 
 - **Cotações (`/quotations`):** `QuotationAPI` + `QuotationController` em `controller.quotation`; casos de uso em `application.quotation` delegando ao `QuotationService`; `QuotationResponseMapper` extrai `toResponse`; exclusão **permanente**; endpoints `/trash` removidos; mensagens de exceção do fluxo em português/minúsculas onde alinhado.
 - **Clientes (`/customers`):** `CustomerAPI` + `CustomerController` em `controller.customer`; casos de uso em `application.customer` delegando ao `CustomerService` (mesmo contrato HTTP).
-- **Agência (`/agency`):** validação de formato de telefone no **patch** saiu do controller e foi para `AgencyService.update` (regra de aplicação); mensagens tocadas alinhadas a minúsculas onde aplicável.
+- **Agência (`/agency`):** validação de telefone no patch em `AgencyService.update`; `AgencyAPI` + `AgencyController` em `controller.agency`; `GetAgency` / `UpdateAgency` + `AgencyResponseMapper` em `application.agency`; remoção de `AgencyService.getCurrentAgency()` (tenant + `getById` no caso de uso).
 - **Financeiro / usuários (parcial):** `FinancialEntryService` e `UserService` — mensagens `ResourceNotFoundException` em inglês substituídas por equivalentes em português/minúsculas nos pontos encontrados.
 - **Lançamentos financeiros (`/financial-entries`):** `FinancialEntryAPI` + `FinancialEntryController` em `controller.financial`; casos de uso em `application.financial` delegando ao `FinancialEntryService`; `FinancialEntryResponseMapper` extrai `toResponse`.
 - **Convites (`/invitations`):** `InvitationAPI` + `InvitationController` em `controller.invitation`; casos de uso em `application.invitation` delegando ao `InvitationService`; `InvitationResponseMapper` (URL via `buildInviteUrl`); mensagens de exceção do serviço alinhadas a português/minúsculas onde aplicável.
 - **Solicitação pública / submissões:** `PublicSolicitacaoSubmitAPI` + `PublicSolicitacaoSubmitController` e `PublicSolicitacaoConfigAPI` + `PublicSolicitacaoConfigController` em `controller.solicitacao.pub` (pacote `pub` porque `public` é palavra reservada em Java); `SolicitacaoSubmissionAgencyAPI` + `SolicitacaoSubmissionAgencyController` em `controller.solicitacao.agency`; casos de uso em `application.solicitacao` delegando aos serviços; `SolicitacaoSubmissionResponseMapper`; `SolicitacaoSubmissionService` recebe `agencyId` explícito em listagem/exclusão (montado no controller a partir do `TenantContext`).
 
-**Próxima fila sugerida (Passo 5):** `AgencyAPI` + controller fino para `/agency` (e eventualmente `SolicitacaoConfigController` autenticado no mesmo molde).
+- **Agência (`/agency`):** `AgencyAPI` + `AgencyController` em `controller.agency`; casos de uso `GetAgency` e `UpdateAgency` em `application.agency` delegando ao `AgencyService`; `AgencyResponseMapper`; `AgencyService.getCurrentAgency()` removido (substituído por `getById` + tenant no fluxo HTTP).
+
+**Próxima fila sugerida (Passo 5):** `SolicitacaoConfigController` autenticado (`/agency/solicitacao-config` ou path atual) no mesmo molde; revisão de dead code após estabilizar pacotes.
 
 ---
 
