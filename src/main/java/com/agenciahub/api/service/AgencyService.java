@@ -9,7 +9,6 @@ import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyAuditLogRepository;
 import com.agenciahub.api.repository.AgencyRepository;
-import com.agenciahub.api.security.TenantContext;
 import com.agenciahub.api.validation.PhoneValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -101,17 +100,6 @@ public class AgencyService {
         }
 
         return agencyRepository.save(agency);
-    }
-
-    /**
-     * Returns the current user's agency based on TenantContext.
-     */
-    public Agency getCurrentAgency() {
-        UUID agencyId = TenantContext.get();
-        if (agencyId == null) {
-            throw new IllegalStateException("nenhuma agência no contexto do tenant");
-        }
-        return getById(agencyId);
     }
 
     /**
