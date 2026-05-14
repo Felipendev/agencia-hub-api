@@ -15,8 +15,9 @@ Princípios gerais (sempre válidos):
 - **Agência (`/agency`):** validação de formato de telefone no **patch** saiu do controller e foi para `AgencyService.update` (regra de aplicação); mensagens tocadas alinhadas a minúsculas onde aplicável.
 - **Financeiro / usuários (parcial):** `FinancialEntryService` e `UserService` — mensagens `ResourceNotFoundException` em inglês substituídas por equivalentes em português/minúsculas nos pontos encontrados.
 - **Lançamentos financeiros (`/financial-entries`):** `FinancialEntryAPI` + `FinancialEntryController` em `controller.financial`; casos de uso em `application.financial` delegando ao `FinancialEntryService`; `FinancialEntryResponseMapper` extrai `toResponse`.
+- **Convites (`/invitations`):** `InvitationAPI` + `InvitationController` em `controller.invitation`; casos de uso em `application.invitation` delegando ao `InvitationService`; `InvitationResponseMapper` (URL via `buildInviteUrl`); mensagens de exceção do serviço alinhadas a português/minúsculas onde aplicável.
 
-**Próxima fila sugerida (Passo 5):** convites / solicitação pública; `AgencyAPI` + controller fino para `/agency` se desejado.
+**Próxima fila sugerida (Passo 5):** solicitação pública; `AgencyAPI` + controller fino para `/agency` se desejado.
 
 ---
 
