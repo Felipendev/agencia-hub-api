@@ -31,7 +31,7 @@ public class TermsService {
             throw new IllegalArgumentException("versão dos termos inválida");
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + userId));
         if (!Boolean.TRUE.equals(user.getTermsAccepted())) {
             user.setTermsAccepted(true);
             userRepository.save(user);

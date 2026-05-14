@@ -123,7 +123,7 @@ public class SolicitacaoSubmissionService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
         }
         var row = submissionRepository.findByIdAndAgency_Id(id, agencyId)
-                .orElseThrow(() -> new ResourceNotFoundException("submissão não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("submissão não encontrada: " + id));
         submissionRepository.delete(row);
     }
 

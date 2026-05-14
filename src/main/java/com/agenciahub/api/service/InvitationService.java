@@ -36,7 +36,7 @@ public class InvitationService {
     public Invitation createInvitation(String email, User inviter) {
         // Reload user within transaction to access lazy-loaded agency
         User managedInviter = userRepository.findById(inviter.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + inviter.getId()));
 
         String token = UUID.randomUUID().toString();
         String inviteUrl = baseUrl + "/convite/" + token;
@@ -69,7 +69,7 @@ public class InvitationService {
     @Transactional(readOnly = true)
     public Invitation validateToken(String token) {
         Invitation invitation = invitationRepository.findWithAgencyByToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + token));
         ensureTokenIsUsable(invitation);
         return invitation;
     }
@@ -77,7 +77,7 @@ public class InvitationService {
     @Transactional(readOnly = true)
     public InviteValidationResponse validateTokenDetails(String token) {
         Invitation invitation = invitationRepository.findWithAgencyByToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + token));
         ensureTokenIsUsable(invitation);
         return new InviteValidationResponse(invitation.getEmail(), invitation.getAgency().getName());
     }
@@ -96,10 +96,10 @@ public class InvitationService {
     @Transactional
     public void revoke(UUID invitationId, UUID agencyId) {
         Invitation invitation = invitationRepository.findById(invitationId)
-                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + invitationId));
 
         if (!invitation.getAgency().getId().equals(agencyId)) {
-            throw new ResourceNotFoundException("convite não encontrado");
+            throw new ResourceNotFoundException("convite não encontrado: " + invitationId);
         }
 
         if (invitation.getStatus() != InvitationStatus.PENDING) {

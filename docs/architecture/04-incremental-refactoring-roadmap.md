@@ -25,8 +25,9 @@ Princípios gerais (sempre válidos):
 - **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT; testes em `SecurityContextUsersTest`; **`UnauthenticatedException`** quando não há contexto utilizável para **`requireUserId()`** ou **`requireUser()`** → **401** / `UNAUTHENTICATED` no handler global.
 - **Tenant:** `TenantContext.requireAgencyId()` nos controllers que dependem de agência no `ThreadLocal` (falha explícita se ausente); **`MissingAgencyContextException`** → **403** com código `MISSING_AGENCY_CONTEXT` no `GlobalExceptionHandler`; demais `IllegalStateException` seguem **400**; testes em `TenantContextTest` e `GlobalExceptionHandlerTest`.
 - **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
+- **404 por lookup:** mensagens `ResourceNotFoundException` em `AuthService`, `TermsService`, `AgencyService`, `InvitationService` e `SolicitacaoSubmissionService` passam a incluir **identificador** (e-mail, id ou token) no texto, alinhado a `UserService` / `QuotationService`.
 
-**Próxima fila sugerida (Passo 5):** revisar mensagens em serviços que ainda usam 404 “usuário não encontrado” em lookup por id (distinto de falta de contexto de segurança); documentar códigos `ApiError` no OpenAPI se o time quiser; ADRs só quando surgir decisão transversal.
+**Próxima fila sugerida (Passo 5):** documentar códigos `ApiError` comuns (`NOT_FOUND`, `UNAUTHENTICATED`, etc.) no OpenAPI ou wiki do time; ADRs só quando surgir decisão transversal.
 
 ---
 

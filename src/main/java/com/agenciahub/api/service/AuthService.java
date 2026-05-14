@@ -204,7 +204,7 @@ public class AuthService {
 
         // Find user
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + email));
 
         // Activate user
         user.setEmailVerified(true);
@@ -245,7 +245,7 @@ public class AuthService {
         String email = request.email().trim().toLowerCase();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + email));
 
         boolean sent = verificationCodeService.generateAndSend(
                 email,
@@ -304,7 +304,7 @@ public class AuthService {
 
         // Find user and update password
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + email));
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         user.setPasswordChangedAt(Instant.now());
@@ -318,7 +318,7 @@ public class AuthService {
     @Transactional
     public Map<String, String> changePassword(ChangePasswordRequest request, UUID currentUserId) {
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + currentUserId));
 
         // Validate current password
         if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
