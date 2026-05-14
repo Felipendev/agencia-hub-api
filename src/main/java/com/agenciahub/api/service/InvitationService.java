@@ -36,7 +36,7 @@ public class InvitationService {
     public Invitation createInvitation(String email, User inviter) {
         // Reload user within transaction to access lazy-loaded agency
         User managedInviter = userRepository.findById(inviter.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
 
         String token = UUID.randomUUID().toString();
         String inviteUrl = baseUrl + "/convite/" + token;
@@ -69,7 +69,7 @@ public class InvitationService {
     @Transactional(readOnly = true)
     public Invitation validateToken(String token) {
         Invitation invitation = invitationRepository.findWithAgencyByToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException("Convite não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado"));
         ensureTokenIsUsable(invitation);
         return invitation;
     }
@@ -77,7 +77,7 @@ public class InvitationService {
     @Transactional(readOnly = true)
     public InviteValidationResponse validateTokenDetails(String token) {
         Invitation invitation = invitationRepository.findWithAgencyByToken(token)
-                .orElseThrow(() -> new ResourceNotFoundException("Convite não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado"));
         ensureTokenIsUsable(invitation);
         return new InviteValidationResponse(invitation.getEmail(), invitation.getAgency().getName());
     }
@@ -96,14 +96,14 @@ public class InvitationService {
     @Transactional
     public void revoke(UUID invitationId, UUID agencyId) {
         Invitation invitation = invitationRepository.findById(invitationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Convite não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado"));
 
         if (!invitation.getAgency().getId().equals(agencyId)) {
-            throw new ResourceNotFoundException("Convite não encontrado");
+            throw new ResourceNotFoundException("convite não encontrado");
         }
 
         if (invitation.getStatus() != InvitationStatus.PENDING) {
-            throw new IllegalArgumentException("Apenas convites pendentes podem ser revogados");
+            throw new IllegalArgumentException("apenas convites pendentes podem ser revogados");
         }
 
         invitation.setStatus(InvitationStatus.REVOKED);
@@ -119,19 +119,19 @@ public class InvitationService {
 
     private void ensureTokenIsUsable(Invitation invitation) {
         if (invitation.getStatus() == InvitationStatus.ACCEPTED) {
-            throw new IllegalStateException("Este convite já foi utilizado");
+            throw new IllegalStateException("este convite já foi utilizado");
         }
 
         if (invitation.getStatus() == InvitationStatus.REVOKED) {
-            throw new IllegalStateException("Este convite foi cancelado");
+            throw new IllegalStateException("este convite foi cancelado");
         }
 
         if (Instant.now().isAfter(invitation.getExpiresAt())) {
-            throw new IllegalStateException("Este convite expirou");
+            throw new IllegalStateException("este convite expirou");
         }
 
         if (invitation.getStatus() != InvitationStatus.PENDING) {
-            throw new IllegalStateException("Este convite não está mais disponível");
+            throw new IllegalStateException("este convite não está mais disponível");
         }
     }
 }
