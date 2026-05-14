@@ -2,6 +2,7 @@ package com.agenciahub.api.web;
 
 import com.agenciahub.api.exception.ApiError;
 import com.agenciahub.api.exception.DuplicateCustomerException;
+import com.agenciahub.api.exception.MissingAgencyContextException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -59,6 +60,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ApiError(ex.getMessage(), "BAD_REQUEST"));
+    }
+
+    @ExceptionHandler(MissingAgencyContextException.class)
+    public ResponseEntity<ApiError> handleMissingAgencyContext(MissingAgencyContextException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiError(ex.getMessage(), "MISSING_AGENCY_CONTEXT"));
     }
 
     @ExceptionHandler(IllegalStateException.class)

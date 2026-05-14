@@ -1,5 +1,6 @@
 package com.agenciahub.api.security;
 
+import com.agenciahub.api.exception.MissingAgencyContextException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +38,8 @@ class TenantContextTest {
 
     @Test
     void requireAgencyId_throws_whenMissing() {
-        IllegalStateException ex = assertThrows(IllegalStateException.class, TenantContext::requireAgencyId);
+        MissingAgencyContextException ex = assertThrows(MissingAgencyContextException.class,
+                TenantContext::requireAgencyId);
         assertEquals("agência não definida no contexto da requisição", ex.getMessage());
     }
 
