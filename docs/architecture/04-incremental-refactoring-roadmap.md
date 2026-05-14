@@ -26,8 +26,9 @@ Princípios gerais (sempre válidos):
 - **Tenant:** `TenantContext.requireAgencyId()` nos controllers que dependem de agência no `ThreadLocal` (falha explícita se ausente); **`MissingAgencyContextException`** → **403** com código `MISSING_AGENCY_CONTEXT` no `GlobalExceptionHandler`; demais `IllegalStateException` seguem **400**; testes em `TenantContextTest` e `GlobalExceptionHandlerTest`.
 - **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
 - **404 por lookup:** mensagens `ResourceNotFoundException` em `AuthService`, `TermsService`, `AgencyService`, `InvitationService` e `SolicitacaoSubmissionService` passam a incluir **identificador** (e-mail, id ou token) no texto, alinhado a `UserService` / `QuotationService`.
+- **OpenAPI — erros:** `OpenApiConfig` define o schema global **`ApiError`** e descreve no **info** os códigos `code` e HTTP associados (`UNAUTHENTICATED`, `MISSING_AGENCY_CONTEXT`, `NOT_FOUND`, etc.).
 
-**Próxima fila sugerida (Passo 5):** documentar códigos `ApiError` comuns (`NOT_FOUND`, `UNAUTHENTICATED`, etc.) no OpenAPI ou wiki do time; ADRs só quando surgir decisão transversal.
+**Próxima fila sugerida (Passo 5 / 6):** repetir padrão de `@ApiResponse` referenciando `#/components/schemas/ApiError` nos `*API` mais expostos ao cliente, se quiser documentação por operação; **Passo 6** (`Clock` em fluxos com tempo) quando surgir necessidade de testes determinísticos; ADRs só quando surgir decisão transversal.
 
 ---
 
