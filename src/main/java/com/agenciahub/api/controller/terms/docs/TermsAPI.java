@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.terms.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.terms.AcceptTermsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.Map;
 
 @Tag(name = "Termos", description = "Metadados públicos da versão vigente e aceite autenticado (atualiza flag no usuário).")
+@StandardErrorApiResponses
 public interface TermsAPI {
 
     @GetMapping("/public/terms/latest")
