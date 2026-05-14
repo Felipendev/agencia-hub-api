@@ -18,7 +18,9 @@ Princípios gerais (sempre válidos):
 - **Convites (`/invitations`):** `InvitationAPI` + `InvitationController` em `controller.invitation`; casos de uso em `application.invitation` delegando ao `InvitationService`; `InvitationResponseMapper` (URL via `buildInviteUrl`); mensagens de exceção do serviço alinhadas a português/minúsculas onde aplicável.
 - **Solicitação pública / submissões / config agência:** formulário público e config por slug em `controller.solicitacao.pub`; submissões e **config autenticada** (`/agency/solicitacao-config`) em `controller.solicitacao.agency` — `SolicitacaoSubmissionAgencyAPI`, `SolicitacaoConfigAgencyAPI`, controllers finos; casos de uso em `application.solicitacao`; `SolicitacaoSubmissionResponseMapper`; serviços de submissão e de config recebem **`agencyId` explícito** onde aplicável; `SolicitacaoConfigService` sem `TenantContext` nos métodos de agência.
 
-**Próxima fila sugerida (Passo 5):** outros controllers em `controller/` raiz (`UserController`, `SellerDashboardController`, `AuthController`, `TermsController`, …) no mesmo molde conforme prioridade; revisão de dead code após estabilizar pacotes.
+- **Termos:** `TermsAPI` + `TermsController` em `controller.terms` (paths absolutos nos métodos: um único contrato evita falha de registro de mapeamento ao implementar várias interfaces); `GetLatestTermsPublic` / `AcceptTerms` em `application.terms`; `TermsService`; DTO `AcceptTermsRequest` em `dto.terms`; mensagens alinhadas a minúsculas onde aplicável.
+
+**Próxima fila sugerida (Passo 5):** `UserController`, `SellerDashboardController`, `AuthController` no mesmo molde conforme prioridade; revisão de dead code após estabilizar pacotes.
 
 ---
 
