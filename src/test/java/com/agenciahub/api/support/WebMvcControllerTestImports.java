@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Import;
  * and {@code @MockitoBean} on {@link com.agenciahub.api.security.JwtAuthFilter} and
  * {@link com.agenciahub.api.security.RateLimitFilter} so the slice does not need a real
  * {@link com.agenciahub.api.security.JwtService}.
+ * <p>For some controllers, importing only {@link com.agenciahub.api.web.GlobalExceptionHandler}
+ * (without this configuration) keeps request mapping predictable in the slice; use this
+ * class when the test must exercise {@code SecurityConfig} / method security together with MockMvc.
  */
 @TestConfiguration
 @Import({GlobalExceptionHandler.class, CorsConfig.class, SecurityConfig.class})
