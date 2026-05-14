@@ -8,7 +8,7 @@ import com.agenciahub.api.dto.agency.AgencyResponse;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.security.TenantContext;
-import com.agenciahub.api.controller.GlobalExceptionHandler;
+import com.agenciahub.api.web.GlobalExceptionHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

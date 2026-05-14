@@ -5,7 +5,7 @@ import com.agenciahub.api.application.financial.GetFinancialEntryByIdUseCase;
 import com.agenciahub.api.application.financial.ListFinancialEntriesQuery;
 import com.agenciahub.api.application.financial.ListFinancialEntriesUseCase;
 import com.agenciahub.api.application.financial.UpdateFinancialEntryUseCase;
-import com.agenciahub.api.controller.GlobalExceptionHandler;
+import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
 import com.agenciahub.api.domain.FinancialEntryType;
