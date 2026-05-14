@@ -28,8 +28,9 @@ Princípios gerais (sempre válidos):
 - **404 por lookup:** mensagens `ResourceNotFoundException` em `AuthService`, `TermsService`, `AgencyService`, `InvitationService` e `SolicitacaoSubmissionService` passam a incluir **identificador** (e-mail, id ou token) no texto, alinhado a `UserService` / `QuotationService`.
 - **OpenAPI — erros:** `OpenApiConfig` define o schema global **`ApiError`** e descreve no **info** os códigos `code` e HTTP associados (`UNAUTHENTICATED`, `MISSING_AGENCY_CONTEXT`, `NOT_FOUND`, etc.).
 - **OpenAPI — respostas de erro por recurso:** meta-anotação `@StandardErrorApiResponses` (`api.docs`) documenta 400/401/403/404/409/500 com schema `ApiError`; aplicada em **todos** os `*API` (auth, termos, usuários, agência, clientes, cotações, financeiro, convites, painel vendedor, solicitação pública e agência).
+- **Passo 7 (ADRs):** **ADR 0003** registra o contrato de erros HTTP (`ApiError`), OpenAPI (`@StandardErrorApiResponses` + `OpenApiConfig`), `GlobalExceptionHandler` em `web`, e política de **401** / **403** para contexto de segurança e tenant (`SecurityContextUsers`, `TenantContext.requireAgencyId`); `02-backend-architecture.md` referencia o ADR na camada API.
 
-**Próxima fila sugerida:** **Passo 6** (`Clock` em fluxos com tempo) **adiado** até surgir necessidade de testes determinísticos ou lógica sensível a tempo; ADRs quando surgir decisão transversal; demais melhorias de contrato ou observabilidade conforme prioridade do produto.
+**Próxima fila sugerida:** **Passo 6** (`Clock` em fluxos com tempo) **adiado** até surgir necessidade de testes determinísticos ou lógica sensível a tempo; novos ADRs ou atualizações em `01-` / `02-` quando outra decisão transversal surgir; demais melhorias de contrato ou observabilidade conforme prioridade do produto.
 
 ---
 
@@ -194,6 +195,8 @@ sequenceDiagram
 
 - [ ] Atualizar `01-architecture-principles.md` / `02-backend-architecture.md` só quando um limite real mudar (ex.: “controllers vivem em `api`”).
 - [ ] Novo ADR quando houver escolha relevante (ex.: pacote por feature, política de exceções, uso obrigatório de `Clock` em serviços X).
+
+**Neste repositório:** **ADR 0003** (`adr/0003-api-errors-openapi-tenant-security.md`) cobre o contrato de erros (`ApiError`), documentação OpenAPI (`@StandardErrorApiResponses`, `OpenApiConfig`), handler global em `web` e política **401/403** para autenticação e tenant; `02-backend-architecture.md` foi alinhado na secção *OpenAPI contracts*.
 
 **Pronto quando:** Novo desenvolvedor (ou agente) lê os docs e sabe onde colocar código novo.
 
