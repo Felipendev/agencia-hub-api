@@ -58,15 +58,15 @@ public class AuthService {
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email().trim().toLowerCase())
-                .orElseThrow(() -> new ResourceNotFoundException("Credenciais inválidas"));
+                .orElseThrow(() -> new ResourceNotFoundException("credenciais inválidas"));
 
         if (!Boolean.TRUE.equals(user.getActive())) {
-            throw new IllegalStateException("Usuário inativo.");
+            throw new IllegalStateException("usuário inativo.");
         }
 
         // Check email verification
         if (!Boolean.TRUE.equals(user.getEmailVerified())) {
-            throw new IllegalStateException("Verifique seu e-mail para acessar o sistema");
+            throw new IllegalStateException("verifique seu e-mail para acessar o sistema");
         }
 
         // Check agency status
@@ -74,12 +74,12 @@ public class AuthService {
         if (agency != null) {
             AgencyStatus agencyStatus = agency.getStatus();
             if (agencyStatus == AgencyStatus.PENDING_VERIFICATION || agencyStatus == AgencyStatus.CANCELED) {
-                throw new IllegalStateException("Sua agência não está ativa. Entre em contato com o suporte.");
+                throw new IllegalStateException("sua agência não está ativa. entre em contato com o suporte.");
             }
         }
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new ResourceNotFoundException("Credenciais inválidas");
+            throw new ResourceNotFoundException("credenciais inválidas");
         }
 
         String publicLinkCode = publicLinkCodeService.ensurePersistedForUserId(user.getId());
@@ -116,32 +116,32 @@ public class AuthService {
 
         // Whitelist check: only allowed emails can register during beta
         if (!ALLOWED_OWNER_EMAILS.contains(email)) {
-            throw new IllegalArgumentException("O sistema está em fase de testes. Cadastro restrito por convite.");
+            throw new IllegalArgumentException("o sistema está em fase de testes. cadastro restrito por convite.");
         }
 
         // Validate email uniqueness (case-insensitive)
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Este e-mail já está cadastrado");
+            throw new IllegalArgumentException("este e-mail já está cadastrado");
         }
 
         // Validate password confirmation match
         if (!request.password().equals(request.passwordConfirmation())) {
-            throw new IllegalArgumentException("As senhas não coincidem");
+            throw new IllegalArgumentException("as senhas não coincidem");
         }
 
         // Validate password length
         if (request.password().length() < 8) {
-            throw new IllegalArgumentException("A senha deve ter no mínimo 8 caracteres");
+            throw new IllegalArgumentException("a senha deve ter no mínimo 8 caracteres");
         }
 
         // Validate phone format
         if (!PhoneValidator.isValid(request.ownerPhone())) {
-            throw new IllegalArgumentException("Formato de telefone inválido. Use DDD + número");
+            throw new IllegalArgumentException("formato de telefone inválido. use DDD + número");
         }
 
         // Validate terms acceptance
         if (!Boolean.TRUE.equals(request.termsAccepted())) {
-            throw new IllegalArgumentException("É necessário aceitar os Termos de Uso");
+            throw new IllegalArgumentException("é necessário aceitar os termos de uso");
         }
         if (!TermsService.CURRENT_TERMS_VERSION.equals(request.termsVersion())) {
             throw new IllegalArgumentException("versão dos termos inválida");
@@ -150,7 +150,7 @@ public class AuthService {
         // Validate optional agency phone
         if (request.agencyPhone() != null && !request.agencyPhone().isBlank()
                 && !PhoneValidator.isValid(request.agencyPhone())) {
-            throw new IllegalArgumentException("Formato de telefone da agência inválido. Use DDD + número");
+            throw new IllegalArgumentException("formato de telefone da agência inválido. use DDD + número");
         }
 
         // Create Agency
@@ -188,7 +188,7 @@ public class AuthService {
         return new RegisterAgencyResponse(
                 agency.getId(),
                 user.getId(),
-                "Código de verificação enviado para " + email
+                "código de verificação enviado para " + email
         );
     }
 
@@ -199,12 +199,12 @@ public class AuthService {
         // Validate code
         boolean valid = verificationCodeService.verify(email, request.code(), VerificationCodeType.EMAIL_VERIFICATION);
         if (!valid) {
-            throw new IllegalArgumentException("Código inválido ou expirado");
+            throw new IllegalArgumentException("código inválido ou expirado");
         }
 
         // Find user
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
 
         // Activate user
         user.setEmailVerified(true);
@@ -245,7 +245,7 @@ public class AuthService {
         String email = request.email().trim().toLowerCase();
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
 
         boolean sent = verificationCodeService.generateAndSend(
                 email,
@@ -255,10 +255,10 @@ public class AuthService {
         );
 
         if (!sent) {
-            throw new IllegalStateException("Limite de reenvios atingido. Tente novamente mais tarde.");
+            throw new IllegalStateException("limite de reenvios atingido. tente novamente mais tarde.");
         }
 
-        return Map.of("message", "Código reenviado para " + email);
+        return Map.of("message", "código reenviado para " + email);
     }
 
     // ─── Forgot Password (Task 13.1) ─────────────────────────────────────────────
@@ -277,7 +277,7 @@ public class AuthService {
                 )
         );
 
-        return Map.of("message", "Se o e-mail estiver cadastrado, você receberá um código");
+        return Map.of("message", "se o e-mail estiver cadastrado, você receberá um código");
     }
 
     // ─── Reset Password (Task 13.2) ──────────────────────────────────────────────
@@ -288,29 +288,29 @@ public class AuthService {
 
         // Validate password length
         if (request.newPassword().length() < 8) {
-            throw new IllegalArgumentException("A senha deve ter no mínimo 8 caracteres");
+            throw new IllegalArgumentException("a senha deve ter no mínimo 8 caracteres");
         }
 
         // Validate password confirmation
         if (!request.newPassword().equals(request.newPasswordConfirmation())) {
-            throw new IllegalArgumentException("As senhas não coincidem");
+            throw new IllegalArgumentException("as senhas não coincidem");
         }
 
         // Verify code
         boolean valid = verificationCodeService.verify(email, request.code(), VerificationCodeType.PASSWORD_RESET);
         if (!valid) {
-            throw new IllegalArgumentException("Código inválido ou expirado");
+            throw new IllegalArgumentException("código inválido ou expirado");
         }
 
         // Find user and update password
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
 
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         user.setPasswordChangedAt(Instant.now());
         userRepository.save(user);
 
-        return Map.of("message", "Senha redefinida com sucesso");
+        return Map.of("message", "senha redefinida com sucesso");
     }
 
     // ─── Change Password (Task 13.3) ─────────────────────────────────────────────
@@ -318,21 +318,21 @@ public class AuthService {
     @Transactional
     public Map<String, String> changePassword(ChangePasswordRequest request, UUID currentUserId) {
         User user = userRepository.findById(currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
 
         // Validate current password
         if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
-            throw new IllegalArgumentException("Senha atual incorreta");
+            throw new IllegalArgumentException("senha atual incorreta");
         }
 
         // Validate new password length
         if (request.newPassword().length() < 8) {
-            throw new IllegalArgumentException("A senha deve ter no mínimo 8 caracteres");
+            throw new IllegalArgumentException("a senha deve ter no mínimo 8 caracteres");
         }
 
         // Validate password confirmation
         if (!request.newPassword().equals(request.newPasswordConfirmation())) {
-            throw new IllegalArgumentException("As senhas não coincidem");
+            throw new IllegalArgumentException("as senhas não coincidem");
         }
 
         // Update password and passwordChangedAt
@@ -341,7 +341,7 @@ public class AuthService {
         user.setMustChangePassword(Boolean.FALSE);
         userRepository.save(user);
 
-        return Map.of("message", "Senha alterada com sucesso");
+        return Map.of("message", "senha alterada com sucesso");
     }
 
     // ─── Register via Invite (Task 15.2) ─────────────────────────────────────────
@@ -353,19 +353,19 @@ public class AuthService {
 
         // Validate password length
         if (request.password().length() < 8) {
-            throw new IllegalArgumentException("A senha deve ter no mínimo 8 caracteres");
+            throw new IllegalArgumentException("a senha deve ter no mínimo 8 caracteres");
         }
 
         // Validate password confirmation match
         if (!request.password().equals(request.passwordConfirmation())) {
-            throw new IllegalArgumentException("As senhas não coincidem");
+            throw new IllegalArgumentException("as senhas não coincidem");
         }
 
         // Validate phone format (optional)
         boolean valid = request.phone() != null && !request.phone().isBlank();
         if (valid) {
             if (!PhoneValidator.isValid(request.phone())) {
-                throw new IllegalArgumentException("Formato de telefone inválido. Use DDD + número");
+                throw new IllegalArgumentException("formato de telefone inválido. use DDD + número");
             }
         }
 
@@ -375,7 +375,7 @@ public class AuthService {
         // Seller registration is authorized by the invitation itself — no whitelist needed
 
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Este e-mail já está cadastrado");
+            throw new IllegalArgumentException("este e-mail já está cadastrado");
         }
 
         // Create SELLER user linked to invitation's agency
@@ -409,7 +409,7 @@ public class AuthService {
         return new RegisterAgencyResponse(
                 invitation.getAgency().getId(),
                 user.getId(),
-                "Código de verificação enviado para " + email
+                "código de verificação enviado para " + email
         );
     }
 }

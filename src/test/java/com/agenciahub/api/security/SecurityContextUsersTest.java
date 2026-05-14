@@ -2,7 +2,7 @@ package com.agenciahub.api.security;
 
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.entity.User;
-import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.exception.UnauthenticatedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,25 +63,25 @@ class SecurityContextUsersTest {
     }
 
     @Test
-    void requireUser_throwsResourceNotFound_whenNoAuthentication() {
-        assertThrows(ResourceNotFoundException.class, SecurityContextUsers::requireUser);
+    void requireUser_throwsUnauthenticated_whenNoAuthentication() {
+        assertThrows(UnauthenticatedException.class, SecurityContextUsers::requireUser);
     }
 
     @Test
-    void requireUser_throwsResourceNotFound_whenPrincipalIsNotUser() {
+    void requireUser_throwsUnauthenticated_whenPrincipalIsNotUser() {
         setAuthentication(new UsernamePasswordAuthenticationToken(42, null, List.of()));
-        assertThrows(ResourceNotFoundException.class, SecurityContextUsers::requireUser);
+        assertThrows(UnauthenticatedException.class, SecurityContextUsers::requireUser);
     }
 
     @Test
-    void requireUserId_throwsIllegalState_whenNoAuthentication() {
-        assertThrows(IllegalStateException.class, SecurityContextUsers::requireUserId);
+    void requireUserId_throwsUnauthenticated_whenNoAuthentication() {
+        assertThrows(UnauthenticatedException.class, SecurityContextUsers::requireUserId);
     }
 
     @Test
-    void requireUserId_throwsIllegalState_whenPrincipalIsNotUserAndNameIsNotUuid() {
+    void requireUserId_throwsUnauthenticated_whenPrincipalIsNotUserAndNameIsNotUuid() {
         setAuthentication(new UsernamePasswordAuthenticationToken(42, null, List.of()));
-        IllegalStateException ex = assertThrows(IllegalStateException.class, SecurityContextUsers::requireUserId);
+        UnauthenticatedException ex = assertThrows(UnauthenticatedException.class, SecurityContextUsers::requireUserId);
         assertEquals("usuário não autenticado", ex.getMessage());
     }
 
