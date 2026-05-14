@@ -6,6 +6,7 @@ import com.agenciahub.api.domain.FinancialEntryType;
 import com.agenciahub.api.dto.financial.CreateFinancialEntryRequest;
 import com.agenciahub.api.dto.financial.FinancialEntryResponse;
 import com.agenciahub.api.dto.financial.UpdateFinancialEntryRequest;
+import com.agenciahub.api.application.financial.FinancialEntryResponseMapper;
 import com.agenciahub.api.entity.Customer;
 import com.agenciahub.api.entity.FinancialEntry;
 import com.agenciahub.api.exception.ResourceNotFoundException;
@@ -27,6 +28,7 @@ public class FinancialEntryService {
 
     private final FinancialEntryRepository financialEntryRepository;
     private final CustomerRepository customerRepository;
+    private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Transactional(readOnly = true)
     public List<FinancialEntryResponse> search(
@@ -42,13 +44,13 @@ public class FinancialEntryService {
                 from, to, type, category, status, customerId, bankAccount);
         List<FinancialEntry> rows = financialEntryRepository.findAll(
                 spec, Sort.by(Sort.Direction.DESC, "entryDate"));
-        return rows.stream().map(this::toResponse).toList();
+        return rows.stream().map(financialEntryResponseMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public FinancialEntryResponse getById(UUID id) {
         return financialEntryRepository.findById(id)
-                .map(this::toResponse)
+                .map(financialEntryResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
     }
 
@@ -66,7 +68,7 @@ public class FinancialEntryService {
                 .bankAccount(blankToNull(request.bankAccount()))
                 .build();
         FinancialEntry saved = financialEntryRepository.save(entity);
-        return toResponse(saved);
+        return financialEntryResponseMapper.toResponse(saved);
     }
 
     @Transactional
@@ -97,7 +99,7 @@ public class FinancialEntryService {
         if (request.bankAccount() != null) {
             entity.setBankAccount(blankToNull(request.bankAccount()));
         }
-        return toResponse(entity);
+        return financialEntryResponseMapper.toResponse(entity);
     }
 
     private static String blankToNull(String value) {
@@ -112,21 +114,5 @@ public class FinancialEntryService {
         }
         return customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + customerId));
-    }
-
-    private FinancialEntryResponse toResponse(FinancialEntry e) {
-        Customer c = e.getCustomer();
-        return new FinancialEntryResponse(
-                e.getId(),
-                e.getDescription(),
-                e.getType(),
-                e.getCategory(),
-                e.getAmount(),
-                e.getEntryDate(),
-                e.getStatus(),
-                c != null ? c.getId() : null,
-                c != null ? c.getName() : null,
-                e.getBankAccount()
-        );
     }
 }

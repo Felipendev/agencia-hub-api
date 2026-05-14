@@ -14,8 +14,9 @@ Princípios gerais (sempre válidos):
 - **Clientes (`/customers`):** `CustomerAPI` + `CustomerController` em `controller.customer`; casos de uso em `application.customer` delegando ao `CustomerService` (mesmo contrato HTTP).
 - **Agência (`/agency`):** validação de formato de telefone no **patch** saiu do controller e foi para `AgencyService.update` (regra de aplicação); mensagens tocadas alinhadas a minúsculas onde aplicável.
 - **Financeiro / usuários (parcial):** `FinancialEntryService` e `UserService` — mensagens `ResourceNotFoundException` em inglês substituídas por equivalentes em português/minúsculas nos pontos encontrados.
+- **Lançamentos financeiros (`/financial-entries`):** `FinancialEntryAPI` + `FinancialEntryController` em `controller.financial`; casos de uso em `application.financial` delegando ao `FinancialEntryService`; `FinancialEntryResponseMapper` extrai `toResponse`.
 
-**Próxima fila sugerida (Passo 5):** `FinancialEntryController` + `*API` + use cases; depois convites / solicitação pública; `AgencyAPI` + controller fino para `/agency` se desejado.
+**Próxima fila sugerida (Passo 5):** convites / solicitação pública; `AgencyAPI` + controller fino para `/agency` se desejado.
 
 ---
 
