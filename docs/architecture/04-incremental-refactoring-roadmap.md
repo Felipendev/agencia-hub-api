@@ -22,9 +22,10 @@ Princípios gerais (sempre válidos):
 - **Usuários (`/users`):** `UserAPI` + `UserController` em `controller.user`; casos de uso em `application.user` delegando ao `UserService`; `UserResponseMapper` (mapeamento fora do controller).
 - **Painel do vendedor (`/seller-dashboard`):** `SellerDashboardAPI` + `SellerDashboardController` em `controller.sellerdashboard`; `BuildSellerDashboard` em `application.sellerdashboard` (cotações + comissões) com `UserResponseMapper` e `QuotationService`.
 - **Autenticação (`/auth`):** `AuthAPI` + `AuthController` em `controller.auth`; casos de uso em `application.auth` delegando ao `AuthService` / `InvitationService` (contrato HTTP inalterado).
-- **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT.
+- **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT; testes em `SecurityContextUsersTest`.
+- **Tenant:** `TenantContext.requireAgencyId()` nos controllers que dependem de agência no `ThreadLocal` (falha explícita se ausente); testes em `TenantContextTest`.
 
-**Próxima fila sugerida (Passo 5):** onde fizer sentido, usar `SecurityContextUsers.optionalUser()` em novos interceptors ou serviços; revisar duplicação JWT + tenant apenas se surgir bug ou teste flaky; ADRs só quando surgir decisão transversal.
+**Próxima fila sugerida (Passo 5):** revisar `GlobalExceptionHandler` (pacote / mapeamento de `IllegalStateException` para respostas HTTP); dead code em serviços grandes (`AuthService`, `QuotationService`) por uso real; ADRs só quando surgir decisão transversal.
 
 ---
 

@@ -25,7 +25,7 @@ public class AgencyController implements AgencyAPI {
 
     @Override
     public AgencyResponse getAgency() {
-        UUID agencyId = TenantContext.get();
+        UUID agencyId = TenantContext.requireAgencyId();
         return getAgencyUseCase.execute(agencyId);
     }
 
