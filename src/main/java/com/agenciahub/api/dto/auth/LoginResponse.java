@@ -19,6 +19,7 @@ public record LoginResponse(
         SubscriptionStatus subscriptionStatus,
         Instant trialEndsAt,
         Boolean mustChangePassword,
-        String publicLinkCode
+        String publicLinkCode,
+        Boolean requiresTermsAcceptance
 ) {
 }

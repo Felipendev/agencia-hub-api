@@ -83,6 +83,11 @@ public class User {
     @Builder.Default
     private Boolean mustChangePassword = Boolean.FALSE;
 
+    /** Versão vigente dos termos aceita implicitamente quando true (ver TermsService). */
+    @Column(name = "terms_accepted", nullable = false)
+    @Builder.Default
+    private Boolean termsAccepted = Boolean.FALSE;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

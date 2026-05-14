@@ -96,7 +96,8 @@ public class UserService {
                 Boolean.TRUE.equals(u.getActive()),
                 u.getCommissionPct(),
                 u.getCommissionFixed(),
-                u.getCreatedAt()
+                u.getCreatedAt(),
+                Boolean.TRUE.equals(u.getTermsAccepted())
         );
     }
 }

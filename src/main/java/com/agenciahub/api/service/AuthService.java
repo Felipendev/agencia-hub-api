@@ -18,12 +18,10 @@ import com.agenciahub.api.dto.auth.VerifyEmailRequest;
 import com.agenciahub.api.dto.auth.VerifyEmailResponse;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.Invitation;
-import com.agenciahub.api.entity.TermsAcceptance;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyRepository;
 import com.agenciahub.api.repository.InvitationRepository;
-import com.agenciahub.api.repository.TermsAcceptanceRepository;
 import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.security.JwtService;
 import com.agenciahub.api.validation.PhoneValidator;
@@ -50,7 +48,6 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final AgencyRepository agencyRepository;
-    private final TermsAcceptanceRepository termsAcceptanceRepository;
     private final InvitationRepository invitationRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -106,14 +103,15 @@ public class AuthService {
                 agency != null ? agency.getSubscriptionStatus() : null,
                 agency != null ? agency.getTrialEndsAt() : null,
                 Boolean.TRUE.equals(user.getMustChangePassword()) ? Boolean.TRUE : null,
-                publicLinkCode
+                publicLinkCode,
+                !Boolean.TRUE.equals(user.getTermsAccepted())
         );
     }
 
     // ─── Registration (Task 11.1) ────────────────────────────────────────────────
 
     @Transactional
-    public RegisterAgencyResponse register(RegisterAgencyRequest request, String ipAddress) {
+    public RegisterAgencyResponse register(RegisterAgencyRequest request) {
         String email = request.email().trim().toLowerCase();
 
         // Whitelist check: only allowed emails can register during beta
@@ -145,6 +143,9 @@ public class AuthService {
         if (!Boolean.TRUE.equals(request.termsAccepted())) {
             throw new IllegalArgumentException("É necessário aceitar os Termos de Uso");
         }
+        if (!TermsService.CURRENT_TERMS_VERSION.equals(request.termsVersion())) {
+            throw new IllegalArgumentException("versão dos termos inválida");
+        }
 
         // Validate optional agency phone
         if (request.agencyPhone() != null && !request.agencyPhone().isBlank()
@@ -173,16 +174,9 @@ public class AuthService {
                 .phone(PhoneValidator.formatForStorage(request.ownerPhone()))
                 .emailVerified(false)
                 .active(true)
+                .termsAccepted(true)
                 .build();
         user = userRepository.save(user);
-
-        // Record terms acceptance
-        TermsAcceptance termsAcceptance = TermsAcceptance.builder()
-                .user(user)
-                .termsVersion(request.termsVersion())
-                .ipAddress(ipAddress)
-                .build();
-        termsAcceptanceRepository.save(termsAcceptance);
 
         verificationCodeService.generateAndSend(
                 email,

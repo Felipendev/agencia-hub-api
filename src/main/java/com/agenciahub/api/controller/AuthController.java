@@ -18,7 +18,6 @@ import com.agenciahub.api.service.AuthService;
 import com.agenciahub.api.service.InvitationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -54,11 +53,8 @@ public class AuthController {
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Register a new agency and owner")
-    public RegisterAgencyResponse register(
-            @Valid @RequestBody RegisterAgencyRequest request,
-            HttpServletRequest httpRequest) {
-        String ipAddress = getClientIp(httpRequest);
-        return authService.register(request, ipAddress);
+    public RegisterAgencyResponse register(@Valid @RequestBody RegisterAgencyRequest request) {
+        return authService.register(request);
     }
 
     @PostMapping("/verify-email")
@@ -114,13 +110,5 @@ public class AuthController {
             return user.getId();
         }
         return UUID.fromString(authentication.getName());
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
     }
 }

@@ -5,7 +5,6 @@ import com.agenciahub.api.application.terms.AcceptTermsUseCase;
 import com.agenciahub.api.application.terms.GetLatestTermsPublicUseCase;
 import com.agenciahub.api.controller.terms.docs.TermsAPI;
 import com.agenciahub.api.dto.terms.AcceptTermsRequest;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,10 +26,9 @@ public class TermsController implements TermsAPI {
     }
 
     @Override
-    public Map<String, String> accept(AcceptTermsRequest request, HttpServletRequest httpRequest) {
+    public Map<String, String> accept(AcceptTermsRequest request) {
         UUID userId = getCurrentUserId();
-        String ip = getClientIp(httpRequest);
-        return acceptTermsUseCase.execute(new AcceptTermsCommand(userId, request.termsVersion(), ip));
+        return acceptTermsUseCase.execute(new AcceptTermsCommand(userId, request.termsVersion()));
     }
 
     private UUID getCurrentUserId() {
@@ -39,13 +37,5 @@ public class TermsController implements TermsAPI {
             throw new IllegalStateException("usuário não autenticado");
         }
         return UUID.fromString(authentication.getName());
-    }
-
-    private String getClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
     }
 }
