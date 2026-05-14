@@ -1,9 +1,9 @@
-package com.agenciahub.api.controller;
+package com.agenciahub.api.controller.solicitacao.pub;
 
+import com.agenciahub.api.application.solicitacao.GetPublicSolicitacaoConfigBySlugUseCase;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
-import com.agenciahub.api.service.SolicitacaoConfigService;
 import com.agenciahub.api.support.WebMvcControllerTestImports;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -23,15 +23,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
-        controllers = PublicSolicitacaoController.class,
+        controllers = PublicSolicitacaoConfigController.class,
         excludeAutoConfiguration = {
                 SecurityAutoConfiguration.class,
                 UserDetailsServiceAutoConfiguration.class
-        }
-)
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @Import(WebMvcControllerTestImports.class)
-class PublicSolicitacaoControllerTest {
+class PublicSolicitacaoConfigControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -43,7 +42,7 @@ class PublicSolicitacaoControllerTest {
     private RateLimitFilter rateLimitFilter;
 
     @MockitoBean
-    private SolicitacaoConfigService solicitacaoConfigService;
+    private GetPublicSolicitacaoConfigBySlugUseCase getPublicSolicitacaoConfigBySlugUseCase;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -51,7 +50,7 @@ class PublicSolicitacaoControllerTest {
     @Test
     void getBySlug_returnsConfig() throws Exception {
         var links = objectMapper.createArrayNode();
-        when(solicitacaoConfigService.getPublicBySlug("demo"))
+        when(getPublicSolicitacaoConfigBySlugUseCase.execute("demo"))
                 .thenReturn(new SolicitacaoConfigResponse(
                         "demo", "Título", "Intro", null, "Marca", links));
 
@@ -62,8 +61,8 @@ class PublicSolicitacaoControllerTest {
     }
 
     @Test
-    void getBySlug_whenServiceThrowsUnhandled_returns500() throws Exception {
-        when(solicitacaoConfigService.getPublicBySlug(anyString()))
+    void getBySlug_whenUseCaseThrowsUnhandled_returns500() throws Exception {
+        when(getPublicSolicitacaoConfigBySlugUseCase.execute(anyString()))
                 .thenThrow(new RuntimeException("simulated failure"));
 
         mockMvc.perform(get("/public/solicitacao-config/demo"))
