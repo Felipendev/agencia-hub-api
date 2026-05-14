@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.sellerdashboard.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.seller.SellerDashboardResponse;
 import com.agenciahub.api.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @RequestMapping("/seller-dashboard")
 @Tag(name = "Painel do vendedor", description = "Métricas e cotações recentes do vendedor; owner pode consultar qualquer vendedor.")
+@StandardErrorApiResponses
 public interface SellerDashboardAPI {
 
     @GetMapping("/me")

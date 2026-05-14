@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.financial.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
 import com.agenciahub.api.domain.FinancialEntryType;
@@ -34,6 +35,7 @@ import java.util.UUID;
 
                 Acesso restrito a usuários com papel **OWNER**.""")
 @RequestMapping("/financial-entries")
+@StandardErrorApiResponses
 public interface FinancialEntryAPI {
 
     @GetMapping

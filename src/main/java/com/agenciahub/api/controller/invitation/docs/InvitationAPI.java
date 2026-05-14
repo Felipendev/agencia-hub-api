@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.invitation.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.invitation.CreateInvitationRequest;
 import com.agenciahub.api.dto.invitation.InvitationResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +28,7 @@ import java.util.UUID;
 
                 Acesso restrito a usuários com papel **OWNER**. O convite envia e-mail com link público `/convite/{token}`.""")
 @RequestMapping("/invitations")
+@StandardErrorApiResponses
 public interface InvitationAPI {
 
     @PostMapping

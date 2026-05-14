@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.solicitacao.agency.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigRequest;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Tag(
         name = "Configuração do formulário (agência)",
         description = "CRUD da configuração do formulário público de solicitação para a agência do tenant. Acesso **OWNER**.")
+@StandardErrorApiResponses
 public interface SolicitacaoConfigAgencyAPI {
 
     @GetMapping
