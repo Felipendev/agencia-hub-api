@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.auth.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.auth.ChangePasswordRequest;
 import com.agenciahub.api.dto.auth.ForgotPasswordRequest;
 import com.agenciahub.api.dto.auth.InviteValidationResponse;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 @RequestMapping("/auth")
 @Tag(name = "Autenticação", description = "Cadastro, login, verificação de e-mail e fluxos de senha.")
+@StandardErrorApiResponses
 public interface AuthAPI {
 
     @PostMapping("/login")

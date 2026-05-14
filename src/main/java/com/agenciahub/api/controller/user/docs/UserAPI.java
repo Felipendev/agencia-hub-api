@@ -1,5 +1,6 @@
 package com.agenciahub.api.controller.user.docs;
 
+import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.user.CreateUserRequest;
 import com.agenciahub.api.dto.user.UpdateUserRequest;
 import com.agenciahub.api.dto.user.UserResponse;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @Tag(
         name = "Usuários",
         description = "Gestão de usuários da agência. Acesso restrito a papel **OWNER** (ver filtro de segurança).")
+@StandardErrorApiResponses
 public interface UserAPI {
 
     @GetMapping

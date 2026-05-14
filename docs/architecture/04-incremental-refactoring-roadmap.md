@@ -27,8 +27,9 @@ Princípios gerais (sempre válidos):
 - **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
 - **404 por lookup:** mensagens `ResourceNotFoundException` em `AuthService`, `TermsService`, `AgencyService`, `InvitationService` e `SolicitacaoSubmissionService` passam a incluir **identificador** (e-mail, id ou token) no texto, alinhado a `UserService` / `QuotationService`.
 - **OpenAPI — erros:** `OpenApiConfig` define o schema global **`ApiError`** e descreve no **info** os códigos `code` e HTTP associados (`UNAUTHENTICATED`, `MISSING_AGENCY_CONTEXT`, `NOT_FOUND`, etc.).
+- **OpenAPI — respostas de erro por recurso:** meta-anotação `@StandardErrorApiResponses` (`api.docs`) documenta 400/401/403/404/409/500 com schema `ApiError`; aplicada em **`AuthAPI`**, **`TermsAPI`** e **`UserAPI`** (demais `*API` podem reutilizar a mesma anotação em tipo ou método).
 
-**Próxima fila sugerida (Passo 5 / 6):** repetir padrão de `@ApiResponse` referenciando `#/components/schemas/ApiError` nos `*API` mais expostos ao cliente, se quiser documentação por operação; **Passo 6** (`Clock` em fluxos com tempo) quando surgir necessidade de testes determinísticos; ADRs só quando surgir decisão transversal.
+**Próxima fila sugerida (Passo 5 / 6):** estender `@StandardErrorApiResponses` aos demais `*API` conforme prioridade de exposição ao cliente; **Passo 6** (`Clock` em fluxos com tempo) quando surgir necessidade de testes determinísticos; ADRs só quando surgir decisão transversal.
 
 ---
 
