@@ -9,12 +9,10 @@ import com.agenciahub.api.controller.invitation.docs.InvitationAPI;
 import com.agenciahub.api.dto.invitation.CreateInvitationRequest;
 import com.agenciahub.api.dto.invitation.InvitationResponse;
 import com.agenciahub.api.entity.User;
-import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,7 +29,7 @@ public class InvitationController implements InvitationAPI {
 
     @Override
     public InvitationResponse create(CreateInvitationRequest request) {
-        User inviter = getCurrentUser();
+        User inviter = SecurityContextUsers.requireUser();
         return createInvitationUseCase.execute(new CreateInvitationCommand(request, inviter));
     }
 
@@ -45,13 +43,5 @@ public class InvitationController implements InvitationAPI {
     public void revoke(UUID id) {
         UUID agencyId = TenantContext.get();
         revokeInvitationUseCase.execute(new RevokeInvitationCommand(id, agencyId));
-    }
-
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof User user) {
-            return user;
-        }
-        throw new ResourceNotFoundException("usuário não encontrado");
     }
 }
