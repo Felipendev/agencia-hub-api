@@ -12,33 +12,26 @@ import java.util.UUID;
 
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
 
-    List<Customer> findByDeletedAtIsNullOrderByCreatedAtDesc();
+    List<Customer> findAllByOrderByCreatedAtDesc();
 
-    List<Customer> findByDeletedAtIsNotNullOrderByDeletedAtDesc();
+    List<Customer> findByNameContainingIgnoreCaseOrderByCreatedAtDesc(String name);
 
-    Optional<Customer> findByIdAndDeletedAtIsNull(UUID id);
+    List<Customer> findByStatusOrderByCreatedAtDesc(CustomerStatus status);
 
-    Optional<Customer> findByIdAndDeletedAtIsNotNull(UUID id);
+    List<Customer> findByNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(String name, CustomerStatus status);
 
-    List<Customer> findByDeletedAtIsNullAndNameContainingIgnoreCaseOrderByCreatedAtDesc(String name);
+    boolean existsByEmailIgnoreCase(String email);
 
-    List<Customer> findByDeletedAtIsNullAndStatusOrderByCreatedAtDesc(CustomerStatus status);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, UUID id);
 
-    List<Customer> findByDeletedAtIsNullAndNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
-            String name, CustomerStatus status);
-
-    boolean existsByDeletedAtIsNullAndEmailIgnoreCase(String email);
-
-    boolean existsByDeletedAtIsNullAndEmailIgnoreCaseAndIdNot(String email, UUID id);
-
-    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE c.deletedAt IS NULL AND FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
+    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
     boolean existsByNormalizedPhone(@Param("phone") String normalizedPhone);
 
-    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE c.deletedAt IS NULL AND FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone AND c.id <> :id")
+    @Query("SELECT COUNT(c) > 0 FROM Customer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone AND c.id <> :id")
     boolean existsByNormalizedPhoneAndIdNot(@Param("phone") String normalizedPhone, @Param("id") UUID id);
 
-    Optional<Customer> findFirstByDeletedAtIsNullAndEmailIgnoreCase(String email);
+    Optional<Customer> findFirstByEmailIgnoreCase(String email);
 
-    @Query("SELECT c FROM Customer c WHERE c.deletedAt IS NULL AND FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
-    Optional<Customer> findFirstActiveByNormalizedPhone(@Param("phone") String phone);
+    @Query("SELECT c FROM Customer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
+    Optional<Customer> findFirstByNormalizedPhone(@Param("phone") String phone);
 }

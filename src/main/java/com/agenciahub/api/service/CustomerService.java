@@ -9,7 +9,6 @@ import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.CustomerRepository;
 import com.agenciahub.api.repository.FinancialEntryRepository;
-import com.agenciahub.api.repository.OpportunityRepository;
 import com.agenciahub.api.repository.QuotationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,6 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final QuotationRepository quotationRepository;
-    private final OpportunityRepository opportunityRepository;
     private final FinancialEntryRepository financialEntryRepository;
 
     @Transactional(readOnly = true)
@@ -33,13 +31,13 @@ public class CustomerService {
         boolean hasName = name != null && !name.isBlank();
         List<Customer> rows;
         if (!hasName && status == null) {
-            rows = customerRepository.findByDeletedAtIsNullOrderByCreatedAtDesc();
+            rows = customerRepository.findAllByOrderByCreatedAtDesc();
         } else if (hasName && status == null) {
-            rows = customerRepository.findByDeletedAtIsNullAndNameContainingIgnoreCaseOrderByCreatedAtDesc(name.strip());
+            rows = customerRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc(name.strip());
         } else if (!hasName) {
-            rows = customerRepository.findByDeletedAtIsNullAndStatusOrderByCreatedAtDesc(status);
+            rows = customerRepository.findByStatusOrderByCreatedAtDesc(status);
         } else {
-            rows = customerRepository.findByDeletedAtIsNullAndNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
+            rows = customerRepository.findByNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
                     name.strip(), status);
         }
         return rows.stream().map(this::toResponse).toList();
@@ -47,16 +45,16 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public CustomerResponse getById(UUID id) {
-        return customerRepository.findByIdAndDeletedAtIsNull(id)
+        return customerRepository.findById(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
     }
 
     @Transactional(readOnly = true)
     public Optional<CustomerResponse> lookupActiveByContact(String email, String phone) {
         if (email != null && !email.isBlank()) {
             Optional<Customer> byEmail =
-                    customerRepository.findFirstByDeletedAtIsNullAndEmailIgnoreCase(email.strip());
+                    customerRepository.findFirstByEmailIgnoreCase(email.strip());
             if (byEmail.isPresent()) {
                 return Optional.of(toResponse(byEmail.get()));
             }
@@ -64,7 +62,7 @@ public class CustomerService {
         if (phone != null && !phone.isBlank()) {
             String norm = normalizePhone(phone);
             if (!norm.isEmpty()) {
-                Optional<Customer> byPhone = customerRepository.findFirstActiveByNormalizedPhone(norm);
+                Optional<Customer> byPhone = customerRepository.findFirstByNormalizedPhone(norm);
                 if (byPhone.isPresent()) {
                     return Optional.of(toResponse(byPhone.get()));
                 }
@@ -78,7 +76,7 @@ public class CustomerService {
         String email = request.email().strip();
         String phone = normalizePhone(request.phone());
 
-        if (!email.isEmpty() && customerRepository.existsByDeletedAtIsNullAndEmailIgnoreCase(email)) {
+        if (!email.isEmpty() && customerRepository.existsByEmailIgnoreCase(email)) {
             throw new DuplicateCustomerException("e-mail", email);
         }
         if (!phone.isEmpty() && customerRepository.existsByNormalizedPhone(phone)) {
@@ -101,13 +99,13 @@ public class CustomerService {
     @Transactional
     public CustomerResponse update(UUID id, UpdateCustomerRequest request) {
         Customer entity = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
 
         if (request.email() != null) {
             String email = request.email().strip();
             if (!email.isEmpty()
                     && !email.equalsIgnoreCase(entity.getEmail())
-                    && customerRepository.existsByDeletedAtIsNullAndEmailIgnoreCaseAndIdNot(email, id)) {
+                    && customerRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
                 throw new DuplicateCustomerException("e-mail", email);
             }
             entity.setEmail(email);
@@ -122,37 +120,24 @@ public class CustomerService {
             }
             entity.setPhone(request.phone().strip());
         }
-        if (request.name() != null)                entity.setName(request.name().strip());
-        if (request.interestDestination() != null)  entity.setInterestDestination(request.interestDestination().strip());
-        if (request.status() != null)               entity.setStatus(request.status());
-        if (request.notes() != null)                entity.setNotes(request.notes());
+        if (request.name() != null) entity.setName(request.name().strip());
+        if (request.interestDestination() != null) {
+            entity.setInterestDestination(request.interestDestination().strip());
+        }
+        if (request.status() != null) entity.setStatus(request.status());
+        if (request.notes() != null) entity.setNotes(request.notes());
 
         return toResponse(entity);
     }
 
     @Transactional
     public void delete(UUID id) {
-        Customer entity = customerRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado: " + id));
+        Customer entity = customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
         UUID customerId = entity.getId();
-        opportunityRepository.deleteByCustomer_Id(customerId);
         quotationRepository.deleteAll(quotationRepository.findByCustomer_IdOrderByCreatedAtDesc(customerId));
         financialEntryRepository.unlinkCustomer(customerId);
         customerRepository.delete(entity);
-    }
-
-    @Transactional
-    public CustomerResponse restore(UUID id) {
-        Customer entity = customerRepository.findByIdAndDeletedAtIsNotNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado na lixeira: " + id));
-        entity.setDeletedAt(null);
-        return toResponse(entity);
-    }
-
-    @Transactional(readOnly = true)
-    public List<CustomerResponse> listDeleted() {
-        return customerRepository.findByDeletedAtIsNotNullOrderByDeletedAtDesc().stream()
-                .map(this::toResponse).toList();
     }
 
     private static String normalizePhone(String phone) {
@@ -169,8 +154,6 @@ public class CustomerService {
                 c.getInterestDestination(),
                 c.getStatus(),
                 c.getNotes(),
-                c.getCreatedAt(),
-                c.getDeletedAt()
-        );
+                c.getCreatedAt());
     }
 }

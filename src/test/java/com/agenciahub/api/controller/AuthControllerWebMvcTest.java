@@ -6,11 +6,16 @@ import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.auth.LoginRequest;
 import com.agenciahub.api.dto.auth.LoginResponse;
 import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.security.JwtAuthFilter;
+import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.service.AuthService;
 import com.agenciahub.api.service.InvitationService;
+import com.agenciahub.api.support.WebMvcControllerTestImports;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -28,13 +33,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(
         controllers = AuthController.class,
-        excludeAutoConfiguration = SecurityAutoConfiguration.class
+        excludeAutoConfiguration = {
+                SecurityAutoConfiguration.class,
+                UserDetailsServiceAutoConfiguration.class
+        }
 )
-@Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
+@Import(WebMvcControllerTestImports.class)
 class AuthControllerWebMvcTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockitoBean
+    private JwtAuthFilter jwtAuthFilter;
+
+    @MockitoBean
+    private RateLimitFilter rateLimitFilter;
 
     @MockitoBean
     private AuthService authService;

@@ -49,7 +49,7 @@ public class FinancialEntryService {
     public FinancialEntryResponse getById(UUID id) {
         return financialEntryRepository.findById(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Financial entry not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
     }
 
     @Transactional
@@ -72,7 +72,7 @@ public class FinancialEntryService {
     @Transactional
     public FinancialEntryResponse update(UUID id, UpdateFinancialEntryRequest request) {
         FinancialEntry entity = financialEntryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Financial entry not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
         if (request.description() != null) {
             entity.setDescription(request.description().strip());
         }
@@ -111,7 +111,7 @@ public class FinancialEntryService {
             return null;
         }
         return customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + customerId));
+                .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + customerId));
     }
 
     private FinancialEntryResponse toResponse(FinancialEntry e) {

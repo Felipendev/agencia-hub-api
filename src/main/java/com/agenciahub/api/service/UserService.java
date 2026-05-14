@@ -39,13 +39,13 @@ public class UserService {
     public UserResponse getById(UUID id) {
         return userRepository.findById(id)
                 .map(this::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }
 
     @Transactional(readOnly = true)
     public User getEntityById(UUID id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }
 
     @Transactional
@@ -69,7 +69,7 @@ public class UserService {
     @Transactional
     public UserResponse update(UUID id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
 
         if (request.name() != null) user.setName(request.name().strip());
         if (request.password() != null && !request.password().isBlank()) {

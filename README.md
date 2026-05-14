@@ -72,7 +72,6 @@ Tests use **H2** (in-memory) with the same Flyway migrations.
 | Resource            | Path prefix (after `/api/v1`) |
 |---------------------|-------------------------------|
 | Customers           | `/customers`                  |
-| Opportunities       | `/opportunities`              |
 | Quotations (quotes) | `/quotations`                 |
 | Financial entries   | `/financial-entries`          |
 

@@ -52,10 +52,6 @@ public class Quotation {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "opportunity_id")
-    private Opportunity opportunity;
-
     /** Sales associate responsible for this quotation (commission target). */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
@@ -126,9 +122,6 @@ public class Quotation {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
 
     @PrePersist
     void prePersist() {

@@ -112,14 +112,6 @@ if [ "$STATUS" = "200" ]; then
       -H "Authorization: Bearer $TOKEN")
     assert_status "GET /quotations" "200" "$STATUS"
 
-    STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/trash/quotations" \
-      -H "Authorization: Bearer $TOKEN")
-    assert_status "GET /trash/quotations" "200" "$STATUS"
-
-    STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/trash/customers" \
-      -H "Authorization: Bearer $TOKEN")
-    assert_status "GET /trash/customers" "200" "$STATUS"
-
     STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/agency/solicitacao-config?slug=demo" \
       -H "Authorization: Bearer $TOKEN")
     assert_status "GET /agency/solicitacao-config" "200" "$STATUS"
