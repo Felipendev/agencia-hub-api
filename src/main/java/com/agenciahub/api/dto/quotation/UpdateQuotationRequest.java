@@ -12,7 +12,6 @@ import java.util.UUID;
  * Partial update: {@code null} fields are ignored.
  */
 public record UpdateQuotationRequest(
-        UUID opportunityId,
         UUID sellerId,
         String title,
         String destination,

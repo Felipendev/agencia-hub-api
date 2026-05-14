@@ -1,16 +1,25 @@
-package com.agenciahub.api.controller;
+package com.agenciahub.api.controller.quotation;
 
+import com.agenciahub.api.application.quotation.CreateQuotationCommand;
+import com.agenciahub.api.application.quotation.CreateQuotationUseCase;
+import com.agenciahub.api.application.quotation.GetQuotationByIdUseCase;
+import com.agenciahub.api.application.quotation.ListQuotationsQuery;
+import com.agenciahub.api.application.quotation.ListQuotationsUseCase;
+import com.agenciahub.api.application.quotation.DeleteQuotationUseCase;
+import com.agenciahub.api.application.quotation.UpdateQuotationUseCase;
 import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.dto.quotation.CreateQuotationRequest;
 import com.agenciahub.api.dto.quotation.QuotationResponse;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.service.QuotationService;
+import com.agenciahub.api.security.JwtAuthFilter;
+import com.agenciahub.api.security.RateLimitFilter;
+import com.agenciahub.api.support.WebMvcControllerTestImports;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -24,9 +33,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,9 +46,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(
         controllers = QuotationController.class,
-        excludeAutoConfiguration = SecurityAutoConfiguration.class
-)
-@Import(GlobalExceptionHandler.class)
+        excludeAutoConfiguration = {
+                SecurityAutoConfiguration.class,
+                UserDetailsServiceAutoConfiguration.class
+        })
+@AutoConfigureMockMvc(addFilters = false)
+@Import(WebMvcControllerTestImports.class)
 class QuotationControllerWebMvcTest {
 
     @Autowired
@@ -48,12 +61,34 @@ class QuotationControllerWebMvcTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private QuotationService quotationService;
+    private JwtAuthFilter jwtAuthFilter;
+
+    @MockitoBean
+    private RateLimitFilter rateLimitFilter;
+
+    @MockitoBean
+    private ListQuotationsUseCase listQuotationsUseCase;
+
+    @MockitoBean
+    private GetQuotationByIdUseCase getQuotationByIdUseCase;
+
+    @MockitoBean
+    private CreateQuotationUseCase createQuotationUseCase;
+
+    @MockitoBean
+    private UpdateQuotationUseCase updateQuotationUseCase;
+
+    @MockitoBean
+    private DeleteQuotationUseCase deleteQuotationUseCase;
 
     @Test
     void list_returnsQuotations() throws Exception {
-        when(quotationService.search(isNull(), isNull(), isNull(), isNull(), eq(UserRole.OWNER)))
-                .thenReturn(List.of());
+        when(listQuotationsUseCase.execute(any(ListQuotationsQuery.class)))
+                .thenAnswer(inv -> {
+                    ListQuotationsQuery q = inv.getArgument(0);
+                    assertNull(q.caller());
+                    return List.<QuotationResponse>of();
+                });
 
         mockMvc.perform(get("/quotations"))
                 .andExpect(status().isOk())
@@ -63,7 +98,8 @@ class QuotationControllerWebMvcTest {
     @Test
     void get_whenMissing_returns404() throws Exception {
         UUID id = UUID.randomUUID();
-        when(quotationService.getById(id)).thenThrow(new ResourceNotFoundException("Cotação não encontrada"));
+        when(getQuotationByIdUseCase.execute(eq(id)))
+                .thenThrow(new ResourceNotFoundException("cotação não encontrada"));
 
         mockMvc.perform(get("/quotations/" + id))
                 .andExpect(status().isNotFound())
@@ -79,8 +115,6 @@ class QuotationControllerWebMvcTest {
                 qid,
                 cid,
                 "Cliente",
-                null,
-                null,
                 null,
                 null,
                 "Título",
@@ -99,13 +133,18 @@ class QuotationControllerWebMvcTest {
                 null,
                 Instant.parse("2026-01-01T00:00:00Z"),
                 Instant.parse("2026-01-01T00:00:00Z"),
-                null,
                 QuotationCreationSource.INTERNAL,
                 null,
                 null,
                 null);
 
-        when(quotationService.create(any(CreateQuotationRequest.class), any())).thenReturn(resp);
+        when(createQuotationUseCase.execute(any(CreateQuotationCommand.class)))
+                .thenAnswer(inv -> {
+                    CreateQuotationCommand cmd = inv.getArgument(0);
+                    assertNull(cmd.caller());
+                    assertEquals(cid, cmd.request().customerId());
+                    return resp;
+                });
 
         mockMvc.perform(post("/quotations")
                         .contentType(MediaType.APPLICATION_JSON)

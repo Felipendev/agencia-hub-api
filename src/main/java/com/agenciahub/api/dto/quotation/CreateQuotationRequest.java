@@ -19,7 +19,6 @@ import java.util.UUID;
  */
 public record CreateQuotationRequest(
         @NotNull UUID customerId,
-        UUID opportunityId,
         UUID sellerId,
         @NotBlank String title,
         @NotBlank String destination,

@@ -61,9 +61,6 @@ public class Customer {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
-
     @PrePersist
     void prePersist() {
         if (createdAt == null) {

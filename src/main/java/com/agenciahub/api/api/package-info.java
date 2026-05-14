@@ -1,7 +1,10 @@
 /**
- * External API surface: REST controllers and transport DTOs organized by feature.
+ * External API surface: REST controllers, public {@code *API} documentation interfaces
+ * and transport DTOs organized by feature.
  * <p>
- * Controllers currently live under {@code com.agenciahub.api.controller}; they can
- * move into subpackages here gradually when a feature-based layout is adopted.
+ * Layout alvo (incremental): {@code com.agenciahub.api.controller.<feature>.docs} para
+ * interfaces OpenAPI ({@code XxxAPI}); {@code com.agenciahub.api.controller.<feature>}
+ * para o {@code @RestController} que implementa {@code XxxAPI}. Ver
+ * {@code docs/architecture/02-backend-architecture.md} e Passo 4 do roadmap.
  */
 package com.agenciahub.api.api;

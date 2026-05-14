@@ -13,7 +13,6 @@ public record CustomerResponse(
         String interestDestination,
         CustomerStatus status,
         String notes,
-        Instant createdAt,
-        Instant deletedAt
+        Instant createdAt
 ) {
 }

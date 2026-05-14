@@ -45,6 +45,28 @@ When rules conflict, follow this order:
 - Avoid duplicated logic.
 - Do not add extra features, unrelated refactors or files outside the requested scope.
 
+## Application / use cases
+
+- Prefer `com.agenciahub.api.application.UseCase<I, O>` for operations that return a result, and `VoidUseCase<I>` when `execute` has no return value.
+- For non-trivial flows, prefer a **dedicated interface** `XxxUseCase extends UseCase<Request, Response>` with a **`@Service`** implementation named after the action (e.g. `Xxx implements XxxUseCase`), not `XxxUseCaseImpl`.
+- Direct `@Service` classes named `SomethingUseCase` implementing `UseCase` are acceptable for small pilots; evolve to interface + implementation when the class grows.
+- Use cases may use `@Slf4j` and `log.info` at stable boundaries (start/success with ids); avoid noisy or per-line logging.
+
+## Mensagens de exceção
+
+- Texto das mensagens expostas em exceções de negócio ou aplicação (mensagem passada ao construtor ou ao cliente): **português** e **minúsculas** no corpo da mensagem (incluindo início da frase). Identificadores técnicos (uuid, códigos) podem manter o formato natural.
+- Ao alterar código existente em inglês, alinhar gradualmente a este padrão no mesmo arquivo ou fluxo que estiver sendo tocado.
+
+## Documentação OpenAPI (`*API`)
+
+- Contrato e documentação rica do REST ficam em **interfaces públicas** nomeadas `*API` (ex.: `QuotationAPI` quando extraída), preferencialmente no subpacote `docs` dentro do agrupamento da feature (ex.: `controller.quotation.docs`).
+- O `@RestController` **implementa** a interface `*API`; evita duplicar `@Operation` / `@ApiResponses` no controller quando já estiverem na interface.
+- Textos de `@Tag`, `@Operation` (summary e description), `@ApiResponse` e descrições correlatas: **português**, no estilo rico acordado para este repositório (descrição em bloco de texto, regras em lista quando fizer sentido, códigos de resposta documentados).
+
+## Organização de pacotes (api / controller)
+
+- **Alvo incremental** (equivalente à referência por feature): `com.agenciahub.api.controller.<feature>.docs` para interfaces `*API`; `com.agenciahub.api.controller.<feature>` para o controller; use cases em `com.agenciahub.api.application.<feature>`. Não renomear pacotes em massa fora de um passo de roadmap explícito.
+
 ## Backend Architecture
 
 - Keep clear boundaries between API, Application, Domain and Infrastructure responsibilities.

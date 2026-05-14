@@ -52,6 +52,16 @@ Examples of API concerns:
 - OpenAPI documentation
 - exception handlers
 
+### OpenAPI contracts (`*API`) and feature packages
+
+- Prefer **public interfaces** named `*API` that declare REST paths and carry **OpenAPI** annotations (`@Tag`, `@Operation` with summary and multiline description, `@ApiResponses` / `@ApiResponse`). Documentation strings must be **Portuguese**, in the agreed rich style (rule lists where helpful, HTTP status descriptions in Portuguese).
+- Controllers **`implements`** the feature `*API` interface; avoid duplicating Swagger annotations on the class when they already live on the interface.
+- **Target package layout** (incremental; same structural idea as grouping by feature in a reference project): `com.agenciahub.api.controller.<feature>.docs` for `*API`, and `com.agenciahub.api.controller.<feature>` for the `@RestController`. Pair with use cases under `com.agenciahub.api.application.<feature>`. Avoid mass-moving unrelated controllers outside an explicit roadmap step.
+
+### Application-facing error messages
+
+- **Exception message strings** meant for logs, API error bodies, or operators: **Portuguese** and **lowercase** narrative text (UUIDs and similar tokens keep their usual spelling). When editing a file, align existing English messages in that flow to this convention where practical.
+
 ## Application Layer
 
 Responsible for:
@@ -78,6 +88,26 @@ Examples of application concerns:
 - query service when appropriate
 - application commands
 - application responses
+
+### Use case contracts (this project)
+
+In `com.agenciahub.api.application` the codebase exposes two generic shapes:
+
+- **`UseCase<I, O>`** — one input, one output (`execute` returns `O`).
+- **`VoidUseCase<I>`** — one input, no return value (`execute` is `void`); use when the operation only coordinates side effects (notifications, deletes without payload, etc.).
+
+**Recommended style for new use cases (when the operation is non-trivial):**
+
+1. Define a **dedicated interface** that extends the generic contract, so callers depend on a stable operation name:
+   - Example: `UpdateBookingUseCase extends UseCase<UpdateBookingRequest, UpdateBookingResponse>` (names are illustrative; use this project’s vocabulary).
+2. Implement it in a **`@Service`** class whose name reflects the action **without** a redundant `Impl` suffix:
+   - Example: `UpdateBooking implements UpdateBookingUseCase` (not `UpdateBookingUseCaseImpl`).
+
+A **single class** that implements `UseCase<I, O>` directly (e.g. `ListBookingsUseCase`) is still acceptable for small pilots or very thin operations; move to the interface + implementation split when the class accumulates collaborators or mapping logic.
+
+**Logging:** implementations may use `@Slf4j` and `log.info` at clear boundaries (for example, start of `execute` with a correlation or entity id, and a single success line). Keep volume reasonable—avoid logging inside tight loops or for every trivial step.
+
+Do **not** copy class or package names from external sample repositories; only the **shape** (interface + implementing service + logging discipline) is prescriptive.
 
 ## Domain Layer
 

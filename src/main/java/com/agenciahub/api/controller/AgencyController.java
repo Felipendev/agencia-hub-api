@@ -6,7 +6,6 @@ import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.service.AgencyService;
-import com.agenciahub.api.validation.PhoneValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -39,13 +38,6 @@ public class AgencyController {
     @PatchMapping
     @Operation(summary = "Update agency fields")
     public AgencyResponse updateAgency(@Valid @RequestBody UpdateAgencyRequest request) {
-        // Validate phone format if provided
-        if (request.phone() != null && !request.phone().isBlank()) {
-            if (!PhoneValidator.isValid(request.phone())) {
-                throw new IllegalArgumentException("Formato de telefone inválido. Use DDD + número");
-            }
-        }
-
         User currentUser = getCurrentUser();
         Agency agency = agencyService.update(currentUser.getAgency().getId(), request, currentUser);
         return toResponse(agency);
@@ -72,6 +64,6 @@ public class AgencyController {
         if (authentication.getPrincipal() instanceof User user) {
             return user;
         }
-        throw new ResourceNotFoundException("Usuário não encontrado");
+        throw new ResourceNotFoundException("usuário não encontrado");
     }
 }

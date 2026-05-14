@@ -8,6 +8,15 @@ Princípios gerais (sempre válidos):
 - Não mover tudo de uma vez; cada passo deve deixar o `main` verde (build + testes).
 - Novo padrão só vira convenção depois de **um** fluxo piloto bem feito e revisado.
 
+### Progresso consolidado (referência do repositório)
+
+- **Cotações (`/quotations`):** `QuotationAPI` + `QuotationController` em `controller.quotation`; casos de uso em `application.quotation` delegando ao `QuotationService`; `QuotationResponseMapper` extrai `toResponse`; exclusão **permanente**; endpoints `/trash` removidos; mensagens de exceção do fluxo em português/minúsculas onde alinhado.
+- **Clientes (`/customers`):** `CustomerAPI` + `CustomerController` em `controller.customer`; casos de uso em `application.customer` delegando ao `CustomerService` (mesmo contrato HTTP).
+- **Agência (`/agency`):** validação de formato de telefone no **patch** saiu do controller e foi para `AgencyService.update` (regra de aplicação); mensagens tocadas alinhadas a minúsculas onde aplicável.
+- **Financeiro / usuários (parcial):** `FinancialEntryService` e `UserService` — mensagens `ResourceNotFoundException` em inglês substituídas por equivalentes em português/minúsculas nos pontos encontrados.
+
+**Próxima fila sugerida (Passo 5):** `FinancialEntryController` + `*API` + use cases; depois convites / solicitação pública; `AgencyAPI` + controller fino para `/agency` se desejado.
+
 ---
 
 ## Visão em sequência (diagrama)
@@ -63,9 +72,11 @@ sequenceDiagram
 - [ ] Rodar `mvn test` localmente; corrigir **falhas de contexto** em testes (ex.: `@WebMvcTest` + filtros JWT sem beans necessários).
 - [ ] Garantir o mesmo na CI (GitHub Actions ou equivalente).
 
+**Neste repositório (`agencia-hub-api`):** em `@WebMvcTest`, importar `com.agenciahub.api.support.WebMvcControllerTestImports`, anotar `@AutoConfigureMockMvc(addFilters = false)` e registrar `@MockitoBean` para `JwtAuthFilter` e `RateLimitFilter`, para o slice não precisar de `JwtService` real. Reutilize o mesmo padrão ao adicionar novos testes de controller.
+
 **Pronto quando:** `mvn test` verde no `main` (ou na branch de integração que vocês usam).
 
-**Depois deste passo, fazer:** Passo 2 — escolher **uma** feature piloto (sugestão histórica: CRUD de oportunidades — pouco acoplamento a auth).
+**Depois deste passo, fazer:** Passo 2 — escolher **uma** feature piloto (sugestão: CRUD de **cotação** — pouco acoplamento a auth).
 
 **Evitar:** Misturar correção de teste com refator grande de domínio no mesmo PR.
 
@@ -73,17 +84,17 @@ sequenceDiagram
 
 ## Passo 2 — Primeiro caso de uso (piloto) sem mudar API HTTP
 
-**Objetivo:** Ter **um** fluxo onde o `*Service` delega a uma classe que implementa `UseCase<I,O>` (ou equivalente), mantendo endpoints e DTOs iguais.
+**Objetivo:** Ter **um** fluxo onde o `*Service` delega a interfaces de caso de uso (`XxxUseCase`) implementadas por `@Service` (`Xxx`), mantendo endpoints e DTOs iguais.
 
 **Inclui (checklist):**
 
-- [ ] Escolher um fluxo pequeno (ex.: criar/atualizar/listar oportunidade).
-- [ ] Criar classes em `com.agenciahub.api.application.<feature>` que implementam `UseCase`, mais DTOs de comando/resultado **se** fizer sentido; senão, `UseCase` com tipos já existentes no piloto.
+- [ ] Escolher um fluxo pequeno (ex.: criar/atualizar/listar **cotação**).
+- [ ] Criar interfaces `XxxUseCase extends UseCase<…>` (ou `VoidUseCase`) e `@Service` `Xxx implements XxxUseCase` em `com.agenciahub.api.application.<feature>`, mais DTOs de comando/resultado **se** fizer sentido; alinhar com `02-backend-architecture.md`, secção *Use case contracts*.
 - [ ] O `@Service` público vira fachada: chama o use case e retorna o mesmo DTO de resposta de antes.
 
 **Pronto quando:** Testes do piloto verdes; contrato REST inalterado (mesmos paths, status, shape de JSON).
 
-**Depois deste passo, fazer:** Passo 3 no **mesmo** piloto (extrair mapeamento).
+**Depois deste passo, fazer:** Passo 3 no **mesmo** piloto (extrair mapeamento para um `*ResponseMapper` dedicado); em seguida Passo 4 (controller fino) ou Passo 5 conforme prioridade.
 
 **Evitar:** Piloto em `AuthService`, segurança ou fluxo com muitas integrações na primeira rodada.
 
@@ -95,7 +106,7 @@ sequenceDiagram
 
 **Inclui (checklist):**
 
-- [ ] Classe dedicada (ex.: `OpportunityResponseMapper`) com métodos nomeados (`toResponse`, etc.) no escopo do piloto.
+- [ ] Classe dedicada (ex.: `QuotationResponseMapper`) com métodos nomeados (`toResponse`, etc.) no escopo do piloto.
 - [ ] Serviço/use case só orquestra e chama o mapper.
 
 **Pronto quando:** Comportamento e testes iguais; método privado gigante de mapeamento sumiu ou ficou trivial.
@@ -108,12 +119,15 @@ sequenceDiagram
 
 ## Passo 4 — Controller apenas adaptador no piloto
 
-**Objetivo:** Nenhuma regra de negócio nem validação de domínio no controller do piloto.
+**Objetivo:** Nenhuma regra de negócio nem validação de domínio no controller do piloto; contrato HTTP e OpenAPI explícitos.
 
 **Inclui (checklist):**
 
 - [ ] Mover validações que não são só “formato HTTP/Bean Validation” para o serviço/use case.
 - [ ] Controller: `@Valid`, parâmetros, delegação, resposta.
+- [ ] Extrair documentação OpenAPI para interface pública `*API` no subpacote `docs` da feature (ex.: `controller.quotation.docs.QuotationAPI`); o `@RestController` implementa essa interface (ver `.cursor/rules.md`).
+- [ ] Mensagens de exceção no fluxo tocado: **português** e **minúsculas** (ver `02-backend-architecture.md` e `.cursor/rules.md`).
+- [ ] (Opcional neste passo) Repetir o **agrupamento por feature** em outros controllers (`controller.<feature>`, `application.<feature>`), um agregado por PR.
 
 **Pronto quando:** Controller do piloto sem `if` de regra de negócio; testes verdes.
 
@@ -133,7 +147,7 @@ sequenceDiagram
 - [ ] Para cada item: UseCase (se ganho claro) → mapper → controller fino.
 - [ ] Só mergear com testes verdes.
 
-**Pronto quando:** Pelo menos **duas** features usam o mesmo padrão (piloto +1); time alinha nomes de pacotes por feature (`application.opportunity`, etc.) se desejado.
+**Pronto quando:** Pelo menos **duas** features usam o mesmo padrão (piloto +1); time alinha nomes de pacotes por feature (`application.quotation`, `application.customer`, etc.) se desejado.
 
 **Depois deste passo, fazer:** Avaliar Passo 6 quando surgir necessidade real de testes com tempo fixo.
 

@@ -10,6 +10,7 @@ import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyAuditLogRepository;
 import com.agenciahub.api.repository.AgencyRepository;
 import com.agenciahub.api.security.TenantContext;
+import com.agenciahub.api.validation.PhoneValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,7 @@ public class AgencyService {
      */
     public Agency getById(UUID id) {
         return agencyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Agência não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("agência não encontrada"));
     }
 
     /**
@@ -58,6 +59,9 @@ public class AgencyService {
         }
 
         if (request.phone() != null) {
+            if (!request.phone().isBlank() && !PhoneValidator.isValid(request.phone())) {
+                throw new IllegalArgumentException("formato de telefone inválido. use ddd + número");
+            }
             auditField(agency, currentUser, "phone", agency.getPhone(), request.phone());
             agency.setPhone(request.phone());
         }
@@ -90,7 +94,7 @@ public class AgencyService {
 
         if (request.logoUrl() != null) {
             if (!request.logoUrl().isEmpty() && !request.logoUrl().startsWith("data:image/")) {
-                throw new IllegalArgumentException("Logo deve ser uma imagem válida");
+                throw new IllegalArgumentException("logo deve ser uma imagem válida");
             }
             auditField(agency, currentUser, "logo_url", agency.getLogoUrl(), "(logo updated)");
             agency.setLogoUrl(request.logoUrl().isEmpty() ? null : request.logoUrl());
@@ -105,7 +109,7 @@ public class AgencyService {
     public Agency getCurrentAgency() {
         UUID agencyId = TenantContext.get();
         if (agencyId == null) {
-            throw new IllegalStateException("Nenhuma agência no contexto do tenant");
+            throw new IllegalStateException("nenhuma agência no contexto do tenant");
         }
         return getById(agencyId);
     }
@@ -122,12 +126,12 @@ public class AgencyService {
         String digits = cnpj.replaceAll("\\D", "");
 
         if (digits.length() != 14) {
-            throw new IllegalArgumentException("CNPJ inválido");
+            throw new IllegalArgumentException("cnpj inválido");
         }
 
         // Reject all-same-digit CNPJs
         if (digits.chars().distinct().count() == 1) {
-            throw new IllegalArgumentException("CNPJ inválido");
+            throw new IllegalArgumentException("cnpj inválido");
         }
 
         // Validate first check digit
@@ -139,7 +143,7 @@ public class AgencyService {
         int remainder = sum % 11;
         int checkDigit1 = remainder < 2 ? 0 : 11 - remainder;
         if (Character.getNumericValue(digits.charAt(12)) != checkDigit1) {
-            throw new IllegalArgumentException("CNPJ inválido");
+            throw new IllegalArgumentException("cnpj inválido");
         }
 
         // Validate second check digit
@@ -151,7 +155,7 @@ public class AgencyService {
         remainder = sum % 11;
         int checkDigit2 = remainder < 2 ? 0 : 11 - remainder;
         if (Character.getNumericValue(digits.charAt(13)) != checkDigit2) {
-            throw new IllegalArgumentException("CNPJ inválido");
+            throw new IllegalArgumentException("cnpj inválido");
         }
     }
 
