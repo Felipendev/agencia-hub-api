@@ -1,31 +1,26 @@
-package com.agenciahub.api.controller;
+package com.agenciahub.api.controller.solicitacao.pub.docs;
 
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
-import com.agenciahub.api.service.SolicitacaoSubmissionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
 @RequestMapping("/public/solicitacao")
-@RequiredArgsConstructor
-@Tag(name = "Public Solicitacao")
-public class PublicSolicitacaoSubmitController {
-
-    private final SolicitacaoSubmissionService submissionService;
+@Tag(
+        name = "Solicitação pública",
+        description = "Envio do formulário público de solicitação de orçamento (sem autenticação).")
+public interface PublicSolicitacaoSubmitAPI {
 
     @PostMapping("/submit")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Persist public quotation form submission (no auth)")
-    public PublicSolicitacaoSubmitResponse submit(@Valid @RequestBody PublicSolicitacaoSubmitRequest body) {
-        return submissionService.submit(body);
-    }
+    @Operation(
+            summary = "Registra envio do formulário",
+            description = "Persiste a submissão pública; valida telefone e presença de origem/destino nos detalhes.")
+    PublicSolicitacaoSubmitResponse submit(@Valid @RequestBody PublicSolicitacaoSubmitRequest body);
 }

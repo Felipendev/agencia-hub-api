@@ -1,5 +1,6 @@
 package com.agenciahub.api.service;
 
+import com.agenciahub.api.application.solicitacao.SolicitacaoSubmissionResponseMapper;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
@@ -12,7 +13,6 @@ import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.SolicitacaoConfigRepository;
 import com.agenciahub.api.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.security.TenantContext;
 import com.agenciahub.api.validation.PhoneValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -31,18 +31,18 @@ public class SolicitacaoSubmissionService {
     private final SolicitacaoSubmissionRepository submissionRepository;
     private final SolicitacaoConfigRepository configRepository;
     private final UserRepository userRepository;
+    private final SolicitacaoSubmissionResponseMapper solicitacaoSubmissionResponseMapper;
 
     @Transactional
     public PublicSolicitacaoSubmitResponse submit(PublicSolicitacaoSubmitRequest request) {
         String telefoneDigits = PhoneValidator.normalize(request.telefone());
         if (!PhoneValidator.isValid(telefoneDigits)) {
-            throw new IllegalArgumentException(
-                    "Informe um celular válido com DDD (10 ou 11 dígitos).");
+            throw new IllegalArgumentException("informe um celular válido com DDD (10 ou 11 dígitos).");
         }
 
         JsonNode detalhes = request.detalhes();
         if (!hasRouteInfo(detalhes)) {
-            throw new IllegalArgumentException("Informe origem e/ou destino.");
+            throw new IllegalArgumentException("informe origem e/ou destino.");
         }
 
         var configOpt = configRepository.findFirstBySlug(request.slug().trim());
@@ -75,15 +75,15 @@ public class SolicitacaoSubmissionService {
     private User resolveReferralByPublicCode(String code, Agency agency) {
         if (agency == null) {
             throw new IllegalArgumentException(
-                    "Não é possível atribuir vendedor sem configuração de agência para este link.");
+                    "não é possível atribuir vendedor sem configuração de agência para este link.");
         }
         User u = userRepository.findByPublicLinkCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Código de vendedor inválido ou inexistente."));
+                .orElseThrow(() -> new IllegalArgumentException("código de vendedor inválido ou inexistente."));
         if (u.getAgency() == null || !u.getAgency().getId().equals(agency.getId())) {
-            throw new IllegalArgumentException("Este código de vendedor não pertence à agência deste formulário.");
+            throw new IllegalArgumentException("este código de vendedor não pertence à agência deste formulário.");
         }
         if (u.getRole() != UserRole.SELLER && u.getRole() != UserRole.OWNER) {
-            throw new IllegalArgumentException("Apenas vendedor ou gestor podem ser indicados no link.");
+            throw new IllegalArgumentException("apenas vendedor ou gestor podem ser indicados no link.");
         }
         return u;
     }
@@ -94,56 +94,37 @@ public class SolicitacaoSubmissionService {
         }
         if (agency == null) {
             throw new IllegalArgumentException(
-                    "Não é possível atribuir vendedor sem configuração de agência para este link.");
+                    "não é possível atribuir vendedor sem configuração de agência para este link.");
         }
         User u = userRepository.findById(referralSellerId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário de indicação inválido."));
+                .orElseThrow(() -> new IllegalArgumentException("usuário de indicação inválido."));
         if (u.getAgency() == null || !u.getAgency().getId().equals(agency.getId())) {
-            throw new IllegalArgumentException("O indicador deve pertencer à mesma agência do formulário.");
+            throw new IllegalArgumentException("o indicador deve pertencer à mesma agência do formulário.");
         }
         if (u.getRole() != UserRole.SELLER && u.getRole() != UserRole.OWNER) {
-            throw new IllegalArgumentException("Apenas vendedor ou gestor podem ser indicados no link.");
+            throw new IllegalArgumentException("apenas vendedor ou gestor podem ser indicados no link.");
         }
         return u;
     }
 
     @Transactional(readOnly = true)
-    public List<SolicitacaoSubmissionResponse> listForCurrentAgency() {
-        UUID agencyId = TenantContext.get();
+    public List<SolicitacaoSubmissionResponse> listForAgency(UUID agencyId) {
         if (agencyId == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Agência não identificada");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
         }
         return submissionRepository.findByAgency_IdOrderByCreatedAtDesc(agencyId).stream()
-                .map(this::toResponse)
+                .map(solicitacaoSubmissionResponseMapper::toResponse)
                 .toList();
     }
 
     @Transactional
-    public void deleteForCurrentAgency(UUID id) {
-        UUID agencyId = TenantContext.get();
+    public void deleteForAgency(UUID id, UUID agencyId) {
         if (agencyId == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Agência não identificada");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
         }
         var row = submissionRepository.findByIdAndAgency_Id(id, agencyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Submissão não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("submissão não encontrada"));
         submissionRepository.delete(row);
-    }
-
-    private SolicitacaoSubmissionResponse toResponse(SolicitacaoSubmission s) {
-        User ref = s.getReferralSeller();
-        UUID refId = ref != null ? ref.getId() : null;
-        String refName = ref != null ? ref.getName() : null;
-        return new SolicitacaoSubmissionResponse(
-                s.getId(),
-                s.getSlug(),
-                s.getCreatedAt(),
-                s.getNome(),
-                s.getEmail(),
-                s.getTelefone(),
-                refId,
-                refName,
-                s.getDetalhes(),
-                s.getObservacoes());
     }
 
     private static boolean hasRouteInfo(JsonNode det) {

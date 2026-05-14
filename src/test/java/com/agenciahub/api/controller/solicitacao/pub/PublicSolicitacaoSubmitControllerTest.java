@@ -1,10 +1,10 @@
-package com.agenciahub.api.controller;
+package com.agenciahub.api.controller.solicitacao.pub;
 
+import com.agenciahub.api.application.solicitacao.SubmitPublicSolicitacaoUseCase;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
-import com.agenciahub.api.service.SolicitacaoSubmissionService;
 import com.agenciahub.api.support.WebMvcControllerTestImports;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         excludeAutoConfiguration = {
                 SecurityAutoConfiguration.class,
                 UserDetailsServiceAutoConfiguration.class
-        }
-)
+        })
 @AutoConfigureMockMvc(addFilters = false)
 @Import(WebMvcControllerTestImports.class)
 class PublicSolicitacaoSubmitControllerTest {
@@ -46,12 +45,12 @@ class PublicSolicitacaoSubmitControllerTest {
     private RateLimitFilter rateLimitFilter;
 
     @MockitoBean
-    private SolicitacaoSubmissionService submissionService;
+    private SubmitPublicSolicitacaoUseCase submitPublicSolicitacaoUseCase;
 
     @Test
     void submit_returns201() throws Exception {
         UUID id = UUID.randomUUID();
-        when(submissionService.submit(any(PublicSolicitacaoSubmitRequest.class)))
+        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequest.class)))
                 .thenReturn(new PublicSolicitacaoSubmitResponse(true, id));
 
         mockMvc.perform(post("/public/solicitacao/submit")
@@ -74,7 +73,7 @@ class PublicSolicitacaoSubmitControllerTest {
     @Test
     void submit_withSellerPublicCode_returns201() throws Exception {
         UUID id = UUID.randomUUID();
-        when(submissionService.submit(any(PublicSolicitacaoSubmitRequest.class)))
+        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequest.class)))
                 .thenReturn(new PublicSolicitacaoSubmitResponse(true, id));
 
         mockMvc.perform(post("/public/solicitacao/submit")
