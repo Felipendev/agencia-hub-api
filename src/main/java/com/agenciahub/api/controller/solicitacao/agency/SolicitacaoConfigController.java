@@ -23,13 +23,13 @@ public class SolicitacaoConfigController implements SolicitacaoConfigAgencyAPI {
 
     @Override
     public SolicitacaoConfigResponse get() {
-        UUID agencyId = TenantContext.get();
+        UUID agencyId = TenantContext.requireAgencyId();
         return getOrCreateSolicitacaoConfigForAgencyUseCase.execute(agencyId);
     }
 
     @Override
     public SolicitacaoConfigResponse upsert(SolicitacaoConfigRequest request) {
-        UUID agencyId = TenantContext.get();
+        UUID agencyId = TenantContext.requireAgencyId();
         return upsertSolicitacaoConfigForAgencyUseCase.execute(
                 new UpsertSolicitacaoConfigCommand(agencyId, request));
     }

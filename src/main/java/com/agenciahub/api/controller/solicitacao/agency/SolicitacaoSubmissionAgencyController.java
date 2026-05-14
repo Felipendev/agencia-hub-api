@@ -23,13 +23,13 @@ public class SolicitacaoSubmissionAgencyController implements SolicitacaoSubmiss
 
     @Override
     public List<SolicitacaoSubmissionResponse> list() {
-        UUID agencyId = TenantContext.get();
+        UUID agencyId = TenantContext.requireAgencyId();
         return listSolicitacaoSubmissionsForAgencyUseCase.execute(agencyId);
     }
 
     @Override
     public void delete(UUID id) {
-        UUID agencyId = TenantContext.get();
+        UUID agencyId = TenantContext.requireAgencyId();
         deleteSolicitacaoSubmissionForAgencyUseCase.execute(
                 new DeleteSolicitacaoSubmissionCommand(id, agencyId));
     }

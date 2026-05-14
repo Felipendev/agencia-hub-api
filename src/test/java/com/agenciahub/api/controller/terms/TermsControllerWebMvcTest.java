@@ -2,7 +2,7 @@ package com.agenciahub.api.controller.terms;
 
 import com.agenciahub.api.application.terms.AcceptTermsUseCase;
 import com.agenciahub.api.application.terms.GetLatestTermsPublicUseCase;
-import com.agenciahub.api.controller.GlobalExceptionHandler;
+import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import org.junit.jupiter.api.Test;

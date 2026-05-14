@@ -1,4 +1,4 @@
-package com.agenciahub.api.controller;
+package com.agenciahub.api.web;
 
 import com.agenciahub.api.exception.ApiError;
 import com.agenciahub.api.exception.DuplicateCustomerException;
@@ -41,17 +41,17 @@ public class GlobalExceptionHandler {
         if (msg != null && msg.contains("idx_customers_email_unique")) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(new ApiError("Já existe um cliente cadastrado com este e-mail.", "DUPLICATE_CUSTOMER"));
+                    .body(new ApiError("já existe um cliente cadastrado com este e-mail.", "DUPLICATE_CUSTOMER"));
         }
         if (msg != null && msg.contains("idx_customers_phone_unique")) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(new ApiError("Já existe um cliente cadastrado com este telefone.", "DUPLICATE_CUSTOMER"));
+                    .body(new ApiError("já existe um cliente cadastrado com este telefone.", "DUPLICATE_CUSTOMER"));
         }
         log.error("Data integrity violation", ex);
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(new ApiError("Violação de integridade de dados.", "DATA_INTEGRITY"));
+                .body(new ApiError("violação de integridade de dados.", "DATA_INTEGRITY"));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -83,6 +83,6 @@ public class GlobalExceptionHandler {
         log.error("Unhandled error", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiError("Internal server error", "INTERNAL_ERROR"));
+                .body(new ApiError("erro interno do servidor", "INTERNAL_ERROR"));
     }
 }

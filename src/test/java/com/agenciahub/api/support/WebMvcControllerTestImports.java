@@ -2,7 +2,7 @@ package com.agenciahub.api.support;
 
 import com.agenciahub.api.config.CorsConfig;
 import com.agenciahub.api.config.SecurityConfig;
-import com.agenciahub.api.controller.GlobalExceptionHandler;
+import com.agenciahub.api.web.GlobalExceptionHandler;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
 

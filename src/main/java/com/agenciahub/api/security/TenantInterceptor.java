@@ -3,8 +3,6 @@ package com.agenciahub.api.security;
 import com.agenciahub.api.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -19,13 +17,9 @@ public class TenantInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.getPrincipal() instanceof User user) {
-            if (user.getAgency() != null) {
-                TenantContext.set(user.getAgency().getId());
-            }
-        }
+        SecurityContextUsers.optionalUser()
+                .map(User::getAgency)
+                .ifPresent(agency -> TenantContext.set(agency.getId()));
 
         return true;
     }

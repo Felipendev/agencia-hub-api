@@ -3,7 +3,7 @@ package com.agenciahub.api.controller.invitation;
 import com.agenciahub.api.application.invitation.CreateInvitationUseCase;
 import com.agenciahub.api.application.invitation.ListInvitationsUseCase;
 import com.agenciahub.api.application.invitation.RevokeInvitationUseCase;
-import com.agenciahub.api.controller.GlobalExceptionHandler;
+import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.dto.invitation.InvitationResponse;
 import com.agenciahub.api.security.JwtAuthFilter;

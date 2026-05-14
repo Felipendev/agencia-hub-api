@@ -22,9 +22,11 @@ Princípios gerais (sempre válidos):
 - **Usuários (`/users`):** `UserAPI` + `UserController` em `controller.user`; casos de uso em `application.user` delegando ao `UserService`; `UserResponseMapper` (mapeamento fora do controller).
 - **Painel do vendedor (`/seller-dashboard`):** `SellerDashboardAPI` + `SellerDashboardController` em `controller.sellerdashboard`; `BuildSellerDashboard` em `application.sellerdashboard` (cotações + comissões) com `UserResponseMapper` e `QuotationService`.
 - **Autenticação (`/auth`):** `AuthAPI` + `AuthController` em `controller.auth`; casos de uso em `application.auth` delegando ao `AuthService` / `InvitationService` (contrato HTTP inalterado).
-- **Contexto de segurança:** `SecurityContextUsers` (`requireUserId` / `requireUser`) usado em termos, auth, agência e convites — evita duplicação e garante id a partir da entidade `User` do JWT.
+- **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT; testes em `SecurityContextUsersTest`.
+- **Tenant:** `TenantContext.requireAgencyId()` nos controllers que dependem de agência no `ThreadLocal` (falha explícita se ausente); testes em `TenantContextTest`.
+- **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
 
-**Próxima fila sugerida (Passo 5):** revisar outros pontos que ainda leem `SecurityContextHolder` manualmente (ex.: `TenantInterceptor`); extrair casos de uso onde ainda houver lógica repetida em controllers de solicitação; ADRs só quando surgir decisão transversal.
+**Próxima fila sugerida (Passo 5):** dead code em serviços grandes (`AuthService`, `QuotationService`) por uso real; eventual refinamento de status para subtipos de `IllegalStateException` (hoje tudo 400); ADRs só quando surgir decisão transversal.
 
 ---
 

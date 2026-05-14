@@ -35,13 +35,13 @@ public class InvitationController implements InvitationAPI {
 
     @Override
     public List<InvitationResponse> list() {
-        UUID agencyId = TenantContext.get();
+        UUID agencyId = TenantContext.requireAgencyId();
         return listInvitationsUseCase.execute(agencyId);
     }
 
     @Override
     public void revoke(UUID id) {
-        UUID agencyId = TenantContext.get();
+        UUID agencyId = TenantContext.requireAgencyId();
         revokeInvitationUseCase.execute(new RevokeInvitationCommand(id, agencyId));
     }
 }
