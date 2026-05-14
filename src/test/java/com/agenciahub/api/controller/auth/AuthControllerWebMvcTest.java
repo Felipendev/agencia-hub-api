@@ -1,15 +1,21 @@
-package com.agenciahub.api.controller;
+package com.agenciahub.api.controller.auth;
 
+import com.agenciahub.api.application.auth.ChangePasswordUseCase;
+import com.agenciahub.api.application.auth.ForgotPasswordUseCase;
+import com.agenciahub.api.application.auth.LoginUseCase;
+import com.agenciahub.api.application.auth.RegisterAgencyUseCase;
+import com.agenciahub.api.application.auth.RegisterViaInviteUseCase;
+import com.agenciahub.api.application.auth.ResendCodeUseCase;
+import com.agenciahub.api.application.auth.ResetPasswordUseCase;
+import com.agenciahub.api.application.auth.ValidateInviteTokenUseCase;
+import com.agenciahub.api.application.auth.VerifyEmailUseCase;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.auth.LoginRequest;
 import com.agenciahub.api.dto.auth.LoginResponse;
-import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
-import com.agenciahub.api.service.AuthService;
-import com.agenciahub.api.service.InvitationService;
 import com.agenciahub.api.support.WebMvcControllerTestImports;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,19 +58,37 @@ class AuthControllerWebMvcTest {
     private RateLimitFilter rateLimitFilter;
 
     @MockitoBean
-    private AuthService authService;
+    private LoginUseCase loginUseCase;
 
     @MockitoBean
-    private UserRepository userRepository;
+    private RegisterAgencyUseCase registerAgencyUseCase;
 
     @MockitoBean
-    private InvitationService invitationService;
+    private VerifyEmailUseCase verifyEmailUseCase;
+
+    @MockitoBean
+    private ResendCodeUseCase resendCodeUseCase;
+
+    @MockitoBean
+    private ForgotPasswordUseCase forgotPasswordUseCase;
+
+    @MockitoBean
+    private ResetPasswordUseCase resetPasswordUseCase;
+
+    @MockitoBean
+    private ChangePasswordUseCase changePasswordUseCase;
+
+    @MockitoBean
+    private ValidateInviteTokenUseCase validateInviteTokenUseCase;
+
+    @MockitoBean
+    private RegisterViaInviteUseCase registerViaInviteUseCase;
 
     @Test
     void login_happyPath_returnsToken() throws Exception {
         UUID uid = UUID.randomUUID();
         UUID aid = UUID.randomUUID();
-        when(authService.login(any(LoginRequest.class)))
+        when(loginUseCase.execute(any(LoginRequest.class)))
                 .thenReturn(new LoginResponse(
                         "jwt-token",
                         uid,

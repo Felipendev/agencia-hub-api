@@ -1,55 +1,30 @@
-package com.agenciahub.api.controller;
+package com.agenciahub.api.application.sellerdashboard;
 
+import com.agenciahub.api.application.user.UserResponseMapper;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.application.user.UserResponseMapper;
 import com.agenciahub.api.dto.quotation.QuotationResponse;
 import com.agenciahub.api.dto.seller.SellerDashboardResponse;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.service.QuotationService;
-import com.agenciahub.api.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
 
-@RestController
-@RequestMapping("/seller-dashboard")
+@Service
 @RequiredArgsConstructor
-@Tag(name = "Seller Dashboard")
-public class SellerDashboardController {
+public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
 
     private final QuotationService quotationService;
-    private final UserService userService;
     private final UserResponseMapper userResponseMapper;
 
-    /** Seller sees their own dashboard. */
-    @GetMapping("/me")
-    @Operation(summary = "Get dashboard for the authenticated seller")
-    public SellerDashboardResponse myDashboard(@AuthenticationPrincipal User caller) {
-        return buildDashboard(caller, caller.getId());
-    }
-
-    /** Owner can view any seller's dashboard. */
-    @GetMapping("/{sellerId}")
-    @PreAuthorize("hasRole('OWNER')")
-    @Operation(summary = "Get dashboard for a specific seller (owner only)")
-    public SellerDashboardResponse sellerDashboard(@PathVariable UUID sellerId,
-                                                    @AuthenticationPrincipal User caller) {
-        User seller = userService.getEntityById(sellerId);
-        return buildDashboard(seller, sellerId);
-    }
-
-    private SellerDashboardResponse buildDashboard(User sellerEntity, UUID sellerId) {
+    @Override
+    public SellerDashboardResponse execute(User sellerEntity) {
+        UUID sellerId = sellerEntity.getId();
         List<QuotationResponse> all = quotationService.search(
                 null, null, null, sellerId, UserRole.SELLER);
 
@@ -90,14 +65,16 @@ public class SellerDashboardController {
     }
 
     private BigDecimal calculateCommission(User seller, List<QuotationResponse> quotations) {
-        if (quotations.isEmpty()) return BigDecimal.ZERO;
+        if (quotations.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
 
         if (seller.getCommissionPct() != null) {
             BigDecimal total = quotations.stream()
                     .map(QuotationResponse::totalAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             return total.multiply(seller.getCommissionPct())
-                    .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         }
 
         if (seller.getCommissionFixed() != null) {
