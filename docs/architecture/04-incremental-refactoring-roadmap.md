@@ -22,11 +22,11 @@ Princípios gerais (sempre válidos):
 - **Usuários (`/users`):** `UserAPI` + `UserController` em `controller.user`; casos de uso em `application.user` delegando ao `UserService`; `UserResponseMapper` (mapeamento fora do controller).
 - **Painel do vendedor (`/seller-dashboard`):** `SellerDashboardAPI` + `SellerDashboardController` em `controller.sellerdashboard`; `BuildSellerDashboard` em `application.sellerdashboard` (cotações + comissões) com `UserResponseMapper` e `QuotationService`.
 - **Autenticação (`/auth`):** `AuthAPI` + `AuthController` em `controller.auth`; casos de uso em `application.auth` delegando ao `AuthService` / `InvitationService` (contrato HTTP inalterado); mensagens de **`AuthService`** (exceções e `message` em respostas) em **português / minúsculas**; varredura de dead code em `AuthService` e **`QuotationService`**: sem métodos públicos órfãos (uso via `application.*` + `BuildSellerDashboard`).
-- **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT; testes em `SecurityContextUsersTest`.
+- **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT; testes em `SecurityContextUsersTest`; **`UnauthenticatedException`** quando não há contexto utilizável para `requireUserId()` → **401** / `UNAUTHENTICATED` no handler global.
 - **Tenant:** `TenantContext.requireAgencyId()` nos controllers que dependem de agência no `ThreadLocal` (falha explícita se ausente); **`MissingAgencyContextException`** → **403** com código `MISSING_AGENCY_CONTEXT` no `GlobalExceptionHandler`; demais `IllegalStateException` seguem **400**; testes em `TenantContextTest` e `GlobalExceptionHandlerTest`.
 - **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
 
-**Próxima fila sugerida (Passo 5):** eventual tipo dedicado + **401** para `usuário não autenticado` (hoje `IllegalStateException` → 400); padronizar mensagens em outros serviços se desejado; ADRs só quando surgir decisão transversal.
+**Próxima fila sugerida (Passo 5):** alinhar `requireUser()` (hoje `ResourceNotFoundException` / 404) com semântica **401** se quiser consistência total com “sem sessão”; revisar mensagens em serviços restantes; ADRs só quando surgir decisão transversal.
 
 ---
 

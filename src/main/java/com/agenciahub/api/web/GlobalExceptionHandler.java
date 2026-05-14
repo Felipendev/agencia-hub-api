@@ -4,6 +4,7 @@ import com.agenciahub.api.exception.ApiError;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.MissingAgencyContextException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.exception.UnauthenticatedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -67,6 +68,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(new ApiError(ex.getMessage(), "MISSING_AGENCY_CONTEXT"));
+    }
+
+    @ExceptionHandler(UnauthenticatedException.class)
+    public ResponseEntity<ApiError> handleUnauthenticated(UnauthenticatedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiError(ex.getMessage(), "UNAUTHENTICATED"));
     }
 
     @ExceptionHandler(IllegalStateException.class)

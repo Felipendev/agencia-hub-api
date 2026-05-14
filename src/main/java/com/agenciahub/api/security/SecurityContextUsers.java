@@ -2,6 +2,7 @@ package com.agenciahub.api.security;
 
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.exception.UnauthenticatedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -36,12 +37,12 @@ public final class SecurityContextUsers {
                 .orElseGet(() -> {
                     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                     if (authentication == null || authentication.getPrincipal() == null) {
-                        throw new IllegalStateException("usuário não autenticado");
+                        throw new UnauthenticatedException("usuário não autenticado");
                     }
                     try {
                         return UUID.fromString(authentication.getName());
                     } catch (RuntimeException ex) {
-                        throw new IllegalStateException("usuário não autenticado");
+                        throw new UnauthenticatedException("usuário não autenticado");
                     }
                 });
     }

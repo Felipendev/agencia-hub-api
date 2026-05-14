@@ -1,6 +1,7 @@
 package com.agenciahub.api.web;
 
 import com.agenciahub.api.exception.MissingAgencyContextException;
+import com.agenciahub.api.exception.UnauthenticatedException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +21,11 @@ class GlobalExceptionHandlerTest {
         void missingAgency() {
             throw new MissingAgencyContextException("agência não definida no contexto da requisição");
         }
+
+        @GetMapping("/probe/unauthenticated")
+        void unauthenticated() {
+            throw new UnauthenticatedException("usuário não autenticado");
+        }
     }
 
     @Test
@@ -32,5 +38,17 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("MISSING_AGENCY_CONTEXT"))
                 .andExpect(jsonPath("$.message").value("agência não definida no contexto da requisição"));
+    }
+
+    @Test
+    void unauthenticated_returns401() throws Exception {
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(new ProbeController())
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+
+        mvc.perform(get("/probe/unauthenticated").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
+                .andExpect(jsonPath("$.message").value("usuário não autenticado"));
     }
 }
