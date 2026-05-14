@@ -42,7 +42,7 @@ public class AgencyService {
      */
     public Agency getById(UUID id) {
         return agencyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("agência não encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("agência não encontrada: " + id));
     }
 
     /**
