@@ -14,6 +14,7 @@ public record UserResponse(
         boolean active,
         BigDecimal commissionPct,
         BigDecimal commissionFixed,
-        Instant createdAt
+        Instant createdAt,
+        boolean termsAccepted
 ) {
 }

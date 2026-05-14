@@ -3,7 +3,6 @@ package com.agenciahub.api.controller.terms.docs;
 import com.agenciahub.api.dto.terms.AcceptTermsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Map;
 
-@Tag(name = "Termos", description = "Consulta pública da versão dos termos e registro de aceite autenticado.")
+@Tag(name = "Termos", description = "Metadados públicos da versão vigente e aceite autenticado (atualiza flag no usuário).")
 public interface TermsAPI {
 
     @GetMapping("/public/terms/latest")
@@ -22,6 +21,6 @@ public interface TermsAPI {
 
     @PostMapping("/terms/accept")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registra aceite", description = "Persiste versão aceita e IP de origem.")
-    Map<String, String> accept(@Valid @RequestBody AcceptTermsRequest request, HttpServletRequest httpRequest);
+    @Operation(summary = "Registra aceite", description = "Define `termsAccepted` no usuário autenticado após validar a versão.")
+    Map<String, String> accept(@Valid @RequestBody AcceptTermsRequest request);
 }

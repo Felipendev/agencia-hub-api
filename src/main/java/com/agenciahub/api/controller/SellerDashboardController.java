@@ -2,6 +2,7 @@ package com.agenciahub.api.controller;
 
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.application.user.UserResponseMapper;
 import com.agenciahub.api.dto.quotation.QuotationResponse;
 import com.agenciahub.api.dto.seller.SellerDashboardResponse;
 import com.agenciahub.api.entity.User;
@@ -29,6 +30,7 @@ public class SellerDashboardController {
 
     private final QuotationService quotationService;
     private final UserService userService;
+    private final UserResponseMapper userResponseMapper;
 
     /** Seller sees their own dashboard. */
     @GetMapping("/me")
@@ -71,7 +73,7 @@ public class SellerDashboardController {
                 all.stream().filter(q -> isOpen(q.status())).toList());
 
         return new SellerDashboardResponse(
-                userService.toResponse(sellerEntity),
+                userResponseMapper.toResponse(sellerEntity),
                 all.size(),
                 open,
                 approved,

@@ -14,6 +14,6 @@ public class AcceptTerms implements AcceptTermsUseCase {
 
     @Override
     public Map<String, String> execute(AcceptTermsCommand command) {
-        return termsService.acceptTerms(command.userId(), command.termsVersion(), command.ipAddress());
+        return termsService.acceptTerms(command.userId(), command.termsVersion());
     }
 }

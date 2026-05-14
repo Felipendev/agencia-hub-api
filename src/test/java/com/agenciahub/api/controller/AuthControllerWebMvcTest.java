@@ -77,7 +77,8 @@ class AuthControllerWebMvcTest {
                         SubscriptionStatus.ACTIVE,
                         Instant.parse("2030-01-01T00:00:00Z"),
                         false,
-                        "code"));
+                        "code",
+                        false));
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
