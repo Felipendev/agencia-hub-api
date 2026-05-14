@@ -43,12 +43,12 @@ public class GlobalExceptionHandler {
         if (msg != null && msg.contains("idx_customers_email_unique")) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(new ApiError("já existe um cliente cadastrado com este e-mail.", "DUPLICATE_CUSTOMER"));
+                    .body(new ApiError("já existe um cliente cadastrado com este e-mail", "DUPLICATE_CUSTOMER"));
         }
         if (msg != null && msg.contains("idx_customers_phone_unique")) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body(new ApiError("já existe um cliente cadastrado com este telefone.", "DUPLICATE_CUSTOMER"));
+                    .body(new ApiError("já existe um cliente cadastrado com este telefone", "DUPLICATE_CUSTOMER"));
         }
         log.error("Data integrity violation", ex);
         return ResponseEntity
