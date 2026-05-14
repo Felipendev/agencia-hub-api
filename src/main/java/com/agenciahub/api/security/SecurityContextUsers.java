@@ -5,6 +5,7 @@ import com.agenciahub.api.exception.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -15,29 +16,38 @@ public final class SecurityContextUsers {
     private SecurityContextUsers() {
     }
 
-    public static UUID requireUserId() {
+    /**
+     * When the principal is the persisted {@link User} entity (typical for this API after JWT validation).
+     */
+    public static Optional<User> optionalUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
-            throw new IllegalStateException("usuário não autenticado");
+            return Optional.empty();
         }
         if (authentication.getPrincipal() instanceof User user) {
-            return user.getId();
+            return Optional.of(user);
         }
-        try {
-            return UUID.fromString(authentication.getName());
-        } catch (RuntimeException ex) {
-            throw new IllegalStateException("usuário não autenticado");
-        }
+        return Optional.empty();
+    }
+
+    public static UUID requireUserId() {
+        return optionalUser()
+                .map(User::getId)
+                .orElseGet(() -> {
+                    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                    if (authentication == null || authentication.getPrincipal() == null) {
+                        throw new IllegalStateException("usuário não autenticado");
+                    }
+                    try {
+                        return UUID.fromString(authentication.getName());
+                    } catch (RuntimeException ex) {
+                        throw new IllegalStateException("usuário não autenticado");
+                    }
+                });
     }
 
     public static User requireUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new ResourceNotFoundException("usuário não encontrado");
-        }
-        if (authentication.getPrincipal() instanceof User user) {
-            return user;
-        }
-        throw new ResourceNotFoundException("usuário não encontrado");
+        return optionalUser()
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado"));
     }
 }
