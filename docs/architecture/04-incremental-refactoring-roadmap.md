@@ -21,12 +21,12 @@ Princípios gerais (sempre válidos):
 - **Termos:** `TermsAPI` + `TermsController` em `controller.terms`; aceite persiste **`users.terms_accepted`** (sem tabela `terms_acceptances`); `LoginResponse.requiresTermsAcceptance` quando a flag é falsa; cadastro de agência grava `termsAccepted=true` após validar versão; `GET /public/terms/latest` inalterado.
 - **Usuários (`/users`):** `UserAPI` + `UserController` em `controller.user`; casos de uso em `application.user` delegando ao `UserService`; `UserResponseMapper` (mapeamento fora do controller).
 - **Painel do vendedor (`/seller-dashboard`):** `SellerDashboardAPI` + `SellerDashboardController` em `controller.sellerdashboard`; `BuildSellerDashboard` em `application.sellerdashboard` (cotações + comissões) com `UserResponseMapper` e `QuotationService`.
-- **Autenticação (`/auth`):** `AuthAPI` + `AuthController` em `controller.auth`; casos de uso em `application.auth` delegando ao `AuthService` / `InvitationService` (contrato HTTP inalterado).
+- **Autenticação (`/auth`):** `AuthAPI` + `AuthController` em `controller.auth`; casos de uso em `application.auth` delegando ao `AuthService` / `InvitationService` (contrato HTTP inalterado); mensagens de **`AuthService`** (exceções e `message` em respostas) em **português / minúsculas**; varredura de dead code em `AuthService` e **`QuotationService`**: sem métodos públicos órfãos (uso via `application.*` + `BuildSellerDashboard`).
 - **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT; testes em `SecurityContextUsersTest`.
 - **Tenant:** `TenantContext.requireAgencyId()` nos controllers que dependem de agência no `ThreadLocal` (falha explícita se ausente); testes em `TenantContextTest`.
 - **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
 
-**Próxima fila sugerida (Passo 5):** dead code em serviços grandes (`AuthService`, `QuotationService`) por uso real; eventual refinamento de status para subtipos de `IllegalStateException` (hoje tudo 400); ADRs só quando surgir decisão transversal.
+**Próxima fila sugerida (Passo 5):** eventual refinamento de status HTTP para subtipos de `IllegalStateException` (hoje mapeados como 400); outros serviços (`CustomerService`, etc.) se quiser o mesmo padrão de mensagens; ADRs só quando surgir decisão transversal.
 
 ---
 
