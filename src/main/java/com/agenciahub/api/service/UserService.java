@@ -1,5 +1,6 @@
 package com.agenciahub.api.service;
 
+import com.agenciahub.api.application.user.UserResponseMapper;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.user.CreateUserRequest;
 import com.agenciahub.api.dto.user.UpdateUserRequest;
@@ -22,23 +23,28 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final PublicLinkCodeService publicLinkCodeService;
+    private final UserResponseMapper userResponseMapper;
 
     @Transactional(readOnly = true)
     public List<UserResponse> listAll() {
         return userRepository.findAllByOrderByNameAsc()
-                .stream().map(this::toResponse).toList();
+                .stream()
+                .map(userResponseMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<UserResponse> listSellers() {
         return userRepository.findByRoleAndActiveTrue(UserRole.SELLER)
-                .stream().map(this::toResponse).toList();
+                .stream()
+                .map(userResponseMapper::toResponse)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public UserResponse getById(UUID id) {
         return userRepository.findById(id)
-                .map(this::toResponse)
+                .map(userResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }
 
@@ -63,7 +69,7 @@ public class UserService {
                 .commissionPct(request.commissionPct())
                 .commissionFixed(request.commissionFixed())
                 .build();
-        return toResponse(userRepository.save(user));
+        return userResponseMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional
@@ -84,20 +90,6 @@ public class UserService {
             user.setCommissionFixed(request.commissionFixed());
             user.setCommissionPct(null); // mutually exclusive
         }
-        return toResponse(user);
-    }
-
-    public UserResponse toResponse(User u) {
-        return new UserResponse(
-                u.getId(),
-                u.getName(),
-                u.getEmail(),
-                u.getRole(),
-                Boolean.TRUE.equals(u.getActive()),
-                u.getCommissionPct(),
-                u.getCommissionFixed(),
-                u.getCreatedAt(),
-                Boolean.TRUE.equals(u.getTermsAccepted())
-        );
+        return userResponseMapper.toResponse(user);
     }
 }
