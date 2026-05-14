@@ -7,12 +7,10 @@ import com.agenciahub.api.controller.agency.docs.AgencyAPI;
 import com.agenciahub.api.dto.agency.AgencyResponse;
 import com.agenciahub.api.dto.agency.UpdateAgencyRequest;
 import com.agenciahub.api.entity.User;
-import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
@@ -33,15 +31,7 @@ public class AgencyController implements AgencyAPI {
 
     @Override
     public AgencyResponse updateAgency(UpdateAgencyRequest request) {
-        User currentUser = getCurrentUser();
+        User currentUser = SecurityContextUsers.requireUser();
         return updateAgencyUseCase.execute(new UpdateAgencyCommand(request, currentUser));
-    }
-
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof User user) {
-            return user;
-        }
-        throw new ResourceNotFoundException("usuário não encontrado");
     }
 }

@@ -23,10 +23,8 @@ import com.agenciahub.api.dto.auth.ResendCodeRequest;
 import com.agenciahub.api.dto.auth.ResetPasswordRequest;
 import com.agenciahub.api.dto.auth.VerifyEmailRequest;
 import com.agenciahub.api.dto.auth.VerifyEmailResponse;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.security.SecurityContextUsers;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -78,7 +76,7 @@ public class AuthController implements AuthAPI {
 
     @Override
     public Map<String, String> changePassword(ChangePasswordRequest request) {
-        UUID currentUserId = getCurrentUserId();
+        UUID currentUserId = SecurityContextUsers.requireUserId();
         return changePasswordUseCase.execute(new ChangePasswordCommand(currentUserId, request));
     }
 
@@ -90,16 +88,5 @@ public class AuthController implements AuthAPI {
     @Override
     public RegisterAgencyResponse registerViaInvite(RegisterViaInviteRequest request) {
         return registerViaInviteUseCase.execute(request);
-    }
-
-    private UUID getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new IllegalStateException("usuário não autenticado");
-        }
-        if (authentication.getPrincipal() instanceof User user) {
-            return user.getId();
-        }
-        return UUID.fromString(authentication.getName());
     }
 }
