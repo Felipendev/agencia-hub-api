@@ -57,7 +57,7 @@ public class UserService {
     @Transactional
     public UserResponse create(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.email().trim().toLowerCase())) {
-            throw new IllegalArgumentException("E-mail já cadastrado.");
+            throw new IllegalArgumentException("este e-mail já está cadastrado");
         }
         User user = User.builder()
                 .name(request.name().strip())
