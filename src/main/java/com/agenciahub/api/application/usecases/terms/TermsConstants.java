@@ -1,4 +1,4 @@
-package com.agenciahub.api.application.terms;
+package com.agenciahub.api.application.usecases.terms;
 
 /** Versão vigente dos termos (meta pública e validação em registo/aceite). */
 public final class TermsConstants {

@@ -1,5 +1,6 @@
-package com.agenciahub.api.application.terms;
+package com.agenciahub.api.application.usecases.terms.acceptterms;
 
+import com.agenciahub.api.application.usecases.terms.TermsConstants;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
@@ -22,7 +23,8 @@ public class AcceptTerms implements AcceptTermsUseCase {
         if (!TermsConstants.CURRENT_TERMS_VERSION.equals(termsVersion)) {
             throw new IllegalArgumentException("versão dos termos inválida");
         }
-        User user = userRepository.findById(userId)
+        User user = userRepository
+                .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + userId));
         if (!Boolean.TRUE.equals(user.getTermsAccepted())) {
             user.setTermsAccepted(true);

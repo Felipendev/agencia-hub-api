@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.auth;
 
-import com.agenciahub.api.application.terms.TermsConstants;
+import com.agenciahub.api.application.usecases.terms.TermsConstants;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.UserRole;

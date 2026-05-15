@@ -73,7 +73,7 @@ sequenceDiagram
 - [ ] Migrar **uma feature** de cada vez (Convenção B no **05** §5.2); atualizar imports; `mvn test` verde.
 - [ ] Não obrigar rename de `dto.*` globais no mesmo PR (podem coexistir com DTOs colocados na pasta da operação).
 
-**Pronto quando:** Pelo menos uma feature piloto está na estrutura `usecases/...` (ou decisão documentada no PR para adiar).
+**Pronto quando:** Pelo menos uma feature piloto está na estrutura `usecases/...` (**termos** migrado; outras features podem seguir o mesmo padrão).
 
 **Depois:** Fase 1 nas features recém-reorganizadas (se ainda houver lógica no serviço) **ou** Fase 3 se integrações externas forem o gargalo.
 
@@ -135,7 +135,7 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 
 - Cotações, clientes, agência, convites, solicitação (pública + agência), termos, utilizadores, painel vendedor, auth: padrão `*API` + controller + `application.<feature>` + mappers onde aplicável, muitas rotas ainda com use case a delegar em `*Service`.
 - **Financeiro (`/financial-entries`):** Fase 1 — orquestração absorvida nos use cases; **`FinancialEntryService` removido.**
-- **Termos (`TermsConstants` + use cases):** Fase 1 — **`TermsService` removido**; registo de agência usa `TermsConstants` no use case `RegisterAgency`.
+- **Termos (`TermsConstants` + use cases):** Fase 1 — **`TermsService` removido**; registo de agência usa `TermsConstants` no use case `RegisterAgency`. **Fase 2 (piloto):** pacotes `application/usecases/terms/...` por acção (**06**).
 - **Auth (credenciais / registo / códigos):** Fase 1 — **`AuthService` removido**; orquestração nos use cases em `application.auth` + `AuthBetaWhitelist` (e-mails beta).
 - **Agência:** Fase 1 — **`AgencyService` removido**; `GetAgency` / `UpdateAgency` orquestram repositório + auditoria.
 - **Solicitação (config + submissões):** Fase 1 — **`SolicitacaoConfigService` e `SolicitacaoSubmissionService` removidos**; use cases + `SolicitacaoConfigSupport` (defaults/mapeamento).
