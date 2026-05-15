@@ -70,7 +70,7 @@ Responsible for:
 
 - use cases
 - workflow orchestration
-- transaction boundaries
+- transaction boundaries (see `05-package-refactoring-and-class-responsibilities.md` §4.3 for `@Transactional` policy: avoid unless strictly necessary)
 - calling domain behavior
 - coordinating repositories, gateways or external ports
 

@@ -31,7 +31,7 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 | Camada | Responsabilidade | O que **não** deve fazer |
 |--------|-------------------|-------------------------|
 | **API** | Contrato HTTP, validação de forma (`@Valid`), tradução para comando/consulta, resposta e documentação OpenAPI. | Regra de negócio pesada, queries JPA, orquestração longa. |
-| **Application (caso de uso)** | **Uma operação de aplicação**: orquestra repositórios, portas, integrações, políticas do fluxo (ex.: “vendedor sem `sellerId` no body”), limites de transação quando aplicável. | Ignorar erros de domínio; duplicar validação que o domínio já garante (quando existir domínio rico). |
+| **Application (caso de uso)** | **Uma operação de aplicação**: orquestra repositórios, portas, integrações, políticas do fluxo (ex.: “vendedor sem `sellerId` no body”). **Transação explícita só quando for estritamente necessário** (ver secção 4.3). | Ignorar erros de domínio; duplicar validação que o domínio já garante (quando existir domínio rico). |
 | **Domain** | Invariantes, estados, políticas de negócio **independentes** de Spring/JPA (quando extraídas). | Dependência direta de `HttpServletRequest`, repositório concreto. |
 | **Infrastructure** | Adaptadores (e-mail, clientes HTTP, etc.), implementações de portas — **evolução futura** conforme ADRs. | Regras que pertencem ao núcleo do negócio sem ser adaptação. |
 
@@ -62,9 +62,21 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 
 ### 4.3 Transações (`@Transactional`)
 
-- **Preferência:** `@Transactional` no **método `execute`** da implementação do use case que persiste ou altera estado **consistente** (write).
-- **Leituras:** `@Transactional(readOnly = true)` no use case ou no método de consulta que precisa de sessão lazy (avaliar caso a caso).
-- **Evitar:** espalhar transações no controller.
+**Regra geral:** **evitar** `@Transactional`. Não é padrão obrigatório em use cases nem em serviços novos. Muitas operações ficam corretas com o comportamento **implícito** do Spring Data / uma única chamada ao repositório.
+
+**Usar `@Transactional` apenas quando for estritamente necessário**, por exemplo:
+
+- Várias escritas que **têm** de commitar ou falhar **em conjunto** (atomicidade real entre entidades ou passos).
+- Propagação / isolamento específicos (`REQUIRES_NEW`, etc.) exigidos pelo fluxo.
+- Leitura que **sem** transação `readOnly` causa problema mensurável (ex.: pressão em conexão, lazy loading controlado) — caso raro; justificar.
+
+**Evitar:**
+
+- `@Transactional` “por precaução” em cada método de use case ou leitura.
+- `@Transactional` no controller.
+- Duplicar anotações em cadeia (controller + use case + service) para a mesma operação.
+
+**Em PR:** se introduzir ou manter `@Transactional`, incluir **uma linha** no texto do PR a explicar **por que** é indispensável nesse ponto.
 
 ### 4.4 O que acontece ao antigo `*Service` por agregado
 
@@ -119,13 +131,14 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 2. **`*Service` público** com dezenas de métodos sem coesão — fatiar por operação ou por subdomínio documentado.
 3. **Controller** com `if` de regra de negócio ou chamadas a repositório.
 4. **Dois beans** diferentes (`CreateCustomer` + `CustomerService.create`) como “dupla fonte de verdade” para a mesma operação após migração incompleta.
+5. **`@Transactional` sem necessidade** — anotação por hábito ou “para garantir”; preferir ausência e só adicionar com justificativa (secção 4.3).
 
 ---
 
 ## 7. Checklist de PR (refator por feature)
 
 - [ ] Responsabilidade da operação está **numa** implementação de use case (ou justificativa explícita para exceção).
-- [ ] `@Transactional` nos writes está definido e testado.
+- [ ] **`@Transactional`:** ausente por omissão; se existir, **justificado** no PR como estritamente necessário (secção 4.3).
 - [ ] Controller inalterado em contrato HTTP (salvo acordo explícito).
 - [ ] `mvn test` verde.
 - [ ] Atualizar **uma** linha no `04-incremental-refactoring-roadmap.md` (progresso) se a feature mudar de convenção A→B ou eliminar `*Service` relevante.
@@ -145,4 +158,4 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 
 ## 9. Resumo em uma frase
 
-**Use case = orquestração da operação (pode ser o único `@Service` da operação); `*Service` monolítico = legado a fundir por feature; pacotes = Convenção A ou B por decisão de equipa, sempre incremental.**
+**Use case = orquestração da operação (pode ser o único `@Service` da operação); `*Service` monolítico = legado a fundir por feature; pacotes = Convenção A ou B por decisão de equipa, sempre incremental; `@Transactional` = só quando estritamente necessário, com justificativa.**
