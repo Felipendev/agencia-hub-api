@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/agency/solicitacao-config")
 @Tag(
         name = "Configuração do formulário (agência)",
-        description = "CRUD da configuração do formulário público de solicitação para a agência do tenant. Acesso **OWNER**.")
+        description = "CRUD da configuração do formulário público de solicitação para a agência do tenant. Acesso **AGENCY_OWNER**.")
 @StandardErrorApiResponses
 public interface SolicitacaoConfigAgencyAPI {
 

@@ -40,8 +40,8 @@ public interface QuotationAPI {
     @Operation(
             summary = "Lista cotações com filtros opcionais",
             description = """
-                    - **OWNER**: vê todas as cotações da agência (filtros aplicam-se normalmente).
-                    - **SELLER**: resultados restritos às cotações em que ele é o vendedor (`seller`), independentemente dos filtros de texto.""")
+                    - **AGENCY_OWNER**: vê todas as cotações da agência (filtros aplicam-se normalmente).
+                    - **SALES_AGENT**: resultados restritos às cotações em que ele é o vendedor (`seller`), independentemente dos filtros de texto.""")
     List<QuotationSummaryResponseDTO> list(
             @RequestParam(required = false) UUID customerId,
             @RequestParam(required = false) QuotationStatus status,
@@ -61,7 +61,7 @@ public interface QuotationAPI {
     @Operation(
             summary = "Cria uma cotação",
             description = """
-                    Se o chamador for **SELLER** e o corpo **não** enviar `sellerId`, o sistema atribui automaticamente o vendedor ao usuário autenticado.
+                    Se o chamador for **SALES_AGENT** e o corpo **não** enviar `sellerId`, o sistema atribui automaticamente o vendedor ao usuário autenticado.
 
                     Demais validações de agência, cliente e submissão pública permanecem no caso de uso / serviço de aplicação.""")
     QuotationSummaryResponseDTO create(

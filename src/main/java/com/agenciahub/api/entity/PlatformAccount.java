@@ -1,6 +1,7 @@
 package com.agenciahub.api.entity;
 
 import com.agenciahub.api.domain.enums.AccountKind;
+import com.agenciahub.api.domain.user.AgencyMemberProfile;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,7 +31,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PlatformAccount {
+public class PlatformAccount implements AgencyMemberProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -95,5 +96,10 @@ public class PlatformAccount {
     void prePersist() {
         if (createdAt == null) createdAt = Instant.now();
         if (active == null) active = Boolean.TRUE;
+    }
+
+    @Override
+    public AccountKind kind() {
+        return role;
     }
 }

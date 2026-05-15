@@ -87,7 +87,7 @@ public interface AgencyMemberProfile {
 }
 ```
 
-Implementações futuras: `AgencyOwnerProfile`, `SalesAgentProfile` (comissão, `publicLinkCode`, etc.).
+`PlatformAccount` implementa `AgencyMemberProfile` (`kind()` → `role`). Implementações futuras: `AgencyOwnerProfile`, `SalesAgentProfile` (comissão, `publicLinkCode`, etc.).
 
 #### C.3 Agency owner (`AGENCY_OWNER`)
 

@@ -57,7 +57,7 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 | **`*UseCase` (interface)** | `application…` | Contrato da operação (`execute(Input)` ou `void`). |
 | **Implementação do use case** (`@Service`, nome = verbo/ação) | `application…` | **Todo** o fluxo da operação que hoje estaria “escondido” num `*Service` monolítico **desta** operação. |
 | **Comando / consulta (record ou tipo dedicado)** | Junto do use case ou subpacote `…commands` / `…queries` | Entrada imutável da operação (evitar “god parameter list”). |
-| **DTO de API** | `dto.<feature>` (ou colocalizado se o time adotar pacotes por operação) | Forma do JSON; validação Bean Validation. |
+| **DTO de API** | `application.usecases.<feature>.<ação>` (**ADR 0008**; pacote `dto.*` eliminado) | Forma do JSON; validação Bean Validation. |
 | **`*ResponseMapper`** | `application.<feature>` | Conversão entidade → DTO de resposta (sem regra de negócio pesada). |
 | **Repositório Spring Data** | `repository` (até existir ADR de ports em `infrastructure`) | Acesso a dados; queries específicas. |
 | **`GlobalExceptionHandler`** | `web` | Tradução de exceções para `ApiError` + HTTP. |
@@ -117,7 +117,7 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 
 - **`<verbo>`:** `create`, `update`, `delete`, `list`, `getbyid`, etc. (inglês, minúsculas, consistente com nomes de classes).
 - **Quando usar:** muitas operações, DTOs e mappers por operação; paralelismo de PRs por pasta sem conflitos constantes.
-- **Regra:** o **controller** continua em `controller.<feature>`; **não** mover `@RestController` para dentro de `application` (mantém-se alinhado ao **ADR 0004** e ao `02-backend-architecture.md`). As interfaces `*API` vivem em `application.controllers.docs`.
+- **Regra:** o **controller** continua em `application.controller`; **não** mover `@RestController` para dentro de `usecases` (mantém-se alinhado ao **ADR 0004** / **ADR 0007**). As interfaces `*API` vivem em `application.controller.doc`.
 
 ### 5.3 Transição A → B
 
