@@ -1,230 +1,160 @@
 # Roadmap de refatoração incremental (backend)
 
-Este documento é um **mapa de sequência**: ordem sugerida de trabalho, critério de pronto em cada passo e o que fazer **logo após** concluí-lo. Objetivo: evoluir em direção à arquitetura descrita em `02-backend-architecture.md` e na referência detalhada **`06-clean-architecture-use-case-driven.md`** sem reescrita grande e sem esquecer dependências (CI, testes, documentação).
+Este documento define a **sequência a executar a partir de agora**, alinhada a **`02-backend-architecture.md`**, **`05-package-refactoring-and-class-responsibilities.md`** e **`06-clean-architecture-use-case-driven.md`**. O trabalho já feito no repositório conta como **Fase 0 (baseline)** — **não** deve ser repetido como checklist obrigatório.
 
-Princípios gerais (sempre válidos):
+**Princípios (sempre válidos):**
 
-- Um passo por PR quando possível; PRs menores revisam melhor.
-- Não mover tudo de uma vez; cada passo deve deixar o `main` verde (build + testes).
-- Novo padrão só vira convenção depois de **um** fluxo piloto bem feito e revisado.
-
-### Progresso consolidado (referência do repositório)
-
-- **Cotações (`/quotations`):** `QuotationAPI` (`application.controllers.docs`) + `QuotationController` (`controller.quotation`); casos de uso em `application.quotation` delegando ao `QuotationService`; `QuotationResponseMapper` extrai `toResponse`; exclusão **permanente**; endpoints `/trash` removidos; mensagens de exceção do fluxo em português/minúsculas onde alinhado.
-- **Clientes (`/customers`):** `CustomerAPI` (`application.controllers.docs`) + `CustomerController` (`controller.customer`); casos de uso em `application.customer` delegando ao `CustomerService` (mesmo contrato HTTP).
-- **Agência (`/agency`):** validação de telefone no patch em `AgencyService.update`; `AgencyAPI` (`application.controllers.docs`) + `AgencyController` (`controller.agency`); `GetAgency` / `UpdateAgency` + `AgencyResponseMapper` em `application.agency`; remoção de `AgencyService.getCurrentAgency()` (tenant + `getById` no caso de uso).
-- **Financeiro / usuários (parcial):** `FinancialEntryService` e `UserService` — mensagens `ResourceNotFoundException` em inglês substituídas por equivalentes em português/minúsculas nos pontos encontrados; duplicidade de e-mail em `UserService.create` alinhada a `AuthService` (`este e-mail já está cadastrado`); `PublicLinkCodeService` com mensagens em minúsculas e `ensurePersistedForUserId` a usar `ResourceNotFoundException` quando o id não existe.
-- **Lançamentos financeiros (`/financial-entries`):** `FinancialEntryAPI` (`application.controllers.docs`) + `FinancialEntryController` (`controller.financial`); casos de uso em `application.financial` delegando ao `FinancialEntryService`; `FinancialEntryResponseMapper` extrai `toResponse`.
-- **Convites (`/invitations`):** `InvitationAPI` (`application.controllers.docs`) + `InvitationController` (`controller.invitation`); casos de uso em `application.invitation` delegando ao `InvitationService`; `InvitationResponseMapper` (URL via `buildInviteUrl`); mensagens de exceção do serviço alinhadas a português/minúsculas onde aplicável.
-- **Solicitação pública / submissões / config agência:** formulário público e config por slug em `controller.solicitacao.pub` (`PublicSolicitacaoConfigAPI` / `PublicSolicitacaoSubmitAPI` em `application.controllers.docs`); submissões e **config autenticada** (`/agency/solicitacao-config`) em `controller.solicitacao.agency` — `SolicitacaoSubmissionAgencyAPI`, `SolicitacaoConfigAgencyAPI` em `application.controllers.docs`, controllers finos; casos de uso em `application.solicitacao`; `SolicitacaoSubmissionResponseMapper`; serviços de submissão e de config recebem **`agencyId` explícito** onde aplicável; `SolicitacaoConfigService` sem `TenantContext` nos métodos de agência.
-
-- **Termos:** `TermsAPI` (`application.controllers.docs`) + `TermsController` (`controller.terms`); aceite persiste **`users.terms_accepted`** (sem tabela `terms_acceptances`); `LoginResponse.requiresTermsAcceptance` quando a flag é falsa; cadastro de agência grava `termsAccepted=true` após validar versão; `GET /public/terms/latest` inalterado.
-- **Usuários (`/users`):** `UserAPI` (`application.controllers.docs`) + `UserController` (`controller.user`); casos de uso em `application.user` delegando ao `UserService`; `UserResponseMapper` (mapeamento fora do controller).
-- **Painel do vendedor (`/seller-dashboard`):** `SellerDashboardAPI` (`application.controllers.docs`) + `SellerDashboardController` (`controller.sellerdashboard`); `BuildSellerDashboard` em `application.sellerdashboard` (cotações + comissões) com `UserResponseMapper` e `QuotationService`.
-- **Autenticação (`/auth`):** `AuthAPI` (`application.controllers.docs`) + `AuthController` (`controller.auth`); casos de uso em `application.auth` delegando ao `AuthService` / `InvitationService` (contrato HTTP inalterado); mensagens de **`AuthService`** (exceções e `message` em respostas) em **português / minúsculas**; varredura de dead code em `AuthService` e **`QuotationService`**: sem métodos públicos órfãos (uso via `application.*` + `BuildSellerDashboard`).
-- **Contexto de segurança:** `SecurityContextUsers` (`optionalUser`, `requireUserId` / `requireUser`) usado em termos, auth, agência, convites e **`TenantInterceptor`** — evita duplicação e garante id a partir da entidade `User` do JWT; testes em `SecurityContextUsersTest`; **`UnauthenticatedException`** quando não há contexto utilizável para **`requireUserId()`** ou **`requireUser()`** → **401** / `UNAUTHENTICATED` no handler global.
-- **Tenant:** `TenantContext.requireAgencyId()` nos controllers que dependem de agência no `ThreadLocal` (falha explícita se ausente); **`MissingAgencyContextException`** → **403** com código `MISSING_AGENCY_CONTEXT` no `GlobalExceptionHandler`; demais `IllegalStateException` seguem **400**; testes em `TenantContextTest` e `GlobalExceptionHandlerTest`.
-- **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
-- **404 por lookup:** mensagens `ResourceNotFoundException` em `AuthService`, `TermsService`, `AgencyService`, `InvitationService` e `SolicitacaoSubmissionService` passam a incluir **identificador** (e-mail, id ou token) no texto, alinhado a `UserService` / `QuotationService`.
-- **OpenAPI — erros:** `OpenApiConfig` define o schema global **`ApiError`** e descreve no **info** os códigos `code` e HTTP associados (`UNAUTHENTICATED`, `MISSING_AGENCY_CONTEXT`, `NOT_FOUND`, etc.).
-- **OpenAPI — respostas de erro por recurso:** meta-anotação `@StandardErrorApiResponses` (`application.controllers.docs`) documenta 400/401/403/404/409/500 com schema `ApiError`; aplicada em **todos** os `*API` (auth, termos, usuários, agência, clientes, cotações, financeiro, convites, painel vendedor, solicitação pública e agência).
-- **Passo 7 (ADRs):** **ADR 0003** (erros HTTP, OpenAPI, tenant/segurança); **ADR 0004** (mapeamento **pacotes Java** ↔ camadas conceptuais: `controller` + `application.<feature>` sem `application/controllers`); `02-backend-architecture.md` referencia ambos onde aplicável.
-- **Definições de refatoração (pacotes + classes):** `05-package-refactoring-and-class-responsibilities.md` — modelo alvo por operação, convenções de pacote (flat vs `usecases/<feature>/<verbo>`), papel do use case vs legado `*Service`, transações e anti-padrões. Referência alinhada ao modelo Clean / use case driven: **`06-clean-architecture-use-case-driven.md`**.
-- **Testes de controller (`@WebMvcTest`):** cobertura alinhada a todos os `@RestController` — inclui **painel do vendedor** (`SellerDashboardControllerWebMvcTest`) e endpoints **públicos de solicitação** (`PublicSolicitacaoConfigControllerWebMvcTest`, `PublicSolicitacaoSubmitControllerWebMvcTest`); `SellerDashboardController` repete `@AuthenticationPrincipal` / `@PathVariable` na implementação (como `QuotationController`) para resolução correta do utilizador autenticado.
-
-**Próxima fila sugerida:** **Passo 6** (`Clock` em fluxos com tempo) **adiado** até surgir necessidade de testes determinísticos; novos ADRs quando decisão transversal surgir; ao adicionar `@WebMvcTest`, preferir `@Import(GlobalExceptionHandler.class)` + mocks de filtros salvo quando o teste precise explicitamente da cadeia MVC+segurança de `WebMvcControllerTestImports` (evitar regressões de mapeamento de rotas); observabilidade ou pequenos ajustes de contrato conforme produto.
+- Um passo por PR quando possível; `mvn test` verde antes de merge.
+- Novo padrão só vira convenção depois de **um** piloto bem feito e revisado.
+- Contrato HTTP só muda com acordo explícito (produto + API).
 
 ---
 
-## Visão em sequência (diagrama)
+## Fase 0 — Baseline já entregue **(não reexecutar)**
+
+Estado consolidado no `agencia-hub-api` (referência histórica; novos fluxos partem daqui):
+
+- **Documentação:** `01`–`03`, **`05`**, **`06`**, `02` alinhado; **ADR 0003** (erros, OpenAPI, tenant/segurança), **ADR 0004** (pacotes `controller` / `application`); `.cursor/rules.md`.
+- **Apresentação HTTP:** `*API` em `com.agenciahub.api.application.controllers.docs`; `@RestController` em `controller.<feature>`; `@StandardErrorApiResponses` em todos os `*API`; `GlobalExceptionHandler` em `web`.
+- **Aplicação (primeira onda):** casos de uso em `application.<feature>` com interfaces `UseCase` / `VoidUseCase`, muitas operações ainda **delegando** a `*Service`; `*ResponseMapper` onde extraído; controllers finos; mensagens de erro em português/minúsculas nos fluxos alinhados; `SecurityContextUsers`, `TenantContext`, testes de controller (`WebMvcControllerTestImports`, `@MockitoBean` em filtros quando aplicável).
+
+**Isto substitui** o antigo encadeamento “Passo 0 → … → Passo 4” para este repositório: **não** voltar a abrir PRs só para refazer baseline, piloto de cotação isolado ou mover `*API` para `controller.*.docs`.
+
+---
+
+## Visão em sequência (a partir da Fase 1)
 
 ```mermaid
 sequenceDiagram
-    participant T as Time / repo
-    participant P0 as Passo 0 Baseline Git
-    participant P1 as Passo 1 CI verde
-    participant P2 as Passo 2 Piloto feature
-    participant P3 as Passo 3 Mapper piloto
-    participant P4 as Passo 4 API fina piloto
-    participant P5 as Passo 5 Repetir features
-    participant P6 as Passo 6 Tempo Clock piloto
-    participant P7 as Passo 7 Opcional ADRs
+    participant F0 as Fase 0 Baseline feito
+    participant F1 as Fase 1 Orquestração no use case
+    participant F2 as Fase 2 Pacotes e mappers 06
+    participant F3 as Fase 3 Integrações
+    participant F4 as Fase 4 Clock
+    participant F5 as Fase 5 ADR decisões
 
-    T->>P0: docs + estrutura pacotes commitados
-    P0->>P1: mvn test verde na CI
-    P1->>P2: 1º UseCase delegado pelo Service
-    P2->>P3: toResponse extraído do Service
-    P3->>P4: validação saindo do Controller
-    P4->>P5: próximo agregado (mesmo molde)
-    P5->>P6: quando teste exigir instante fixo
-    P6->>P7: decisões que mudam regra global
+    Note over F0: não reexecutar
+    F0->>F1: absorver lógica do *Service
+    F1->>F2: opcional por feature
+    F2->>F3: quando surgir integração clara
+    F1->>F4: quando teste exigir tempo fixo
+    F2->>F5: quando padrão global mudar
+    F3->>F5: quando padrão global mudar
+    F4->>F5: quando padrão global mudar
+    F5->>F1: prioridades revisadas
 ```
 
 ---
 
-## Passo 0 — Baseline no repositório e estrutura mínima
+## Fase 1 — Orquestração no caso de uso (absorver `*Service`)
 
-**Objetivo:** Tudo que define “como vamos trabalhar” e os ganchos de pacote estiverem **commitados** e conhecidos pelo time.
+**Objetivo:** A implementação `@Service` do **caso de uso** passa a conter a **orquestração** (repositórios, políticas de fluxo, chamadas a outros use cases); o `*Service` monolítico encolhe ou desaparece por operação — alinhado ao **06** (use case linear; sem regra de negócio pesada no controller) e ao **05** §4.4.
+
+**Inclui (checklist por PR / por operação):**
+
+- [ ] Escolher um método ou um conjunto coeso num `*Service` (evitar auth completo num único PR).
+- [ ] Mover orquestração para `Xxx implements XxxUseCase` (ou criar use case se ainda for só delegação de uma linha **com** plano de absorção no mesmo PR ou no seguinte).
+- [ ] Manter DTOs HTTP e contrato REST; ajustar apenas o wiring (controller → use case).
+- [ ] `@Transactional` só onde for estritamente necessário (**05** §4.3); justificar no PR se mantiver/adicionar.
+- [ ] `mvn test` verde.
+
+**Pronto quando:** O fluxo tocado não depende do `*Service` para essa operação (ou o serviço ficou só como fachada mínima documentada até remoção).
+
+**Depois:** Continuar Fase 1 noutra operação/agregado **ou** iniciar Fase 2 numa feature onde o pacote `application.<feature>` ficou grande.
+
+**Evitar:** Dois beans como fonte de verdade para a mesma operação (`CreateXxx` + `XxxService.create` sem plano de remoção).
+
+---
+
+## Fase 2 — Pacotes e mappers alinhados ao **06** (opcional por feature)
+
+**Objetivo:** Aproximar a árvore de código do pacote-alvo do **06**: `application/usecases/{feature}/{action}/` com `{Action}UseCase`, `{Action}`, DTOs de entrada/saída da operação e, **quando existir integração ou mapeamento não trivial**, `InputMapper` / `OutputMapper` estáticos.
 
 **Inclui (checklist):**
 
-- [ ] `docs/architecture/*` e `docs/architecture/adr/*` no Git (se ainda forem só locais).
-- [ ] `.cursor/rules.md` no Git (se aplicável ao time).
-- [ ] Pacotes de apoio já acordados: `com.agenciahub.api.application` (ex.: `UseCase`, `application.controllers.docs` para `*API` / OpenAPI), `com.agenciahub.api.infrastructure` (apenas `package-info` até haver classes).
+- [ ] Só entrar quando `application.<feature>` tiver **muitos** tipos ou várias operações em paralelo (equipa sente atrito de PR).
+- [ ] Migrar **uma feature** de cada vez (Convenção B no **05** §5.2); atualizar imports; `mvn test` verde.
+- [ ] Não obrigar rename de `dto.*` globais no mesmo PR (podem coexistir com DTOs colocados na pasta da operação).
 
-**Pronto quando:** `git status` limpo no que diz respeito a baseline; outra pessoa clona e vê a mesma estrutura.
+**Pronto quando:** Pelo menos uma feature piloto está na estrutura `usecases/...` (ou decisão documentada no PR para adiar).
 
-**Depois deste passo, fazer:** Passo 1 (não iniciar UseCase em feature antes da CI estar confiável).
+**Depois:** Fase 1 nas features recém-reorganizadas (se ainda houver lógica no serviço) **ou** Fase 3 se integrações externas forem o gargalo.
 
-**Evitar:** Começar a mover controllers ou renomear pacotes em massa.
+**Evitar:** Big-bang mover todas as features sem piloto.
 
 ---
 
-## Passo 1 — Build e testes confiáveis (`mvn test` verde)
+## Fase 3 — Integrações explícitas
 
-**Objetivo:** Nenhum passo seguinte pode apoiar-se em suíte quebrada.
+**Objetivo:** Outbound HTTP, filas, terceiros, etc. em `application/integrations/{service}/` com interface + implementação, como no **06** — em vez de lógica “escondida” em `service` genérico.
 
 **Inclui (checklist):**
 
-- [ ] Rodar `mvn test` localmente; corrigir **falhas de contexto** em testes (ex.: `@WebMvcTest` + filtros JWT sem beans necessários).
-- [ ] Garantir o mesmo na CI (GitHub Actions ou equivalente).
+- [ ] Identificar um adaptador (ex.: e-mail, cliente REST).
+- [ ] Introduzir interface + implementação; injetar no use case; testes com duplo de teste ou cliente fake quando fizer sentido.
 
-**Neste repositório (`agencia-hub-api`):** em `@WebMvcTest`, importar `com.agenciahub.api.support.WebMvcControllerTestImports`, anotar `@AutoConfigureMockMvc(addFilters = false)` e registrar `@MockitoBean` para `JwtAuthFilter` e `RateLimitFilter`, para o slice não precisar de `JwtService` real. Reutilize o mesmo padrão ao adicionar novos testes de controller.
+**Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro.
 
-**Pronto quando:** `mvn test` verde no `main` (ou na branch de integração que vocês usam).
-
-**Depois deste passo, fazer:** Passo 2 — escolher **uma** feature piloto (sugestão: CRUD de **cotação** — pouco acoplamento a auth).
-
-**Evitar:** Misturar correção de teste com refator grande de domínio no mesmo PR.
+**Depois:** Fase 1 noutros fluxos que reutilizem a integração **ou** Fase 5 se a política de erros/retry for transversal.
 
 ---
 
-## Passo 2 — Primeiro caso de uso (piloto) sem mudar API HTTP
+## Fase 4 — Tempo (`Clock`) só onde a regra e os testes exigirem
 
-**Objetivo:** Ter **um** fluxo onde o `*Service` delega a interfaces de caso de uso (`XxxUseCase`) implementadas por `@Service` (`Xxx`), mantendo endpoints e DTOs iguais.
+**Objetivo:** Instantes determinísticos em testes (expiração, trial, convites, etc.).
 
 **Inclui (checklist):**
 
-- [ ] Escolher um fluxo pequeno (ex.: criar/atualizar/listar **cotação**).
-- [ ] Criar interfaces `XxxUseCase extends UseCase<…>` (ou `VoidUseCase`) e `@Service` `Xxx implements XxxUseCase` em `com.agenciahub.api.application.<feature>`, mais DTOs de comando/resultado **se** fizer sentido; alinhar com `02-backend-architecture.md`, secção *Use case contracts*.
-- [ ] O `@Service` público vira fachada: chama o use case e retorna o mesmo DTO de resposta de antes.
+- [ ] Introduzir `Clock` (ou bean de tempo) **só** no fluxo que vai ganhar teste com instante fixo.
+- [ ] Substituir `Instant.now()` / `System.currentTimeMillis()` **na parte orquestrada** pelo relógio injetado.
 
-**Pronto quando:** Testes do piloto verdes; contrato REST inalterado (mesmos paths, status, shape de JSON).
+**Pronto quando:** Testes do fluxo não dependem do relógio real.
 
-**Depois deste passo, fazer:** Passo 3 no **mesmo** piloto (extrair mapeamento para um `*ResponseMapper` dedicado); em seguida Passo 4 (controller fino) ou Passo 5 conforme prioridade.
+**Depois:** Repetir apenas noutros fluxos com a mesma necessidade; **ADR** se `Clock` global virar regra.
 
-**Evitar:** Piloto em `AuthService`, segurança ou fluxo com muitas integrações na primeira rodada.
+**Evitar:** Injetar `Clock` em toda a base “por precaução”.
 
 ---
 
-## Passo 3 — Mapper dedicado no piloto
+## Fase 5 — Decisões transversais (ADR + docs)
 
-**Objetivo:** Reduzir `toResponse` / builders grandes dentro do serviço ou use case.
+**Objetivo:** Quando algo vira **regra do projeto** (novo pacote raiz, política obrigatória de tempo, split domínio/JPA em larga escala), ficar explícito.
 
 **Inclui (checklist):**
 
-- [ ] Classe dedicada (ex.: `QuotationResponseMapper`) com métodos nomeados (`toResponse`, etc.) no escopo do piloto.
-- [ ] Serviço/use case só orquestra e chama o mapper.
+- [ ] Novo **ADR** + atualização pontual de `02` / `05` / `06` conforme o caso.
+- [ ] Itens grandes que **não** entram sem ADR (já fora do roadmap operacional): separação JPA vs entidade de domínio em **toda** a base; reescrita completa de `AuthService` / segurança; rename em massa de pacotes.
 
-**Pronto quando:** Comportamento e testes iguais; método privado gigante de mapeamento sumiu ou ficou trivial.
+**Pronto quando:** Leitor novo sabe o que mudou e porquê.
 
-**Depois deste passo, fazer:** Passo 4 no **mesmo** piloto (controller fino).
-
-**Evitar:** Criar “framework de mapper” genérico antes de ter 2–3 exemplos reais.
+**Depois:** Voltar à **Fase 1** (ou 2) com prioridades revisadas.
 
 ---
 
-## Passo 4 — Controller apenas adaptador no piloto
+## Referência rápida: “terminei a fase N, e agora?”
 
-**Objetivo:** Nenhuma regra de negócio nem validação de domínio no controller do piloto; contrato HTTP e OpenAPI explícitos.
-
-**Inclui (checklist):**
-
-- [ ] Mover validações que não são só “formato HTTP/Bean Validation” para o serviço/use case.
-- [ ] Controller: `@Valid`, parâmetros, delegação, resposta.
-- [ ] Extrair documentação OpenAPI para interface pública `*API` em `com.agenciahub.api.application.controllers.docs` (ex.: `QuotationAPI`); o `@RestController` em `controller.<feature>` implementa essa interface (ver `.cursor/rules.md`).
-- [ ] Mensagens de exceção no fluxo tocado: **português** e **minúsculas** (ver `02-backend-architecture.md` e `.cursor/rules.md`).
-- [ ] (Opcional neste passo) Repetir o **agrupamento por feature** em outros controllers (`controller.<feature>`, `application.<feature>`), um agregado por PR.
-
-**Pronto quando:** Controller do piloto sem `if` de regra de negócio; testes verdes.
-
-**Depois deste passo, fazer:** Passo 5 — **replicar o molde** em outra feature (segundo PR), não expandir o piloto indefinidamente.
-
-**Evitar:** Tocar em `SecurityConfig` / filtros só por alinhamento estético.
+| Fase concluída | Próxima ação típica |
+|----------------|---------------------|
+| 0 | **Não aplicável** — baseline já feito neste repo. |
+| 1 (um PR) | Continuar **Fase 1** noutra operação **ou** **Fase 2** se a feature estiver madura para reorganizar pacotes. |
+| 2 | **Fase 1** nas operações da feature reorganizada **ou** **Fase 3** se integrações forem o foco. |
+| 3 | **Fase 1** em consumidores **ou** **Fase 5** se houver decisão global. |
+| 4 | **Fase 1** ou **5** conforme contexto. |
+| 5 | **Fase 1** (prioridade revisada). |
 
 ---
 
-## Passo 5 — Repetir o molde feature a feature
+## Repositório novo (“greenfield”) neste mono/modelo
 
-**Objetivo:** Crescimento sustentável: cada feature escolhe quando “entrar” no padrão.
-
-**Inclui (checklist):**
-
-- [ ] Lista priorizada de módulos (ex.: cliente → cotação → solicitação pública → financeiro).
-- [ ] Para cada item: UseCase (se ganho claro) → mapper → controller fino.
-- [ ] Só mergear com testes verdes.
-
-**Pronto quando:** Pelo menos **duas** features usam o mesmo padrão (piloto +1); time alinha nomes de pacotes por feature (`application.quotation`, `application.customer`, etc.) se desejado.
-
-**Depois deste passo, fazer:** Avaliar Passo 6 quando surgir necessidade real de testes com tempo fixo.
-
-**Evitar:** Exigir que **todas** as classes antigas migrem antes de seguir.
+Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir **Fase 0 mínima** (docs de arquitetura, `mvn test` + CI, primeiro fluxo com `*API` + controller + um use case). O detalhe equivale ao antigo “Passo 0–1 + piloto” descrito no **06** e no **05**.
 
 ---
 
-## Passo 6 — Tempo (`Clock`) só onde a regra precisa
+## Histórico de entregas (referência — não checklist)
 
-**Objetivo:** Testes determinísticos para expiração, trial, auditoria, etc.
+*(Consolidado de entregas anteriores; mantém contexto para PRs e auditoria.)*
 
-**Inclui (checklist):**
+- Cotações, clientes, agência, lançamentos financeiros, convites, solicitação (pública + agência), termos, utilizadores, painel vendedor, auth: padrão `*API` + controller + `application.<feature>` + mappers onde aplicável, muitas rotas ainda com use case a delegar em `*Service`.
+- Erros globais, tenant, OpenAPI `ApiError`, `@WebMvcTest` alinhados aos controllers.
 
-- [ ] Introduzir `Clock` (ou serviço de tempo) **no fluxo** que vocês forem testar com instante fixo.
-- [ ] Testes com `Clock.fixed(…)` ou override de bean em `@SpringBootTest` / test slice acordado.
-
-**Pronto quando:** Pelo menos um fluxo crítico deixa de usar `Instant.now()` direto **na parte testada**; testes não dependem do relógio real.
-
-**Depois deste passo, fazer:** Repetir apenas em outros fluxos com a mesma dor; opcionalmente um `@Bean Clock` global (ADR se virar padrão).
-
-**Evitar:** `Clock` em toda a base sem necessidade (como já combinado).
-
----
-
-## Passo 7 — Documentação de decisões (quando o padrão mudar de verdade)
-
-**Objetivo:** O que virou **regra do projeto** fica explícito.
-
-**Inclui (checklist):**
-
-- [ ] Atualizar `01-architecture-principles.md` / `02-backend-architecture.md` só quando um limite real mudar (ex.: “controllers vivem em `api`”).
-- [ ] Novo ADR quando houver escolha relevante (ex.: pacote por feature, política de exceções, uso obrigatório de `Clock` em serviços X).
-
-**Neste repositório:** **ADR 0003** (`adr/0003-api-errors-openapi-tenant-security.md`) cobre o contrato de erros (`ApiError`), documentação OpenAPI (`@StandardErrorApiResponses`, `OpenApiConfig`), handler global em `web` e política **401/403** para autenticação e tenant; **ADR 0004** (`adr/0004-java-packages-vs-conceptual-layers.md`) explica o mapeamento `controller` / `application` / `service` às camadas do diagrama; **`05-package-refactoring-and-class-responsibilities.md`** define o alvo de refatoração (use case vs `*Service`, pacotes); `02-backend-architecture.md` foi alinhado na secção *OpenAPI contracts* e referencia o `05`.
-
-**Pronto quando:** Novo desenvolvedor (ou agente) lê os docs e sabe onde colocar código novo.
-
-**Depois deste passo, fazer:** Volta ao Passo 5 com prioridade revisada.
-
----
-
-## Referência rápida: “terminei o passo N, e agora?”
-
-| Passo concluído | Próxima ação obrigatória |
-|-----------------|-------------------------|
-| 0 | 1 — deixar `mvn test` verde |
-| 1 | 2 — primeiro `UseCase` piloto |
-| 2 | 3 — mapper no mesmo piloto |
-| 3 | 4 — controller fino no mesmo piloto |
-| 4 | 5 — repetir em outra feature |
-| 5 | Continuar 5 até fila acabar ou prioridade mudar; então 6 se precisar |
-| 6 | 5 ou 7 conforme surgir padrão global |
-| 7 | 5 com convenções atualizadas |
-
----
-
-## O que fica **fora** deste roadmap inicial (propositalmente)
-
-- Separação completa entidade JPA vs entidade de domínio em **toda** a base (grande; fazer só se houver ADR e piloto).
-- Reescrita de `AuthService` / segurança sem projeto de testes dedicado.
-- Rename em massa de pacotes (`service` → `application`) sem necessidade operacional.
-
-Quando um destes itens virar necessidade de negócio ou manutenção, abra um **ADR** e insira um novo “Passo X” entre 5 e 7 com escopo explícito.
+Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.

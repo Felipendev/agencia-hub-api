@@ -42,7 +42,7 @@ Names, entities, methods, business flows and domain-specific classes from the re
 
 The project must evolve incrementally.
 
-**Refactoring sequence:** after the baseline is in place, follow the ordered steps in [04-incremental-refactoring-roadmap.md](04-incremental-refactoring-roadmap.md) so each completed step has a clear “what to do next” and nothing critical (tests, CI) is skipped.
+**Refactoring sequence:** after the baseline is in place, follow **`04-incremental-refactoring-roadmap.md`** (Phases **1–5**; Phase **0** is already done in this repository — do not repeat as mandatory checklist).
 
 Before changing production code:
 

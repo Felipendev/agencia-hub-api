@@ -121,7 +121,7 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 ### 5.3 Transição A → B
 
 - **Uma feature de cada vez** (ex.: `customer`), com `mvn test` verde.
-- Atualizar imports e, se existir, `.cursor/rules` ou checklist interno do time.
+- Atualizar imports e, se existir, `.cursor/rules` ou checklist interno do time; alinhar ao **roadmap `04`** (**Fase 2** quando a pasta `application.<feature>` ficar demasiado grande).
 - Não misturar num mesmo PR **reorganização de pastas** com **mudança de regra de negócio**.
 
 ---
@@ -142,7 +142,7 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 - [ ] **`@Transactional`:** ausente por omissão; se existir, **justificado** no PR como estritamente necessário (secção 4.3).
 - [ ] Controller inalterado em contrato HTTP (salvo acordo explícito).
 - [ ] `mvn test` verde.
-- [ ] Atualizar **uma** linha no `04-incremental-refactoring-roadmap.md` (progresso) se a feature mudar de convenção A→B ou eliminar `*Service` relevante.
+- [ ] Atualizar **`04-incremental-refactoring-roadmap.md`** (secção *Histórico de entregas* ou nota na **Fase 1**) quando uma feature eliminar `*Service` relevante ou concluir migração para `application.usecases/...` (**Fase 2**).
 
 ---
 
@@ -151,7 +151,7 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 | Documento | Função |
 |-----------|--------|
 | `02-backend-architecture.md` | Camadas gerais, contratos `UseCase` / `VoidUseCase`, layout HTTP. |
-| `04-incremental-refactoring-roadmap.md` | Ordem de trabalho e princípio “sem rename em massa”. |
+| `04-incremental-refactoring-roadmap.md` | **Fases 1–5** (pós-baseline); Fase 0 tratada como concluída neste repositório. |
 | `06-clean-architecture-use-case-driven.md` | Referência detalhada: camadas, pacotes alvo, mappers, repositório domínio/persistência, pirâmide de testes. |
 | ADR 0004 | Por que `controller` e `application` são irmãos no pacote Java. |
 | Este `05-…` | **Definições** de pacotes evolutivos e **papel** de cada classe no refator. |
