@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.usecases.auth.validatetoken;
 
-import com.agenciahub.api.application.usecases.invitation.InvitationTokenPolicy;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationTokenPolicy;
 import com.agenciahub.api.dto.auth.InviteValidationResponse;
 import com.agenciahub.api.entity.Invitation;
 import com.agenciahub.api.exception.ResourceNotFoundException;

@@ -1,13 +1,13 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.invitation.createinvitation.CreateInvitationCommand;
-import com.agenciahub.api.application.usecases.invitation.createinvitation.CreateInvitationUseCase;
-import com.agenciahub.api.application.usecases.invitation.listinvitations.ListInvitationsUseCase;
-import com.agenciahub.api.application.usecases.invitation.revokeinvitation.RevokeInvitationCommand;
-import com.agenciahub.api.application.usecases.invitation.revokeinvitation.RevokeInvitationUseCase;
+import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationCommand;
+import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationUseCase;
+import com.agenciahub.api.application.usecases.invitation.retrieve.list.ListInvitationsUseCase;
+import com.agenciahub.api.application.usecases.invitation.revoke.RevokeInvitationCommand;
+import com.agenciahub.api.application.usecases.invitation.revoke.RevokeInvitationUseCase;
 import com.agenciahub.api.application.controller.doc.InvitationAPI;
-import com.agenciahub.api.dto.invitation.CreateInvitationRequest;
-import com.agenciahub.api.dto.invitation.InvitationResponse;
+import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationRequestDTO;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
@@ -28,13 +28,13 @@ public class InvitationController implements InvitationAPI {
     private final RevokeInvitationUseCase revokeInvitationUseCase;
 
     @Override
-    public InvitationResponse create(CreateInvitationRequest request) {
+    public InvitationSummaryResponseDTO create(CreateInvitationRequestDTO request) {
         User inviter = SecurityContextUsers.requireUser();
         return createInvitationUseCase.execute(new CreateInvitationCommand(request, inviter));
     }
 
     @Override
-    public List<InvitationResponse> list() {
+    public List<InvitationSummaryResponseDTO> list() {
         UUID agencyId = TenantContext.requireAgencyId();
         return listInvitationsUseCase.execute(agencyId);
     }

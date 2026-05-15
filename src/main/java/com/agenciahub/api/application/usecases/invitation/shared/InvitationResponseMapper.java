@@ -1,6 +1,6 @@
-package com.agenciahub.api.application.usecases.invitation;
+package com.agenciahub.api.application.usecases.invitation.shared;
 
-import com.agenciahub.api.dto.invitation.InvitationResponse;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
 import com.agenciahub.api.entity.Invitation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,8 +11,8 @@ public class InvitationResponseMapper {
 
     private final InvitationLinkBuilder invitationLinkBuilder;
 
-    public InvitationResponse toResponse(Invitation invitation) {
-        return new InvitationResponse(
+    public InvitationSummaryResponseDTO toResponse(Invitation invitation) {
+        return new InvitationSummaryResponseDTO(
                 invitation.getId(),
                 invitation.getEmail(),
                 invitation.getToken(),

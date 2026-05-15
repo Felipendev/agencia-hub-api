@@ -1,7 +1,7 @@
-package com.agenciahub.api.application.usecases.agency.getagency;
+package com.agenciahub.api.application.usecases.agency.retrieve;
 
-import com.agenciahub.api.application.usecases.agency.AgencyResponseMapper;
-import com.agenciahub.api.dto.agency.AgencyResponse;
+import com.agenciahub.api.application.usecases.agency.shared.AgencyResponseMapper;
+import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyRepository;
@@ -18,7 +18,7 @@ public class GetAgency implements GetAgencyUseCase {
     private final AgencyResponseMapper agencyResponseMapper;
 
     @Override
-    public AgencyResponse execute(UUID agencyId) {
+    public AgencySummaryResponseDTO execute(UUID agencyId) {
         if (agencyId == null) {
             throw new IllegalStateException("nenhuma agência no contexto do tenant");
         }

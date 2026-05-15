@@ -1,14 +1,14 @@
-package com.agenciahub.api.application.usecases.agency;
+package com.agenciahub.api.application.usecases.agency.shared;
 
-import com.agenciahub.api.dto.agency.AgencyResponse;
+import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
 import com.agenciahub.api.entity.Agency;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AgencyResponseMapper {
 
-    public AgencyResponse toResponse(Agency agency) {
-        return new AgencyResponse(
+    public AgencySummaryResponseDTO toResponse(Agency agency) {
+        return new AgencySummaryResponseDTO(
                 agency.getId(),
                 agency.getName(),
                 agency.getPhone(),

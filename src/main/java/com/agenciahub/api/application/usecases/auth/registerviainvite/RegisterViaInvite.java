@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.usecases.auth.registerviainvite;
 
-import com.agenciahub.api.application.usecases.invitation.InvitationTokenPolicy;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationTokenPolicy;
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.domain.VerificationCodeType;

@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.dto.invitation.CreateInvitationRequest;
-import com.agenciahub.api.dto.invitation.InvitationResponse;
+import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationRequestDTO;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,11 +35,11 @@ public interface InvitationAPI {
     @Operation(
             summary = "Cria convite",
             description = "Gera token, prazo de validade (72h), persiste e dispara e-mail com o link de aceite.")
-    InvitationResponse create(@Valid @RequestBody CreateInvitationRequest request);
+    InvitationSummaryResponseDTO create(@Valid @RequestBody CreateInvitationRequestDTO request);
 
     @GetMapping
     @Operation(summary = "Lista convites da agência do tenant", description = "Ordenação: mais recentes primeiro.")
-    List<InvitationResponse> list();
+    List<InvitationSummaryResponseDTO> list();
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -1,4 +1,4 @@
-package com.agenciahub.api.application.usecases.invitation;
+package com.agenciahub.api.application.usecases.invitation.shared;
 
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.entity.Invitation;

@@ -1,11 +1,11 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.invitation.createinvitation.CreateInvitationUseCase;
-import com.agenciahub.api.application.usecases.invitation.listinvitations.ListInvitationsUseCase;
-import com.agenciahub.api.application.usecases.invitation.revokeinvitation.RevokeInvitationUseCase;
+import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationUseCase;
+import com.agenciahub.api.application.usecases.invitation.retrieve.list.ListInvitationsUseCase;
+import com.agenciahub.api.application.usecases.invitation.revoke.RevokeInvitationUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.domain.InvitationStatus;
-import com.agenciahub.api.dto.invitation.InvitationResponse;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.security.TenantContext;
@@ -80,7 +80,7 @@ class InvitationControllerWebMvcTest {
         UUID id = UUID.randomUUID();
         Instant now = Instant.parse("2026-01-01T12:00:00Z");
         when(listInvitationsUseCase.execute(agencyId))
-                .thenReturn(List.of(new InvitationResponse(
+                .thenReturn(List.of(new InvitationSummaryResponseDTO(
                         id,
                         "seller@example.com",
                         "token-abc",

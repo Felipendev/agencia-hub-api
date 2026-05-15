@@ -1,8 +1,8 @@
-package com.agenciahub.api.application.usecases.agency.updateagency;
+package com.agenciahub.api.application.usecases.agency.update;
 
-import com.agenciahub.api.application.usecases.agency.AgencyResponseMapper;
-import com.agenciahub.api.dto.agency.AgencyResponse;
-import com.agenciahub.api.dto.agency.UpdateAgencyRequest;
+import com.agenciahub.api.application.usecases.agency.shared.AgencyResponseMapper;
+import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
+import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyRequestDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.AgencyAuditLog;
 import com.agenciahub.api.entity.User;
@@ -27,12 +27,12 @@ public class UpdateAgency implements UpdateAgencyUseCase {
 
     @Override
     @Transactional
-    public AgencyResponse execute(UpdateAgencyCommand command) {
+    public AgencySummaryResponseDTO execute(UpdateAgencyCommand command) {
         User user = command.currentUser();
         UUID id = user.getAgency().getId();
         Agency agency = agencyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("agência não encontrada: " + id));
-        UpdateAgencyRequest request = command.request();
+        UpdateAgencyRequestDTO request = command.request();
 
         if (request.name() != null && !request.name().isBlank()) {
             auditField(agency, user, "name", agency.getName(), request.name());

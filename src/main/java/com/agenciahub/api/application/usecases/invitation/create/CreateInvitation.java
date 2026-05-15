@@ -1,9 +1,9 @@
-package com.agenciahub.api.application.usecases.invitation.createinvitation;
+package com.agenciahub.api.application.usecases.invitation.create;
 
-import com.agenciahub.api.application.usecases.invitation.InvitationResponseMapper;
-import com.agenciahub.api.application.usecases.invitation.InvitationLinkBuilder;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationResponseMapper;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationLinkBuilder;
 import com.agenciahub.api.domain.InvitationStatus;
-import com.agenciahub.api.dto.invitation.InvitationResponse;
+import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
 import com.agenciahub.api.entity.Invitation;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
@@ -30,7 +30,7 @@ public class CreateInvitation implements CreateInvitationUseCase {
 
     @Override
     @Transactional
-    public InvitationResponse execute(CreateInvitationCommand command) {
+    public InvitationSummaryResponseDTO execute(CreateInvitationCommand command) {
         User inviter = command.inviter();
         User managedInviter = userRepository
                 .findById(inviter.getId())

@@ -1,10 +1,10 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.agency.getagency.GetAgencyUseCase;
-import com.agenciahub.api.application.usecases.agency.updateagency.UpdateAgencyUseCase;
+import com.agenciahub.api.application.usecases.agency.retrieve.GetAgencyUseCase;
+import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyUseCase;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
-import com.agenciahub.api.dto.agency.AgencyResponse;
+import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.security.TenantContext;
@@ -72,7 +72,7 @@ class AgencyControllerWebMvcTest {
     @Test
     void get_returnsAgency() throws Exception {
         when(getAgencyUseCase.execute(eq(agencyId)))
-                .thenReturn(new AgencyResponse(
+                .thenReturn(new AgencySummaryResponseDTO(
                         agencyId,
                         "Minha agência",
                         "11999999999",

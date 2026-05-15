@@ -1,11 +1,11 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.agency.getagency.GetAgencyUseCase;
-import com.agenciahub.api.application.usecases.agency.updateagency.UpdateAgencyCommand;
-import com.agenciahub.api.application.usecases.agency.updateagency.UpdateAgencyUseCase;
+import com.agenciahub.api.application.usecases.agency.retrieve.GetAgencyUseCase;
+import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyCommand;
+import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyUseCase;
 import com.agenciahub.api.application.controller.doc.AgencyAPI;
-import com.agenciahub.api.dto.agency.AgencyResponse;
-import com.agenciahub.api.dto.agency.UpdateAgencyRequest;
+import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
+import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyRequestDTO;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
@@ -24,13 +24,13 @@ public class AgencyController implements AgencyAPI {
     private final UpdateAgencyUseCase updateAgencyUseCase;
 
     @Override
-    public AgencyResponse getAgency() {
+    public AgencySummaryResponseDTO getAgency() {
         UUID agencyId = TenantContext.requireAgencyId();
         return getAgencyUseCase.execute(agencyId);
     }
 
     @Override
-    public AgencyResponse updateAgency(UpdateAgencyRequest request) {
+    public AgencySummaryResponseDTO updateAgency(UpdateAgencyRequestDTO request) {
         User currentUser = SecurityContextUsers.requireUser();
         return updateAgencyUseCase.execute(new UpdateAgencyCommand(request, currentUser));
     }

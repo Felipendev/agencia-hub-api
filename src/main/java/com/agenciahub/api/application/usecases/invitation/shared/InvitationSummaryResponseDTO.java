@@ -1,11 +1,11 @@
-package com.agenciahub.api.dto.invitation;
+package com.agenciahub.api.application.usecases.invitation.shared;
 
 import com.agenciahub.api.domain.InvitationStatus;
 
 import java.time.Instant;
 import java.util.UUID;
 
-public record InvitationResponse(
+public record InvitationSummaryResponseDTO(
         UUID id,
         String email,
         String token,

@@ -1,4 +1,4 @@
-package com.agenciahub.api.dto.agency;
+package com.agenciahub.api.application.usecases.agency.shared;
 
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.time.Instant;
 import java.util.UUID;
 
-public record AgencyResponse(
+public record AgencySummaryResponseDTO(
         UUID id,
         String name,
         String phone,

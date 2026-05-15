@@ -1,4 +1,4 @@
-package com.agenciahub.api.application.usecases.invitation.revokeinvitation;
+package com.agenciahub.api.application.usecases.invitation.revoke;
 
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.entity.Invitation;
