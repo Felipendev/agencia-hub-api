@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.auth.validatetoken;
 
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationTokenPolicy;
-import com.agenciahub.api.dto.auth.InviteValidationResponse;
+import com.agenciahub.api.application.usecases.auth.validatetoken.InviteValidationResponseDTO;
 import com.agenciahub.api.entity.Invitation;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.InvitationRepository;
@@ -15,11 +15,11 @@ public class ValidateInviteToken implements ValidateInviteTokenUseCase {
     private final InvitationRepository invitationRepository;
 
     @Override
-    public InviteValidationResponse execute(String token) {
+    public InviteValidationResponseDTO execute(String token) {
         Invitation invitation = invitationRepository
                 .findWithAgencyByToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + token));
         InvitationTokenPolicy.ensureUsable(invitation);
-        return new InviteValidationResponse(invitation.getEmail(), invitation.getAgency().getName());
+        return new InviteValidationResponseDTO(invitation.getEmail(), invitation.getAgency().getName());
     }
 }

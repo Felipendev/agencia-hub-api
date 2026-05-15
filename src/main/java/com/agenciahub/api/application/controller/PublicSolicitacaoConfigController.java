@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.getpublicsolicitacaoconfigbyslug.GetPublicSolicitacaoConfigBySlugUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.pub.retrieve.byslug.GetPublicSolicitacaoConfigBySlugUseCase;
 import com.agenciahub.api.application.controller.doc.PublicSolicitacaoConfigAPI;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,7 +13,7 @@ public class PublicSolicitacaoConfigController implements PublicSolicitacaoConfi
     private final GetPublicSolicitacaoConfigBySlugUseCase getPublicSolicitacaoConfigBySlugUseCase;
 
     @Override
-    public SolicitacaoConfigResponse getBySlug(String slug) {
+    public SolicitacaoConfigSummaryResponseDTO getBySlug(String slug) {
         return getPublicSolicitacaoConfigBySlugUseCase.execute(slug);
     }
 }

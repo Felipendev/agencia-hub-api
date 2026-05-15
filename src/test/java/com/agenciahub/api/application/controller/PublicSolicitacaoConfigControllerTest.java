@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.getpublicsolicitacaoconfigbyslug.GetPublicSolicitacaoConfigBySlugUseCase;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
+import com.agenciahub.api.application.usecases.solicitacao.pub.retrieve.byslug.GetPublicSolicitacaoConfigBySlugUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.support.WebMvcControllerTestImports;
@@ -51,7 +51,7 @@ class PublicSolicitacaoConfigControllerTest {
     void getBySlug_returnsConfig() throws Exception {
         var links = objectMapper.createArrayNode();
         when(getPublicSolicitacaoConfigBySlugUseCase.execute("demo"))
-                .thenReturn(new SolicitacaoConfigResponse(
+                .thenReturn(new SolicitacaoConfigSummaryResponseDTO(
                         "demo", "Título", "Intro", null, "Marca", links));
 
         mockMvc.perform(get("/public/solicitacao-config/demo"))

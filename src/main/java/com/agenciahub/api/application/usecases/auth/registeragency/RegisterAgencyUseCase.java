@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.usecases.auth.registeragency;
 
 import com.agenciahub.api.application.UseCase;
-import com.agenciahub.api.dto.auth.RegisterAgencyRequest;
-import com.agenciahub.api.dto.auth.RegisterAgencyResponse;
+import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyRequestDTO;
+import com.agenciahub.api.application.usecases.auth.shared.RegisterAgencyResultDTO;
 
-public interface RegisterAgencyUseCase extends UseCase<RegisterAgencyRequest, RegisterAgencyResponse> {
+public interface RegisterAgencyUseCase extends UseCase<RegisterAgencyRequestDTO, RegisterAgencyResultDTO> {
 }

@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.dto.solicitacao.SolicitacaoSubmissionResponse;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +23,7 @@ public interface SolicitacaoSubmissionAgencyAPI {
 
     @GetMapping
     @Operation(summary = "Lista submissões", description = "Ordenação: mais recentes primeiro. Requer papel **OWNER**.")
-    List<SolicitacaoSubmissionResponse> list();
+    List<SolicitacaoSubmissionSummaryResponseDTO> list();
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

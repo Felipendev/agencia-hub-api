@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.submitpublicsolicitacao.SubmitPublicSolicitacaoUseCase;
-import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
-import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.SubmitPublicSolicitacaoUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitRequestDTO;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.support.WebMvcControllerTestImports;
@@ -50,8 +50,8 @@ class PublicSolicitacaoSubmitControllerTest {
     @Test
     void submit_returns201() throws Exception {
         UUID id = UUID.randomUUID();
-        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequest.class)))
-                .thenReturn(new PublicSolicitacaoSubmitResponse(true, id));
+        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequestDTO.class)))
+                .thenReturn(new PublicSolicitacaoSubmitResponseDTO(true, id));
 
         mockMvc.perform(post("/public/solicitacao/submit")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -73,8 +73,8 @@ class PublicSolicitacaoSubmitControllerTest {
     @Test
     void submit_withSellerPublicCode_returns201() throws Exception {
         UUID id = UUID.randomUUID();
-        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequest.class)))
-                .thenReturn(new PublicSolicitacaoSubmitResponse(true, id));
+        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequestDTO.class)))
+                .thenReturn(new PublicSolicitacaoSubmitResponseDTO(true, id));
 
         mockMvc.perform(post("/public/solicitacao/submit")
                         .contentType(MediaType.APPLICATION_JSON)

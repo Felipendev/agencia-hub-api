@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.controller.doc;
 
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.dto.quotation.CreateQuotationRequest;
-import com.agenciahub.api.dto.quotation.QuotationResponse;
-import com.agenciahub.api.dto.quotation.UpdateQuotationRequest;
+import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationRequestDTO;
+import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
+import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationRequestDTO;
 import com.agenciahub.api.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,7 +42,7 @@ public interface QuotationAPI {
             description = """
                     - **OWNER**: vê todas as cotações da agência (filtros aplicam-se normalmente).
                     - **SELLER**: resultados restritos às cotações em que ele é o vendedor (`seller`), independentemente dos filtros de texto.""")
-    List<QuotationResponse> list(
+    List<QuotationSummaryResponseDTO> list(
             @RequestParam(required = false) UUID customerId,
             @RequestParam(required = false) QuotationStatus status,
             @RequestParam(required = false) String search,
@@ -54,7 +54,7 @@ public interface QuotationAPI {
             @ApiResponse(responseCode = "200", description = "cotação encontrada"),
             @ApiResponse(responseCode = "404", description = "cotação inexistente")
     })
-    QuotationResponse get(@Parameter(description = "id da cotação") @PathVariable UUID id);
+    QuotationSummaryResponseDTO get(@Parameter(description = "id da cotação") @PathVariable UUID id);
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -64,15 +64,15 @@ public interface QuotationAPI {
                     Se o chamador for **SELLER** e o corpo **não** enviar `sellerId`, o sistema atribui automaticamente o vendedor ao usuário autenticado.
 
                     Demais validações de agência, cliente e submissão pública permanecem no caso de uso / serviço de aplicação.""")
-    QuotationResponse create(
-            @Valid @RequestBody CreateQuotationRequest request,
+    QuotationSummaryResponseDTO create(
+            @Valid @RequestBody CreateQuotationRequestDTO request,
             @AuthenticationPrincipal User caller);
 
     @PatchMapping("/{id}")
     @Operation(summary = "Atualiza parcialmente uma cotação")
-    QuotationResponse patch(
+    QuotationSummaryResponseDTO patch(
             @Parameter(description = "id da cotação") @PathVariable UUID id,
-            @RequestBody UpdateQuotationRequest request);
+            @RequestBody UpdateQuotationRequestDTO request);
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

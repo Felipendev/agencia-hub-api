@@ -2,13 +2,13 @@ package com.agenciahub.api.application.controller;
 
 import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.BuildSellerDashboardUseCase;
 import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.dto.seller.SellerDashboardResponse;
-import com.agenciahub.api.dto.user.UserResponse;
+import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.SellerDashboardResponseDTO;
+import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
-import com.agenciahub.api.application.usecases.user.getuserentitybyid.GetUserEntityByIdUseCase;
+import com.agenciahub.api.application.usecases.user.retrieve.entity.GetUserEntityByIdUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -86,7 +86,7 @@ class SellerDashboardControllerWebMvcTest {
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_SELLER"))));
 
-        var sellerResp = new UserResponse(
+        var sellerResp = new UserSummaryResponseDTO(
                 seller.getId(),
                 seller.getName(),
                 seller.getEmail(),
@@ -97,7 +97,7 @@ class SellerDashboardControllerWebMvcTest {
                 Instant.parse("2026-01-01T00:00:00Z"),
                 true);
         when(buildSellerDashboardUseCase.execute(any(User.class)))
-                .thenReturn(new SellerDashboardResponse(
+                .thenReturn(new SellerDashboardResponseDTO(
                         sellerResp,
                         2L,
                         1L,
@@ -146,7 +146,7 @@ class SellerDashboardControllerWebMvcTest {
 
         when(getUserEntityByIdUseCase.execute(sellerId)).thenReturn(seller);
 
-        var sellerResp = new UserResponse(
+        var sellerResp = new UserSummaryResponseDTO(
                 sellerId,
                 "Outro",
                 "other@test.com",
@@ -157,7 +157,7 @@ class SellerDashboardControllerWebMvcTest {
                 Instant.parse("2026-01-01T00:00:00Z"),
                 true);
         when(buildSellerDashboardUseCase.execute(eq(seller)))
-                .thenReturn(new SellerDashboardResponse(
+                .thenReturn(new SellerDashboardResponseDTO(
                         sellerResp,
                         0L,
                         0L,

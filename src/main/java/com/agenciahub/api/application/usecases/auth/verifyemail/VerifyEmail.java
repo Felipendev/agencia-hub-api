@@ -2,15 +2,15 @@ package com.agenciahub.api.application.usecases.auth.verifyemail;
 
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.dto.auth.VerifyEmailRequest;
-import com.agenciahub.api.dto.auth.VerifyEmailResponse;
+import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailRequestDTO;
+import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailResponseDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyRepository;
 import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.security.JwtService;
-import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
+import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class VerifyEmail implements VerifyEmailUseCase {
 
     @Override
     @Transactional
-    public VerifyEmailResponse execute(VerifyEmailRequest request) {
+    public VerifyEmailResponseDTO execute(VerifyEmailRequestDTO request) {
         String email = request.email().trim().toLowerCase();
 
         boolean valid =
@@ -60,7 +60,7 @@ public class VerifyEmail implements VerifyEmailUseCase {
                 agency.getId(),
                 user.getPasswordChangedAt());
 
-        return new VerifyEmailResponse(
+        return new VerifyEmailResponseDTO(
                 token,
                 user.getId(),
                 user.getName(),

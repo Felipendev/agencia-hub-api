@@ -60,6 +60,76 @@ FEATURES = {
             "InvitationTokenPolicy",
         ],
     },
+    "quotation": {
+        "folders": {
+            "createquotation": "create",
+            "getquotationbyid": "retrieve/byid",
+            "listquotations": "retrieve/list",
+            "updatequotation": "update",
+            "deletequotation": "delete",
+        },
+        "dto": {
+            "QuotationResponse": ("shared", "QuotationSummaryResponseDTO"),
+            "CreateQuotationRequest": ("create", "CreateQuotationRequestDTO"),
+            "UpdateQuotationRequest": ("update", "UpdateQuotationRequestDTO"),
+        },
+        "root_components": ["QuotationResponseMapper", "QuotationSupport"],
+    },
+    "user": {
+        "folders": {
+            "createuser": "create",
+            "getuserbyid": "retrieve/byid",
+            "listusers": "retrieve/list",
+            "listactivesellers": "retrieve/listactive",
+            "updateuser": "update",
+            "getuserentitybyid": "retrieve/entity",
+        },
+        "dto": {
+            "UserResponse": ("shared", "UserSummaryResponseDTO"),
+            "CreateUserRequest": ("create", "CreateUserRequestDTO"),
+            "UpdateUserRequest": ("update", "UpdateUserRequestDTO"),
+        },
+        "root_components": ["UserResponseMapper", "PublicLinkCodeSupport"],
+    },
+    "solicitacao": {
+        "folders": {
+            "getorcreatesolicitacaoconfigforagency": "config/retrieve",
+            "upsertsolicitacaoconfigforagency": "config/upsert",
+            "getpublicsolicitacaoconfigbyslug": "pub/retrieve/byslug",
+            "listsolicitacaosubmissionsforagency": "submission/retrieve/list",
+            "submitpublicsolicitacao": "pub/submit",
+            "deletesolicitacaosubmissionforagency": "submission/delete",
+        },
+        "dto": {
+            "SolicitacaoConfigResponse": ("shared", "SolicitacaoConfigSummaryResponseDTO"),
+            "SolicitacaoConfigRequest": ("config.upsert", "SolicitacaoConfigRequestDTO"),
+            "SolicitacaoSubmissionResponse": ("shared", "SolicitacaoSubmissionSummaryResponseDTO"),
+            "PublicSolicitacaoSubmitRequest": ("pub.submit", "PublicSolicitacaoSubmitRequestDTO"),
+            "PublicSolicitacaoSubmitResponse": ("pub.submit", "PublicSolicitacaoSubmitResponseDTO"),
+        },
+        "root_components": [
+            "SolicitacaoConfigSupport",
+            "SolicitacaoSubmissionResponseMapper",
+        ],
+    },
+    "auth": {
+        "folders": {},
+        "dto": {
+            "LoginRequest": ("login", "LoginRequestDTO"),
+            "LoginResponse": ("login", "LoginResponseDTO"),
+            "RegisterAgencyRequest": ("registeragency", "RegisterAgencyRequestDTO"),
+            "RegisterAgencyResponse": ("shared", "RegisterAgencyResultDTO"),
+            "RegisterViaInviteRequest": ("registerviainvite", "RegisterViaInviteRequestDTO"),
+            "VerifyEmailRequest": ("verifyemail", "VerifyEmailRequestDTO"),
+            "VerifyEmailResponse": ("verifyemail", "VerifyEmailResponseDTO"),
+            "ResendCodeRequest": ("resendcode", "ResendCodeRequestDTO"),
+            "ForgotPasswordRequest": ("forgotpassword", "ForgotPasswordRequestDTO"),
+            "ResetPasswordRequest": ("resetpassword", "ResetPasswordRequestDTO"),
+            "ChangePasswordRequest": ("changepassword", "ChangePasswordRequestDTO"),
+            "InviteValidationResponse": ("validatetoken", "InviteValidationResponseDTO"),
+        },
+        "root_components": ["AuthBetaWhitelist"],
+    },
 }
 
 
@@ -169,9 +239,6 @@ def migrate_feature(feature: str) -> None:
                 pkg(feature, new_rel.replace("/", ".")),
             )
         )
-    replacements.append(
-        (f"com.agenciahub.api.application.usecases.{feature}.", f"com.agenciahub.api.application.usecases.{feature}.")
-    )
     # fix mapper import from feature root to shared
     replacements.append(
         (
@@ -209,6 +276,21 @@ def migrate_feature(feature: str) -> None:
             f"{pkg(feature, 'shared')}.TermsConstants",
         )
     )
+    for comp in (
+        "QuotationResponseMapper",
+        "QuotationSupport",
+        "UserResponseMapper",
+        "PublicLinkCodeSupport",
+        "SolicitacaoConfigSupport",
+        "SolicitacaoSubmissionResponseMapper",
+        "AuthBetaWhitelist",
+    ):
+        replacements.append(
+            (
+                f"com.agenciahub.api.application.usecases.{feature}.{comp}",
+                f"{pkg(feature, 'shared')}.{comp}",
+            )
+        )
 
     for path in (ROOT / "src").rglob("*.java"):
         text = path.read_text(encoding="utf-8")

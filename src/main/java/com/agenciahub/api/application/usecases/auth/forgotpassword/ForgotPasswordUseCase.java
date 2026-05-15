@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.usecases.auth.forgotpassword;
 
 import com.agenciahub.api.application.UseCase;
-import com.agenciahub.api.dto.auth.ForgotPasswordRequest;
+import com.agenciahub.api.application.usecases.auth.forgotpassword.ForgotPasswordRequestDTO;
 
 import java.util.Map;
 
-public interface ForgotPasswordUseCase extends UseCase<ForgotPasswordRequest, Map<String, String>> {
+public interface ForgotPasswordUseCase extends UseCase<ForgotPasswordRequestDTO, Map<String, String>> {
 }

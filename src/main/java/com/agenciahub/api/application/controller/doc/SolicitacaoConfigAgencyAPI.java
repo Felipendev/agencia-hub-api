@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigRequest;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
+import com.agenciahub.api.application.usecases.solicitacao.config.upsert.SolicitacaoConfigRequestDTO;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,9 +21,9 @@ public interface SolicitacaoConfigAgencyAPI {
     @Operation(
             summary = "Obtém ou cria configuração",
             description = "Retorna a configuração da agência; se não existir, cria padrão e persiste.")
-    SolicitacaoConfigResponse get();
+    SolicitacaoConfigSummaryResponseDTO get();
 
     @PutMapping
     @Operation(summary = "Atualiza configuração", description = "Upsert completo dos campos editáveis (inclui slug).")
-    SolicitacaoConfigResponse upsert(@Valid @RequestBody SolicitacaoConfigRequest request);
+    SolicitacaoConfigSummaryResponseDTO upsert(@Valid @RequestBody SolicitacaoConfigRequestDTO request);
 }

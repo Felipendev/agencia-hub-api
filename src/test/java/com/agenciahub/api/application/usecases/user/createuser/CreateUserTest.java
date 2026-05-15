@@ -1,7 +1,7 @@
-package com.agenciahub.api.application.usecases.user.createuser;
+package com.agenciahub.api.application.usecases.user.create;
 
 import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.dto.user.CreateUserRequest;
+import com.agenciahub.api.application.usecases.user.create.CreateUserRequestDTO;
 import com.agenciahub.api.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,17 +23,17 @@ class CreateUserTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport publicLinkCodeSupport;
+    private com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport publicLinkCodeSupport;
 
     @Mock
-    private com.agenciahub.api.application.usecases.user.UserResponseMapper userResponseMapper;
+    private com.agenciahub.api.application.usecases.user.shared.UserResponseMapper userResponseMapper;
 
     @InjectMocks
     private CreateUser createUser;
 
     @Test
     void execute_whenRoleSeller_rejectsInviteOnlyFlow() {
-        var request = new CreateUserRequest(
+        var request = new CreateUserRequestDTO(
                 "Vendedor",
                 "vendedor@test.com",
                 "password1",

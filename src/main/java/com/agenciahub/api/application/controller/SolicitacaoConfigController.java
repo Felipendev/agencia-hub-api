@@ -1,11 +1,11 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.getorcreatesolicitacaoconfigforagency.GetOrCreateSolicitacaoConfigForAgencyUseCase;
-import com.agenciahub.api.application.usecases.solicitacao.upsertsolicitacaoconfigforagency.UpsertSolicitacaoConfigCommand;
-import com.agenciahub.api.application.usecases.solicitacao.upsertsolicitacaoconfigforagency.UpsertSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.config.retrieve.GetOrCreateSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.config.upsert.UpsertSolicitacaoConfigCommand;
+import com.agenciahub.api.application.usecases.solicitacao.config.upsert.UpsertSolicitacaoConfigForAgencyUseCase;
 import com.agenciahub.api.application.controller.doc.SolicitacaoConfigAgencyAPI;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigRequest;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
+import com.agenciahub.api.application.usecases.solicitacao.config.upsert.SolicitacaoConfigRequestDTO;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +22,13 @@ public class SolicitacaoConfigController implements SolicitacaoConfigAgencyAPI {
     private final UpsertSolicitacaoConfigForAgencyUseCase upsertSolicitacaoConfigForAgencyUseCase;
 
     @Override
-    public SolicitacaoConfigResponse get() {
+    public SolicitacaoConfigSummaryResponseDTO get() {
         UUID agencyId = TenantContext.requireAgencyId();
         return getOrCreateSolicitacaoConfigForAgencyUseCase.execute(agencyId);
     }
 
     @Override
-    public SolicitacaoConfigResponse upsert(SolicitacaoConfigRequest request) {
+    public SolicitacaoConfigSummaryResponseDTO upsert(SolicitacaoConfigRequestDTO request) {
         UUID agencyId = TenantContext.requireAgencyId();
         return upsertSolicitacaoConfigForAgencyUseCase.execute(
                 new UpsertSolicitacaoConfigCommand(agencyId, request));

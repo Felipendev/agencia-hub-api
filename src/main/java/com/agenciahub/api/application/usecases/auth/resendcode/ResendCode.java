@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.auth.resendcode;
 
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.dto.auth.ResendCodeRequest;
+import com.agenciahub.api.application.usecases.auth.resendcode.ResendCodeRequestDTO;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
@@ -19,7 +19,7 @@ public class ResendCode implements ResendCodeUseCase {
     private final VerificationCodePort verificationCodePort;
 
     @Override
-    public Map<String, String> execute(ResendCodeRequest request) {
+    public Map<String, String> execute(ResendCodeRequestDTO request) {
         String email = request.email().trim().toLowerCase();
 
         User user = userRepository

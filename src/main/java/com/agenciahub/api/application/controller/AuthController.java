@@ -11,18 +11,18 @@ import com.agenciahub.api.application.usecases.auth.resetpassword.ResetPasswordU
 import com.agenciahub.api.application.usecases.auth.validatetoken.ValidateInviteTokenUseCase;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailUseCase;
 import com.agenciahub.api.application.controller.doc.AuthAPI;
-import com.agenciahub.api.dto.auth.ChangePasswordRequest;
-import com.agenciahub.api.dto.auth.ForgotPasswordRequest;
-import com.agenciahub.api.dto.auth.InviteValidationResponse;
-import com.agenciahub.api.dto.auth.LoginRequest;
-import com.agenciahub.api.dto.auth.LoginResponse;
-import com.agenciahub.api.dto.auth.RegisterAgencyRequest;
-import com.agenciahub.api.dto.auth.RegisterAgencyResponse;
-import com.agenciahub.api.dto.auth.RegisterViaInviteRequest;
-import com.agenciahub.api.dto.auth.ResendCodeRequest;
-import com.agenciahub.api.dto.auth.ResetPasswordRequest;
-import com.agenciahub.api.dto.auth.VerifyEmailRequest;
-import com.agenciahub.api.dto.auth.VerifyEmailResponse;
+import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswordRequestDTO;
+import com.agenciahub.api.application.usecases.auth.forgotpassword.ForgotPasswordRequestDTO;
+import com.agenciahub.api.application.usecases.auth.validatetoken.InviteValidationResponseDTO;
+import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
+import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
+import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyRequestDTO;
+import com.agenciahub.api.application.usecases.auth.shared.RegisterAgencyResultDTO;
+import com.agenciahub.api.application.usecases.auth.registerviainvite.RegisterViaInviteRequestDTO;
+import com.agenciahub.api.application.usecases.auth.resendcode.ResendCodeRequestDTO;
+import com.agenciahub.api.application.usecases.auth.resetpassword.ResetPasswordRequestDTO;
+import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailRequestDTO;
+import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailResponseDTO;
 import com.agenciahub.api.security.SecurityContextUsers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,48 +45,48 @@ public class AuthController implements AuthAPI {
     private final RegisterViaInviteUseCase registerViaInviteUseCase;
 
     @Override
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponseDTO login(LoginRequestDTO request) {
         return loginUseCase.execute(request);
     }
 
     @Override
-    public RegisterAgencyResponse register(RegisterAgencyRequest request) {
+    public RegisterAgencyResultDTO register(RegisterAgencyRequestDTO request) {
         return registerAgencyUseCase.execute(request);
     }
 
     @Override
-    public VerifyEmailResponse verifyEmail(VerifyEmailRequest request) {
+    public VerifyEmailResponseDTO verifyEmail(VerifyEmailRequestDTO request) {
         return verifyEmailUseCase.execute(request);
     }
 
     @Override
-    public Map<String, String> resendCode(ResendCodeRequest request) {
+    public Map<String, String> resendCode(ResendCodeRequestDTO request) {
         return resendCodeUseCase.execute(request);
     }
 
     @Override
-    public Map<String, String> forgotPassword(ForgotPasswordRequest request) {
+    public Map<String, String> forgotPassword(ForgotPasswordRequestDTO request) {
         return forgotPasswordUseCase.execute(request);
     }
 
     @Override
-    public Map<String, String> resetPassword(ResetPasswordRequest request) {
+    public Map<String, String> resetPassword(ResetPasswordRequestDTO request) {
         return resetPasswordUseCase.execute(request);
     }
 
     @Override
-    public Map<String, String> changePassword(ChangePasswordRequest request) {
+    public Map<String, String> changePassword(ChangePasswordRequestDTO request) {
         UUID currentUserId = SecurityContextUsers.requireUserId();
         return changePasswordUseCase.execute(new ChangePasswordCommand(currentUserId, request));
     }
 
     @Override
-    public InviteValidationResponse validateInvite(String token) {
+    public InviteValidationResponseDTO validateInvite(String token) {
         return validateInviteTokenUseCase.execute(token);
     }
 
     @Override
-    public RegisterAgencyResponse registerViaInvite(RegisterViaInviteRequest request) {
+    public RegisterAgencyResultDTO registerViaInvite(RegisterViaInviteRequestDTO request) {
         return registerViaInviteUseCase.execute(request);
     }
 }

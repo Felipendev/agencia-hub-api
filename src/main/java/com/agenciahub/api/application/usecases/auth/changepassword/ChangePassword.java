@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.usecases.auth.changepassword;
 
-import com.agenciahub.api.dto.auth.ChangePasswordRequest;
+import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswordRequestDTO;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
@@ -21,7 +21,7 @@ public class ChangePassword implements ChangePasswordUseCase {
 
     @Override
     public Map<String, String> execute(ChangePasswordCommand command) {
-        ChangePasswordRequest request = command.request();
+        ChangePasswordRequestDTO request = command.request();
         UUID currentUserId = command.userId();
 
         User user = userRepository

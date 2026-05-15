@@ -4,14 +4,14 @@ import com.agenciahub.api.application.usecases.invitation.shared.InvitationToken
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.dto.auth.RegisterAgencyResponse;
-import com.agenciahub.api.dto.auth.RegisterViaInviteRequest;
+import com.agenciahub.api.application.usecases.auth.shared.RegisterAgencyResultDTO;
+import com.agenciahub.api.application.usecases.auth.registerviainvite.RegisterViaInviteRequestDTO;
 import com.agenciahub.api.entity.Invitation;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.InvitationRepository;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
+import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import com.agenciahub.api.validation.PhoneValidator;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class RegisterViaInvite implements RegisterViaInviteUseCase {
 
     @Override
     @Transactional
-    public RegisterAgencyResponse execute(RegisterViaInviteRequest request) {
+    public RegisterAgencyResultDTO execute(RegisterViaInviteRequestDTO request) {
         Invitation invitation = invitationRepository
                 .findWithAgencyByToken(request.token())
                 .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + request.token()));
@@ -80,7 +80,7 @@ public class RegisterViaInvite implements RegisterViaInviteUseCase {
         invitation.setAcceptedAt(Instant.now());
         invitationRepository.save(invitation);
 
-        return new RegisterAgencyResponse(
+        return new RegisterAgencyResultDTO(
                 invitation.getAgency().getId(),
                 user.getId(),
                 "código de verificação enviado para " + email);

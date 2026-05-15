@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.dto.user.CreateUserRequest;
-import com.agenciahub.api.dto.user.UpdateUserRequest;
-import com.agenciahub.api.dto.user.UserResponse;
+import com.agenciahub.api.application.usecases.user.create.CreateUserRequestDTO;
+import com.agenciahub.api.application.usecases.user.update.UpdateUserRequestDTO;
+import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,24 +28,24 @@ public interface UserAPI {
 
     @GetMapping
     @Operation(summary = "Lista usuários", description = "Ordenação alfabética por nome.")
-    List<UserResponse> list();
+    List<UserSummaryResponseDTO> list();
 
     @GetMapping("/sellers")
     @Operation(summary = "Lista vendedores ativos", description = "Usado em combos de atribuição de cotação.")
-    List<UserResponse> sellers();
+    List<UserSummaryResponseDTO> sellers();
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtém usuário por id")
-    UserResponse get(@Parameter(description = "id do usuário") @PathVariable UUID id);
+    UserSummaryResponseDTO get(@Parameter(description = "id do usuário") @PathVariable UUID id);
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cria usuário", description = "Owner ou vendedor conforme corpo da requisição.")
-    UserResponse create(@Valid @RequestBody CreateUserRequest request);
+    UserSummaryResponseDTO create(@Valid @RequestBody CreateUserRequestDTO request);
 
     @PatchMapping("/{id}")
     @Operation(summary = "Atualiza usuário", description = "Nome, senha, ativo, comissão percentual ou fixa.")
-    UserResponse patch(
+    UserSummaryResponseDTO patch(
             @Parameter(description = "id do usuário") @PathVariable UUID id,
-            @RequestBody UpdateUserRequest request);
+            @RequestBody UpdateUserRequestDTO request);
 }

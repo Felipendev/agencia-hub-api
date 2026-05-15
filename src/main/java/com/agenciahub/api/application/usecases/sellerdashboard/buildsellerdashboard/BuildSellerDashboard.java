@@ -1,11 +1,11 @@
 package com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard;
 
-import com.agenciahub.api.application.usecases.quotation.listquotations.ListQuotationsQuery;
-import com.agenciahub.api.application.usecases.quotation.listquotations.ListQuotationsUseCase;
-import com.agenciahub.api.application.usecases.user.UserResponseMapper;
+import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsQuery;
+import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsUseCase;
+import com.agenciahub.api.application.usecases.user.shared.UserResponseMapper;
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.dto.quotation.QuotationResponse;
-import com.agenciahub.api.dto.seller.SellerDashboardResponse;
+import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
+import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.SellerDashboardResponseDTO;
 import com.agenciahub.api.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,12 +23,12 @@ public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
     private final UserResponseMapper userResponseMapper;
 
     @Override
-    public SellerDashboardResponse execute(User sellerEntity) {
+    public SellerDashboardResponseDTO execute(User sellerEntity) {
         UUID sellerId = sellerEntity.getId();
-        List<QuotationResponse> all =
+        List<QuotationSummaryResponseDTO> all =
                 listQuotationsUseCase.execute(new ListQuotationsQuery(null, null, null, sellerEntity));
 
-        List<QuotationResponse> recent = all.stream()
+        List<QuotationSummaryResponseDTO> recent = all.stream()
                 .sorted((a, b) -> b.updatedAt().compareTo(a.updatedAt()))
                 .limit(10)
                 .toList();
@@ -43,7 +43,7 @@ public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
         BigDecimal pending =
                 calculateCommission(sellerEntity, all.stream().filter(q -> isOpen(q.status())).toList());
 
-        return new SellerDashboardResponse(
+        return new SellerDashboardResponseDTO(
                 userResponseMapper.toResponse(sellerEntity),
                 all.size(),
                 open,
@@ -59,14 +59,14 @@ public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
                 || status == QuotationStatus.AWAITING_CLIENT;
     }
 
-    private BigDecimal calculateCommission(User seller, List<QuotationResponse> quotations) {
+    private BigDecimal calculateCommission(User seller, List<QuotationSummaryResponseDTO> quotations) {
         if (quotations.isEmpty()) {
             return BigDecimal.ZERO;
         }
 
         if (seller.getCommissionPct() != null) {
             BigDecimal total = quotations.stream()
-                    .map(QuotationResponse::totalAmount)
+                    .map(QuotationSummaryResponseDTO::totalAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             return total.multiply(seller.getCommissionPct()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         }

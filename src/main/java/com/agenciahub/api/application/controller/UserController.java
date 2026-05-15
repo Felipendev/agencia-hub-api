@@ -1,15 +1,15 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.user.createuser.CreateUserUseCase;
-import com.agenciahub.api.application.usecases.user.getuserbyid.GetUserByIdUseCase;
-import com.agenciahub.api.application.usecases.user.listactivesellers.ListActiveSellersUseCase;
-import com.agenciahub.api.application.usecases.user.listusers.ListUsersUseCase;
-import com.agenciahub.api.application.usecases.user.updateuser.UpdateUserCommand;
-import com.agenciahub.api.application.usecases.user.updateuser.UpdateUserUseCase;
+import com.agenciahub.api.application.usecases.user.create.CreateUserUseCase;
+import com.agenciahub.api.application.usecases.user.retrieve.byid.GetUserByIdUseCase;
+import com.agenciahub.api.application.usecases.user.retrieve.listactive.ListActiveSellersUseCase;
+import com.agenciahub.api.application.usecases.user.retrieve.list.ListUsersUseCase;
+import com.agenciahub.api.application.usecases.user.update.UpdateUserCommand;
+import com.agenciahub.api.application.usecases.user.update.UpdateUserUseCase;
 import com.agenciahub.api.application.controller.doc.UserAPI;
-import com.agenciahub.api.dto.user.CreateUserRequest;
-import com.agenciahub.api.dto.user.UpdateUserRequest;
-import com.agenciahub.api.dto.user.UserResponse;
+import com.agenciahub.api.application.usecases.user.create.CreateUserRequestDTO;
+import com.agenciahub.api.application.usecases.user.update.UpdateUserRequestDTO;
+import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,27 +27,27 @@ public class UserController implements UserAPI {
     private final UpdateUserUseCase updateUserUseCase;
 
     @Override
-    public List<UserResponse> list() {
+    public List<UserSummaryResponseDTO> list() {
         return listUsersUseCase.execute(null);
     }
 
     @Override
-    public List<UserResponse> sellers() {
+    public List<UserSummaryResponseDTO> sellers() {
         return listActiveSellersUseCase.execute(null);
     }
 
     @Override
-    public UserResponse get(UUID id) {
+    public UserSummaryResponseDTO get(UUID id) {
         return getUserByIdUseCase.execute(id);
     }
 
     @Override
-    public UserResponse create(CreateUserRequest request) {
+    public UserSummaryResponseDTO create(CreateUserRequestDTO request) {
         return createUserUseCase.execute(request);
     }
 
     @Override
-    public UserResponse patch(UUID id, UpdateUserRequest request) {
+    public UserSummaryResponseDTO patch(UUID id, UpdateUserRequestDTO request) {
         return updateUserUseCase.execute(new UpdateUserCommand(id, request));
     }
 }

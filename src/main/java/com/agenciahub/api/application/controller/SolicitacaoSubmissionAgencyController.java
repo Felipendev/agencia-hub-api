@@ -1,10 +1,10 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.deletesolicitacaosubmissionforagency.DeleteSolicitacaoSubmissionCommand;
-import com.agenciahub.api.application.usecases.solicitacao.deletesolicitacaosubmissionforagency.DeleteSolicitacaoSubmissionForAgencyUseCase;
-import com.agenciahub.api.application.usecases.solicitacao.listsolicitacaosubmissionsforagency.ListSolicitacaoSubmissionsForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.submission.delete.DeleteSolicitacaoSubmissionCommand;
+import com.agenciahub.api.application.usecases.solicitacao.submission.delete.DeleteSolicitacaoSubmissionForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.list.ListSolicitacaoSubmissionsForAgencyUseCase;
 import com.agenciahub.api.application.controller.doc.SolicitacaoSubmissionAgencyAPI;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoSubmissionResponse;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +22,7 @@ public class SolicitacaoSubmissionAgencyController implements SolicitacaoSubmiss
     private final DeleteSolicitacaoSubmissionForAgencyUseCase deleteSolicitacaoSubmissionForAgencyUseCase;
 
     @Override
-    public List<SolicitacaoSubmissionResponse> list() {
+    public List<SolicitacaoSubmissionSummaryResponseDTO> list() {
         UUID agencyId = TenantContext.requireAgencyId();
         return listSolicitacaoSubmissionsForAgencyUseCase.execute(agencyId);
     }

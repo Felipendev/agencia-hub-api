@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.getorcreatesolicitacaoconfigforagency.GetOrCreateSolicitacaoConfigForAgencyUseCase;
-import com.agenciahub.api.application.usecases.solicitacao.upsertsolicitacaoconfigforagency.UpsertSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.config.retrieve.GetOrCreateSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.config.upsert.UpsertSolicitacaoConfigForAgencyUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.security.TenantContext;
@@ -74,7 +74,7 @@ class SolicitacaoConfigControllerWebMvcTest {
     void get_returnsConfig() throws Exception {
         var links = objectMapper.createArrayNode();
         when(getOrCreateSolicitacaoConfigForAgencyUseCase.execute(eq(agencyId)))
-                .thenReturn(new SolicitacaoConfigResponse(
+                .thenReturn(new SolicitacaoConfigSummaryResponseDTO(
                         "slug", "Título", "Intro", null, "Marca", links));
 
         mockMvc.perform(get("/agency/solicitacao-config"))

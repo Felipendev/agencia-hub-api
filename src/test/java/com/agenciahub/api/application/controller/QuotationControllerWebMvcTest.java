@@ -1,15 +1,15 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.quotation.createquotation.CreateQuotationCommand;
-import com.agenciahub.api.application.usecases.quotation.createquotation.CreateQuotationUseCase;
-import com.agenciahub.api.application.usecases.quotation.getquotationbyid.GetQuotationByIdUseCase;
-import com.agenciahub.api.application.usecases.quotation.listquotations.ListQuotationsQuery;
-import com.agenciahub.api.application.usecases.quotation.listquotations.ListQuotationsUseCase;
-import com.agenciahub.api.application.usecases.quotation.deletequotation.DeleteQuotationUseCase;
-import com.agenciahub.api.application.usecases.quotation.updatequotation.UpdateQuotationUseCase;
+import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationCommand;
+import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationUseCase;
+import com.agenciahub.api.application.usecases.quotation.retrieve.byid.GetQuotationByIdUseCase;
+import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsQuery;
+import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsUseCase;
+import com.agenciahub.api.application.usecases.quotation.delete.DeleteQuotationUseCase;
+import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationUseCase;
 import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.dto.quotation.QuotationResponse;
+import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
@@ -87,7 +87,7 @@ class QuotationControllerWebMvcTest {
                 .thenAnswer(inv -> {
                     ListQuotationsQuery q = inv.getArgument(0);
                     assertNull(q.caller());
-                    return List.<QuotationResponse>of();
+                    return List.<QuotationSummaryResponseDTO>of();
                 });
 
         mockMvc.perform(get("/quotations"))
@@ -111,7 +111,7 @@ class QuotationControllerWebMvcTest {
         UUID cid = UUID.randomUUID();
         UUID qid = UUID.randomUUID();
         var emptyDetails = objectMapper.createObjectNode();
-        var resp = new QuotationResponse(
+        var resp = new QuotationSummaryResponseDTO(
                 qid,
                 cid,
                 "Cliente",

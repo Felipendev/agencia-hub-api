@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.deletesolicitacaosubmissionforagency.DeleteSolicitacaoSubmissionForAgencyUseCase;
-import com.agenciahub.api.application.usecases.solicitacao.listsolicitacaosubmissionsforagency.ListSolicitacaoSubmissionsForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.submission.delete.DeleteSolicitacaoSubmissionForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.list.ListSolicitacaoSubmissionsForAgencyUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
-import com.agenciahub.api.dto.solicitacao.SolicitacaoSubmissionResponse;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.security.TenantContext;
@@ -74,7 +74,7 @@ class SolicitacaoSubmissionAgencyControllerWebMvcTest {
         UUID id = UUID.randomUUID();
         Instant created = Instant.parse("2026-01-01T12:00:00Z");
         when(listSolicitacaoSubmissionsForAgencyUseCase.execute(eq(agencyId)))
-                .thenReturn(List.of(new SolicitacaoSubmissionResponse(
+                .thenReturn(List.of(new SolicitacaoSubmissionSummaryResponseDTO(
                         id,
                         "demo",
                         created,

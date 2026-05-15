@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.auth.resetpassword;
 
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.dto.auth.ResetPasswordRequest;
+import com.agenciahub.api.application.usecases.auth.resetpassword.ResetPasswordRequestDTO;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
@@ -24,7 +24,7 @@ public class ResetPassword implements ResetPasswordUseCase {
 
     @Override
     @Transactional
-    public Map<String, String> execute(ResetPasswordRequest request) {
+    public Map<String, String> execute(ResetPasswordRequestDTO request) {
         String email = request.email().trim().toLowerCase();
 
         if (request.newPassword().length() < 8) {

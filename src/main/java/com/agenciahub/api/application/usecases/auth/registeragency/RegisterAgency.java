@@ -1,18 +1,18 @@
 package com.agenciahub.api.application.usecases.auth.registeragency;
 
-import com.agenciahub.api.application.usecases.auth.AuthBetaWhitelist;
+import com.agenciahub.api.application.usecases.auth.shared.AuthBetaWhitelist;
 import com.agenciahub.api.application.usecases.terms.shared.TermsConstants;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.dto.auth.RegisterAgencyRequest;
-import com.agenciahub.api.dto.auth.RegisterAgencyResponse;
+import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyRequestDTO;
+import com.agenciahub.api.application.usecases.auth.shared.RegisterAgencyResultDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.repository.AgencyRepository;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
+import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import com.agenciahub.api.validation.PhoneValidator;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class RegisterAgency implements RegisterAgencyUseCase {
 
     @Override
     @Transactional
-    public RegisterAgencyResponse execute(RegisterAgencyRequest request) {
+    public RegisterAgencyResultDTO execute(RegisterAgencyRequestDTO request) {
         String email = request.email().trim().toLowerCase();
 
         if (!AuthBetaWhitelist.ALLOWED_OWNER_EMAILS.contains(email)) {
@@ -95,7 +95,7 @@ public class RegisterAgency implements RegisterAgencyUseCase {
         verificationCodePort.generateAndSend(
                 email, VerificationCodeType.EMAIL_VERIFICATION, user, request.ownerName());
 
-        return new RegisterAgencyResponse(
+        return new RegisterAgencyResultDTO(
                 agency.getId(), user.getId(), "código de verificação enviado para " + email);
     }
 }

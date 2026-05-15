@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
+import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,5 +17,5 @@ public interface PublicSolicitacaoConfigAPI {
 
     @GetMapping("/{slug}")
     @Operation(summary = "Obtém configuração por slug", description = "Usado pela página pública do formulário.")
-    SolicitacaoConfigResponse getBySlug(@Parameter(description = "slug do formulário") @PathVariable String slug);
+    SolicitacaoConfigSummaryResponseDTO getBySlug(@Parameter(description = "slug do formulário") @PathVariable String slug);
 }

@@ -1,12 +1,12 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.user.createuser.CreateUserUseCase;
-import com.agenciahub.api.application.usecases.user.getuserbyid.GetUserByIdUseCase;
-import com.agenciahub.api.application.usecases.user.listactivesellers.ListActiveSellersUseCase;
-import com.agenciahub.api.application.usecases.user.listusers.ListUsersUseCase;
-import com.agenciahub.api.application.usecases.user.updateuser.UpdateUserUseCase;
+import com.agenciahub.api.application.usecases.user.create.CreateUserUseCase;
+import com.agenciahub.api.application.usecases.user.retrieve.byid.GetUserByIdUseCase;
+import com.agenciahub.api.application.usecases.user.retrieve.listactive.ListActiveSellersUseCase;
+import com.agenciahub.api.application.usecases.user.retrieve.list.ListUsersUseCase;
+import com.agenciahub.api.application.usecases.user.update.UpdateUserUseCase;
 import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.dto.user.UserResponse;
+import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
@@ -70,7 +70,7 @@ class UserControllerWebMvcTest {
     void list_returnsUsers() throws Exception {
         UUID id = UUID.randomUUID();
         when(listUsersUseCase.execute(isNull()))
-                .thenReturn(List.of(new UserResponse(
+                .thenReturn(List.of(new UserSummaryResponseDTO(
                         id,
                         "Ana",
                         "ana@test.com",

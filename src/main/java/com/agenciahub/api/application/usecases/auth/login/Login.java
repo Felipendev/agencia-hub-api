@@ -1,14 +1,14 @@
 package com.agenciahub.api.application.usecases.auth.login;
 
 import com.agenciahub.api.domain.AgencyStatus;
-import com.agenciahub.api.dto.auth.LoginRequest;
-import com.agenciahub.api.dto.auth.LoginResponse;
+import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
+import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.security.JwtService;
-import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
+import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class Login implements LoginUseCase {
     private final PublicLinkCodeSupport publicLinkCodeSupport;
 
     @Override
-    public LoginResponse execute(LoginRequest request) {
+    public LoginResponseDTO execute(LoginRequestDTO request) {
         User user = userRepository
                 .findByEmail(request.email().trim().toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException("credenciais inválidas"));
@@ -56,7 +56,7 @@ public class Login implements LoginUseCase {
                 agency != null ? agency.getId() : null,
                 user.getPasswordChangedAt());
 
-        return new LoginResponse(
+        return new LoginResponseDTO(
                 token,
                 user.getId(),
                 user.getName(),

@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.solicitacao.submitpublicsolicitacao.SubmitPublicSolicitacaoUseCase;
-import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
-import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.SubmitPublicSolicitacaoUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitRequestDTO;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.web.GlobalExceptionHandler;
@@ -54,8 +54,8 @@ class PublicSolicitacaoSubmitControllerWebMvcTest {
     @Test
     void submit_happyPath_returns201() throws Exception {
         UUID submissionId = UUID.randomUUID();
-        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequest.class)))
-                .thenReturn(new PublicSolicitacaoSubmitResponse(true, submissionId));
+        when(submitPublicSolicitacaoUseCase.execute(any(PublicSolicitacaoSubmitRequestDTO.class)))
+                .thenReturn(new PublicSolicitacaoSubmitResponseDTO(true, submissionId));
 
         var detalhes = objectMapper.createObjectNode();
         detalhes.put("origem", "São Paulo");

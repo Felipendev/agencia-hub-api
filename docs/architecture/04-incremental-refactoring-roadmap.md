@@ -147,8 +147,9 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - **Fase 4 (ADR):** **ADR 0005** (e-mail), **ADR 0006** (verificação, link público, scheduling).
 - **Refatoração incremental concluída:** sem `com.agenciahub.api.service`; HTTP em `usecases/...`; integrações em `integrations/...`.
 - **ADR 0007 (pacotes HTTP):** `@RestController` + `*API` em `application.controller` (plano) + `application.controller.doc` — **concluído**.
-- **ADR 0008 (piloto customer):** DTOs em `usecases.customer.*` (`CreateCustomerRequestDTO`, `CustomerSummaryResponseDTO` em `shared`); pacotes `create`, `retrieve.byid|list`, `update`, `delete`, `lookup`; `dto/customer` removido.
+- **ADR 0008 (piloto customer):** DTOs em `usecases.customer.*`; `dto/customer` removido.
 - **ADR 0008 (agentes):** `CreateUser` rejeita `UserRole.SELLER` — agente só via convite + `register-invite`.
-- **Próximo:** **ADR 0008** — restantes features (`dto/*`), `AccountKind` / `salesagent`, renomes `PlatformAccount`.
+- **ADR 0008 (DTO colocation):** `dto/*` eliminado — DTOs em `usecases.<feature>.*` (quotation, user, auth, solicitacao, agency, invitation, terms, financial, sellerdashboard); pacote `solicitacao.pub.*` (evita palavra reservada `public`).
+- **Próximo:** **ADR 0008** — `AccountKind` / bounded context `salesagent`, renomes `PlatformAccount` / `CrmCustomer`.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.

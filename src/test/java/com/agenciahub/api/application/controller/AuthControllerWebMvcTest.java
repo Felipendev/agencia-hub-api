@@ -12,8 +12,8 @@ import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailUseCa
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.dto.auth.LoginRequest;
-import com.agenciahub.api.dto.auth.LoginResponse;
+import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
+import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.support.WebMvcControllerTestImports;
@@ -88,8 +88,8 @@ class AuthControllerWebMvcTest {
     void login_happyPath_returnsToken() throws Exception {
         UUID uid = UUID.randomUUID();
         UUID aid = UUID.randomUUID();
-        when(loginUseCase.execute(any(LoginRequest.class)))
-                .thenReturn(new LoginResponse(
+        when(loginUseCase.execute(any(LoginRequestDTO.class)))
+                .thenReturn(new LoginResponseDTO(
                         "jwt-token",
                         uid,
                         "Nome",

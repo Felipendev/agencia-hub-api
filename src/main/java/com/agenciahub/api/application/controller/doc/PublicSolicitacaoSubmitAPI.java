@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
-import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitRequestDTO;
+import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,5 +23,5 @@ public interface PublicSolicitacaoSubmitAPI {
     @Operation(
             summary = "Registra envio do formulário",
             description = "Persiste a submissão pública; valida telefone e presença de origem/destino nos detalhes.")
-    PublicSolicitacaoSubmitResponse submit(@Valid @RequestBody PublicSolicitacaoSubmitRequest body);
+    PublicSolicitacaoSubmitResponseDTO submit(@Valid @RequestBody PublicSolicitacaoSubmitRequestDTO body);
 }
