@@ -165,7 +165,7 @@ com.agenciahub.api/
 | `application/controllers/docs` | **Adotado:** `*API`, `StandardErrorApiResponses`. |
 | Controllers em `application/controllers/` | **Hoje:** `com.agenciahub.api.controller.<feature>` — alinhado ao ADR 0004; não obrigatório mover classes para `application.controllers`. |
 | `application/usecases/{feature}/{action}/` | **Parcial:** muitos casos em `application.<feature>/` (Convenção A no **05**); Convenção B é o mesmo espírito que `{feature}/{action}/`. |
-| `dto.*` Request/Response | **Hoje:** `com.agenciahub.api.dto.<feature>`; DTOs por operação podem coexistir com DTOs partilhados durante migração. |
+| DTO Request/Response por operação | `application.usecases.<feature>.<ação>` (**ADR 0008**); pacote global `dto.*` eliminado. |
 | `domain/` rico | **Hoje:** regras repartidas entre `entity`, `domain` (tipos), `service`; extrair domínio rico é **incremental**. |
 | `application/persistence/` | **Hoje:** `entity` + `repository` na raiz do módulo. |
 | `application/integrations/` | **Hoje:** p.ex. e-mail e outros em `service` — candidatos a extrair para `integrations`. |
