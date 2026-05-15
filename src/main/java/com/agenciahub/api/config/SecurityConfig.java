@@ -60,7 +60,7 @@ public class SecurityConfig {
                 // Public form endpoints
                 .requestMatchers("/public/**").permitAll()
                 // Owner-only: user management
-                .requestMatchers("/users/**").hasRole("OWNER")
+                .requestMatchers("/users/**").hasRole("AGENCY_OWNER")
                 // Everything else requires authentication
                 .anyRequest().authenticated()
             )

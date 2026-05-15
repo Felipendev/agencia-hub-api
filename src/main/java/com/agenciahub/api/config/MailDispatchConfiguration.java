@@ -19,8 +19,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
-import com.agenciahub.api.service.email.TransactionalMail;
-import com.agenciahub.api.service.email.TransactionalMailChannel;
+import com.agenciahub.api.application.integrations.email.TransactionalMail;
+import com.agenciahub.api.application.integrations.email.TransactionalMailChannel;
 
 /**
  * Picks one {@link TransactionalMailChannel} by env priority (Resend -> SMTP -> log).

@@ -1,7 +1,7 @@
 package com.agenciahub.api.security;
 
-import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.domain.enums.AccountKind;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.UnauthenticatedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -38,9 +38,9 @@ class SecurityContextUsersTest {
 
     @Test
     void optionalUser_returnsUser_whenPrincipalIsUserEntity() {
-        User user = sampleUser();
+        PlatformAccount user = sampleUser();
         setAuthentication(new UsernamePasswordAuthenticationToken(
-                user, null, List.of(new SimpleGrantedAuthority("ROLE_OWNER"))));
+                user, null, List.of(new SimpleGrantedAuthority("ROLE_AGENCY_OWNER"))));
 
         assertTrue(SecurityContextUsers.optionalUser().isPresent());
         assertEquals(user.getId(), SecurityContextUsers.optionalUser().orElseThrow().getId());
@@ -48,7 +48,7 @@ class SecurityContextUsersTest {
 
     @Test
     void requireUserId_returnsUserId_whenPrincipalIsUser() {
-        User user = sampleUser();
+        PlatformAccount user = sampleUser();
         setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
 
         assertEquals(user.getId(), SecurityContextUsers.requireUserId());
@@ -56,7 +56,7 @@ class SecurityContextUsersTest {
 
     @Test
     void requireUser_returnsSameInstance_whenPrincipalIsUser() {
-        User user = sampleUser();
+        PlatformAccount user = sampleUser();
         setAuthentication(new UsernamePasswordAuthenticationToken(user, null, List.of()));
 
         assertEquals(user, SecurityContextUsers.requireUser());
@@ -103,13 +103,13 @@ class SecurityContextUsersTest {
         assertEquals(id, SecurityContextUsers.requireUserId());
     }
 
-    private static User sampleUser() {
-        return User.builder()
+    private static PlatformAccount sampleUser() {
+        return PlatformAccount.builder()
                 .id(UUID.fromString("22222222-2222-2222-2222-222222222222"))
                 .name("Tester")
                 .email("tester@example.com")
                 .passwordHash("hash")
-                .role(UserRole.OWNER)
+                .role(AccountKind.AGENCY_OWNER)
                 .build();
     }
 

@@ -4,11 +4,13 @@
 
 Aceito — descreve o estado desejado do repositório `agencia-hub-api` (incremental).
 
+> **Atualização (controllers):** a organização de pacotes HTTP descrita abaixo (`controller` na raiz + `application.controllers.docs`) **será substituída** por **`application.controller`** + **`application.controller.doc`** — ver **ADR 0007**. O restante mapeamento (use cases, integrations, entity/repository) mantém-se.
+
 ## Contexto
 
 - O `02-backend-architecture.md` descreve **quatro áreas conceptuais**: API, Application, Domain, Infrastructure.
 - Em muitos exemplos didáticos ou templates, tudo o que é “aplicação” aparece sob um único prefixo (ex.: `application/controllers`, `application/usecases`, `application/persistence`), o que **espelha literalmente** a árvore de pastas às caixas do diagrama.
-- Neste projeto, os `@RestController` vivem em **`com.agenciahub.api.controller.<feature>`**, as interfaces `*API` (OpenAPI) em **`com.agenciahub.api.application.controllers.docs`**, os casos de uso em **`com.agenciahub.api.application.<feature>`**, e a orquestração transacional / acesso a dados continua em grande parte em **`com.agenciahub.api.service`** (fachadas que os use cases chamam), com entidades e repositórios JPA em `entity` / `repository`.
+- Neste projeto, os `@RestController` vivem em **`com.agenciahub.api.controller.<feature>`**, as interfaces `*API` (OpenAPI) em **`com.agenciahub.api.application.controller.doc`**, os casos de uso em **`com.agenciahub.api.application.<feature>`**, e a orquestração transacional / acesso a dados continua em grande parte em **`com.agenciahub.api.service`** (fachadas que os use cases chamam), com entidades e repositórios JPA em `entity` / `repository`.
 
 Sem documentar essa escolha, parece **incoerência** entre o diagrama (API ≠ Application) e os pacotes (dois irmãos `controller` e `application` em vez de `application/controllers`).
 
@@ -17,7 +19,7 @@ Sem documentar essa escolha, parece **incoerência** entre o diagrama (API ≠ A
 1. **Manter a coerência por responsabilidade, não por espelho literal da árvore do diagrama.** A regra é: *cada pacote deve ter um papel claro*; os nomes dos pacotes **não** precisam repetir os rótulos em inglês das caixas do desenho.
 2. **Mapeamento acordado (pacote → camada):**
    - `com.agenciahub.api.controller.<feature>` → **camada API** (HTTP, adaptação request/response; `@RestController`).
-   - `com.agenciahub.api.application.controllers.docs` → **contratos OpenAPI** (`*API`, meta-anotações partilhadas); os controllers **implementam** estas interfaces.
+   - `com.agenciahub.api.application.controller.doc` → **contratos OpenAPI** (`*API`, meta-anotações partilhadas); os controllers **implementam** estas interfaces.
    - `com.agenciahub.api.application.<feature>` → **camada Application** (casos de uso, comandos de aplicação, mappers de resposta dedicados ao fluxo).
    - `com.agenciahub.api.service` → **orquestração + persistência via Spring** na transição incremental (fachadas chamadas pelos use cases; **não** é “domínio puro”).
    - `com.agenciahub.api.entity` / `repository` → persistência acoplada ao JPA (evolução futura para ports/adapters exige **outro ADR** e piloto).

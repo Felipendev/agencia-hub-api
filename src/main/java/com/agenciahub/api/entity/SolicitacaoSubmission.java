@@ -41,7 +41,7 @@ public class SolicitacaoSubmission {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "referral_seller_id")
-    private User referralSeller;
+    private PlatformAccount referralSeller;
 
     @Column(nullable = false, length = 128)
     private String slug;

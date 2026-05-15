@@ -1,0 +1,40 @@
+package com.agenciahub.api.application.usecases.quotation.shared;
+
+import com.agenciahub.api.domain.QuotationCreationSource;
+import com.agenciahub.api.domain.QuotationStatus;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+public record QuotationSummaryResponseDTO(
+        UUID id,
+        UUID customerId,
+        String customerName,
+        UUID sellerId,
+        String sellerName,
+        String title,
+        String destination,
+        String description,
+        BigDecimal totalAmount,
+        String currency,
+        QuotationStatus status,
+        LocalDate validUntil,
+        LocalDate travelStartDate,
+        LocalDate travelEndDate,
+        JsonNode details,
+        List<String> tags,
+        boolean priority,
+        String assignee,
+        String internalNotes,
+        Instant createdAt,
+        Instant updatedAt,
+        QuotationCreationSource creationSource,
+        UUID createdByUserId,
+        String createdByUserName,
+        UUID publicSubmissionId
+) {
+}

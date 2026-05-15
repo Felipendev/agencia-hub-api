@@ -49,13 +49,13 @@ sequenceDiagram
 
 **Inclui (checklist por PR / por operação):**
 
-- [ ] Escolher um método ou um conjunto coeso num `*Service` (evitar auth completo num único PR).
-- [ ] Mover orquestração para `Xxx implements XxxUseCase` (ou criar use case se ainda for só delegação de uma linha **com** plano de absorção no mesmo PR ou no seguinte).
-- [ ] Manter DTOs HTTP e contrato REST; ajustar apenas o wiring (controller → use case).
-- [ ] `@Transactional` só onde for estritamente necessário (**05** §4.3); justificar no PR se mantiver/adicionar.
-- [ ] `mvn test` verde.
+- [x] Escolher um método ou um conjunto coeso num `*Service` (evitar auth completo num único PR).
+- [x] Mover orquestração para `Xxx implements XxxUseCase` (ou criar use case se ainda for só delegação de uma linha **com** plano de absorção no mesmo PR ou no seguinte).
+- [x] Manter DTOs HTTP e contrato REST; ajustar apenas o wiring (controller → use case).
+- [x] `@Transactional` só onde for estritamente necessário (**05** §4.3); justificar no PR se mantiver/adicionar.
+- [x] `mvn test` verde.
 
-**Pronto quando:** O fluxo tocado não depende do `*Service` para essa operação (ou o serviço ficou só como fachada mínima documentada até remoção).
+**Pronto quando:** O fluxo tocado não depende do `*Service` para essa operação. **Concluído neste repo:** pacote `com.agenciahub.api.service` **eliminado**; restantes auxiliares em `integrations`, `usecases.user` e `scheduling` (**ADR 0006**).
 
 **Depois:** Continuar Fase 1 noutra operação/agregado **ou** iniciar Fase 2 numa feature onde o pacote `application.<feature>` ficou grande.
 
@@ -69,11 +69,10 @@ sequenceDiagram
 
 **Inclui (checklist):**
 
-- [ ] Só entrar quando `application.<feature>` tiver **muitos** tipos ou várias operações em paralelo (equipa sente atrito de PR).
-- [ ] Migrar **uma feature** de cada vez (Convenção B no **05** §5.2); atualizar imports; `mvn test` verde.
-- [ ] Não obrigar rename de `dto.*` globais no mesmo PR (podem coexistir com DTOs colocados na pasta da operação).
+- [x] Migrar **uma feature** de cada vez (Convenção B no **05** §5.2); atualizar imports; `mvn test` verde. **Concluído:** todas as features HTTP em `usecases/...`.
+- [x] Não obrigar rename de `dto.*` globais no mesmo PR (podem coexistir com DTOs colocados na pasta da operação).
 
-**Pronto quando:** Pelo menos uma feature piloto está na estrutura `usecases/...` (ou decisão documentada no PR para adiar).
+**Pronto quando:** Pelo menos uma feature piloto está na estrutura `usecases/...` (**todas** as features HTTP migradas para `application/usecases/{feature}/{ação}/`).
 
 **Depois:** Fase 1 nas features recém-reorganizadas (se ainda houver lógica no serviço) **ou** Fase 3 se integrações externas forem o gargalo.
 
@@ -87,10 +86,10 @@ sequenceDiagram
 
 **Inclui (checklist):**
 
-- [ ] Identificar um adaptador (ex.: e-mail, cliente REST).
-- [ ] Introduzir interface + implementação; injetar no use case; testes com duplo de teste ou cliente fake quando fizer sentido.
+- [x] Identificar um adaptador (ex.: e-mail, cliente REST). **Piloto: e-mail.**
+- [x] Introduzir interface + implementação; injetar no use case; testes com duplo de teste ou cliente fake quando fizer sentido.
 
-**Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro.
+**Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro. **E-mail:** `application.integrations.email` (**ADR 0005**). **Códigos:** `application.integrations.verification` (**ADR 0006**).
 
 **Depois:** Fase 1 noutros fluxos que reutilizem a integração **ou** Fase 4 se a política de erros/retry for transversal.
 
@@ -102,7 +101,7 @@ sequenceDiagram
 
 **Inclui (checklist):**
 
-- [ ] Novo **ADR** + atualização pontual de `02` / `05` / `06` conforme o caso.
+- [x] Novo **ADR** (e-mail em `integrations`) + atualização pontual de `04` conforme o caso.
 - [ ] Itens grandes que **não** entram sem ADR (já fora do roadmap operacional): separação JPA vs entidade de domínio em **toda** a base; reescrita completa de `AuthService` / segurança; rename em massa de pacotes.
 
 **Pronto quando:** Leitor novo sabe o que mudou e porquê.
@@ -135,13 +134,22 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 
 - Cotações, clientes, agência, convites, solicitação (pública + agência), termos, utilizadores, painel vendedor, auth: padrão `*API` + controller + `application.<feature>` + mappers onde aplicável, muitas rotas ainda com use case a delegar em `*Service`.
 - **Financeiro (`/financial-entries`):** Fase 1 — orquestração absorvida nos use cases; **`FinancialEntryService` removido.**
-- **Termos (`TermsConstants` + use cases):** Fase 1 — **`TermsService` removido**; `AuthService` usa `TermsConstants.CURRENT_TERMS_VERSION` para validação no registo.
+- **Termos (`TermsConstants` + use cases):** Fase 1 — **`TermsService` removido**; registo de agência usa `TermsConstants` no use case `RegisterAgency`. **Fase 2 (piloto):** pacotes `application/usecases/terms/...` por acção (**06**).
+- **Auth (credenciais / registo / códigos):** Fase 1 — **`AuthService` removido**; orquestração em `application.usecases.auth.*` + `AuthBetaWhitelist` (e-mails beta).
 - **Agência:** Fase 1 — **`AgencyService` removido**; `GetAgency` / `UpdateAgency` orquestram repositório + auditoria.
 - **Solicitação (config + submissões):** Fase 1 — **`SolicitacaoConfigService` e `SolicitacaoSubmissionService` removidos**; use cases + `SolicitacaoConfigSupport` (defaults/mapeamento).
-- **Convites:** Fase 1 — **`InvitationService` removido**; `InvitationTokenPolicy`, `InvitationLinkBuilder`; `AuthService.registerViaInvite` valida token via repositório + policy.
+- **Convites:** Fase 1 — **`InvitationService` removido**; `InvitationTokenPolicy`, `InvitationLinkBuilder`; `RegisterViaInvite` valida convite no use case.
 - **Clientes:** Fase 1 — **`CustomerService` removido**; `CustomerResponseMapper` + `CustomerPhoneNormalizer`; CRUD/listagem/lookup nos use cases.
 - **Cotações + painel vendedor:** Fase 1 — **`QuotationService` removido**; use cases + `QuotationSupport`; `BuildSellerDashboard` usa `ListQuotationsUseCase`.
 - **Utilizadores:** Fase 1 — **`UserService` removido**; `GetUserEntityById` para painel vendedor (owner); CRUD/listagens nos use cases.
-- Erros globais, tenant, OpenAPI `ApiError`, `@WebMvcTest` alinhados aos controllers.
+- **Fase 2 (pacotes 06):** todas as features HTTP migradas para `application/usecases/{feature}/{ação}/` (além do piloto **termos** já feito).
+- **Fase 3 (integrações):** e-mail em `application/integrations/email` — ver **ADR 0005**.
+- **Fase 4 (ADR):** **ADR 0005** (e-mail), **ADR 0006** (verificação, link público, scheduling).
+- **Refatoração incremental concluída:** sem `com.agenciahub.api.service`; HTTP em `usecases/...`; integrações em `integrations/...`.
+- **ADR 0007 (pacotes HTTP):** `@RestController` + `*API` em `application.controller` (plano) + `application.controller.doc` — **concluído**.
+- **ADR 0008 (piloto customer):** DTOs em `usecases.customer.*`; `dto/customer` removido.
+- **ADR 0008 (agentes):** `CreateUser` rejeita `AccountKind.SALES_AGENT` — agente só via convite + `register-invite`.
+- **ADR 0008 (DTO colocation):** `dto/*` eliminado — DTOs em `usecases.<feature>.*` (quotation, user, auth, solicitacao, agency, invitation, terms, financial, salesagent); pacote `solicitacao.pub.*` (evita palavra reservada `public`).
+- **ADR 0008 (identidade):** `AccountKind` (`AGENCY_OWNER`, `SALES_AGENT`); Flyway `V20`; `UserRole` removido; entidades `PlatformAccount` / `CrmCustomer`; `AgencyMemberProfile`; bounded context `usecases.salesagent` (listagem ativa + dashboard); roles Spring `ROLE_AGENCY_OWNER` / `ROLE_SALES_AGENT`.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.
