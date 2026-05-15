@@ -1,10 +1,10 @@
 package com.agenciahub.api.application.usecases.customer.retrieve.list;
 
-import com.agenciahub.api.application.usecases.customer.shared.CustomerResponseMapper;
-import com.agenciahub.api.domain.CustomerStatus;
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerSummaryResponseDTO;
-import com.agenciahub.api.entity.CrmCustomer;
-import com.agenciahub.api.repository.CrmCustomerRepository;
+import com.agenciahub.api.application.usecases.customer.shared.OutputMapper;
+import com.agenciahub.api.domain.CustomerStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,6 @@ import java.util.List;
 public class ListCustomers implements ListCustomersUseCase {
 
     private final CrmCustomerRepository customerRepository;
-    private final CustomerResponseMapper customerResponseMapper;
 
     @Override
     public List<CustomerSummaryResponseDTO> execute(ListCustomersQuery query) {
@@ -32,6 +31,6 @@ public class ListCustomers implements ListCustomersUseCase {
         } else {
             rows = customerRepository.findByNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(name.strip(), status);
         }
-        return rows.stream().map(customerResponseMapper::toResponse).toList();
+        return rows.stream().map(OutputMapper::toSummary).toList();
     }
 }

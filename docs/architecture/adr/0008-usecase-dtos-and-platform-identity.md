@@ -87,7 +87,7 @@ public interface AgencyMemberProfile {
 }
 ```
 
-`PlatformAccount` implementa `AgencyMemberProfile` (`kind()` → `role`). Implementações futuras: `AgencyOwnerProfile`, `SalesAgentProfile` (comissão, `publicLinkCode`, etc.).
+`PlatformAccount` implementa `AgencyMemberProfile` (`kind()` → `accountKind`). Implementações futuras: `AgencyOwnerProfile`, `SalesAgentProfile` (comissão, `publicLinkCode`, etc.).
 
 #### C.3 Agency owner (`AGENCY_OWNER`)
 
@@ -131,7 +131,7 @@ Três fases distintas; o front não deve tratar “convite enviado” como “ve
 
 **Comissão:** definida **apenas na fase C** (gestão do vendedor), **não** no convite (`Invitation` não transporta `commissionPct` / `commissionFixed`). No aceite, o agente pode nascer sem comissão; o dono ajusta depois.
 
-**Operação do agente (após login):** cotações filtradas ao vendedor autenticado; painel próprio (`seller-dashboard` / `salesagent.dashboard`). Independente de ter usado ou não um eventual `CreateUser` legado — desde que exista conta `SALES_AGENT` válida.
+**Operação do agente (após login):** cotações filtradas ao agente autenticado; painel em `GET /sales-agent/dashboard/me` (`usecases.salesagent.dashboard`). Independente de `CreateUser` legado — desde que exista conta `SALES_AGENT` válida.
 
 **Convites:** listar e revogar convites **pendentes** (`/invitations`); desactivar vendedor ≈ `active: false` no PATCH (não há `DELETE` de conta).
 
@@ -165,7 +165,7 @@ O time autoriza **rename completo** quando a migração tocar a feature:
 | `SELLER` | `SALES_AGENT` |
 | `Customer` (entity) | `CrmCustomer` (opcional na JPA; obrigatório no vocabulário) |
 | `usecases.user` (vendedor) | `usecases.salesagent` |
-| `SellerDashboard*` | `SalesAgentDashboard*` ou `salesagent.dashboard` |
+| `SellerDashboard*` / `/seller-dashboard` | `SalesAgentDashboard*` / `/sales-agent/dashboard` |
 | `dto.*` | DTOs nos pacotes de use case |
 
 Migração de BD: preferir **rename de coluna enum** via Flyway/Liquibase quando existir; senão mapear valor antigo (`SELLER`) no `@Enumerated` até script correr.

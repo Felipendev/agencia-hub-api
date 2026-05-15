@@ -7,15 +7,15 @@ import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationRequestDTO;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
-import com.agenciahub.api.entity.CrmCustomer;
-import com.agenciahub.api.entity.Quotation;
-import com.agenciahub.api.entity.SolicitacaoSubmission;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.entity.Quotation;
+import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.CrmCustomerRepository;
-import com.agenciahub.api.repository.QuotationRepository;
-import com.agenciahub.api.repository.SolicitacaoSubmissionRepository;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
+import com.agenciahub.api.application.persistence.repository.QuotationRepository;
+import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +38,7 @@ public class CreateQuotation implements CreateQuotationUseCase {
         CreateQuotationRequestDTO request = command.request();
         PlatformAccount caller = command.caller();
 
-        if (caller != null && caller.getRole() == AccountKind.SALES_AGENT && request.sellerId() == null) {
+        if (caller != null && caller.getAccountKind() == AccountKind.SALES_AGENT && request.sellerId() == null) {
             request = new CreateQuotationRequestDTO(
                     request.customerId(),
                     caller.getId(),

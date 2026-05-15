@@ -2,8 +2,8 @@ package com.agenciahub.api.application.scheduling;
 
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
-import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.repository.AgencyRepository;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

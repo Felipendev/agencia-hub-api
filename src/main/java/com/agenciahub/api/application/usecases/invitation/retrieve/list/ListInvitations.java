@@ -2,7 +2,7 @@ package com.agenciahub.api.application.usecases.invitation.retrieve.list;
 
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationResponseMapper;
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
-import com.agenciahub.api.repository.InvitationRepository;
+import com.agenciahub.api.application.persistence.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

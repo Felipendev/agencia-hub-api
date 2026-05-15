@@ -8,11 +8,11 @@ import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.domain.VerificationCodeType;
 import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyRequestDTO;
 import com.agenciahub.api.application.usecases.auth.shared.RegisterAgencyResultDTO;
-import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.PlatformAccount;
-import com.agenciahub.api.repository.AgencyRepository;
-import com.agenciahub.api.repository.PlatformAccountRepository;
-import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import com.agenciahub.api.validation.PhoneValidator;
 import lombok.RequiredArgsConstructor;
@@ -84,7 +84,7 @@ public class RegisterAgency implements RegisterAgencyUseCase {
                 .email(email)
                 .publicLinkCode(publicLinkCodeSupport.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .role(AccountKind.AGENCY_OWNER)
+                .accountKind(AccountKind.AGENCY_OWNER)
                 .phone(PhoneValidator.formatForStorage(request.ownerPhone()))
                 .emailVerified(false)
                 .active(true)

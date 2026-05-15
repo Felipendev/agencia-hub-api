@@ -4,13 +4,13 @@ import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.VerificationCodeType;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailRequestDTO;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailResponseDTO;
-import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.AgencyRepository;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.security.JwtService;
-import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -56,7 +56,7 @@ public class VerifyEmail implements VerifyEmailUseCase {
 
         String token = jwtService.generate(
                 user.getId(),
-                user.getRole().name(),
+                user.getAccountKind().name(),
                 agency.getId(),
                 user.getPasswordChangedAt());
 
@@ -65,7 +65,7 @@ public class VerifyEmail implements VerifyEmailUseCase {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole(),
+                user.getAccountKind(),
                 agency.getId(),
                 agency.getName(),
                 publicLinkCode);

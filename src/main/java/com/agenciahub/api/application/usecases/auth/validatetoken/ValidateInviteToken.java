@@ -2,9 +2,9 @@ package com.agenciahub.api.application.usecases.auth.validatetoken;
 
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationTokenPolicy;
 import com.agenciahub.api.application.usecases.auth.validatetoken.InviteValidationResponseDTO;
-import com.agenciahub.api.entity.Invitation;
+import com.agenciahub.api.application.persistence.entity.Invitation;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.InvitationRepository;
+import com.agenciahub.api.application.persistence.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

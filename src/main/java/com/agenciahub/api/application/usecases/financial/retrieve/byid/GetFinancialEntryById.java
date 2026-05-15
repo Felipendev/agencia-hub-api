@@ -3,7 +3,7 @@ package com.agenciahub.api.application.usecases.financial.retrieve.byid;
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntryResponseMapper;
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.FinancialEntryRepository;
+import com.agenciahub.api.application.persistence.repository.FinancialEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

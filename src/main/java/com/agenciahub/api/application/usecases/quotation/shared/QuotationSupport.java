@@ -2,10 +2,10 @@ package com.agenciahub.api.application.usecases.quotation.shared;
 
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.domain.enums.AccountKind;
-import com.agenciahub.api.entity.Quotation;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.Quotation;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -72,7 +72,7 @@ public final class QuotationSupport {
         if (u.getAgency() == null || !u.getAgency().getId().equals(agencyId)) {
             throw new IllegalArgumentException("vendedor não pertence à agência deste cliente.");
         }
-        if (u.getRole() != AccountKind.SALES_AGENT && u.getRole() != AccountKind.AGENCY_OWNER) {
+        if (u.getAccountKind() != AccountKind.SALES_AGENT && u.getAccountKind() != AccountKind.AGENCY_OWNER) {
             throw new IllegalArgumentException("usuário inválido como vendedor.");
         }
         return u;

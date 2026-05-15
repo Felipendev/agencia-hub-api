@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.usecases.salesagent.retrieve.listactive;
 
-import com.agenciahub.api.application.usecases.user.shared.UserResponseMapper;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountResponseMapper;
 import com.agenciahub.api.domain.enums.AccountKind;
-import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +14,11 @@ import java.util.List;
 public class ListActiveSalesAgents implements ListActiveSalesAgentsUseCase {
 
     private final PlatformAccountRepository userRepository;
-    private final UserResponseMapper userResponseMapper;
+    private final PlatformAccountResponseMapper userResponseMapper;
 
     @Override
-    public List<UserSummaryResponseDTO> execute(Void unused) {
-        return userRepository.findByRoleAndActiveTrue(AccountKind.SALES_AGENT).stream()
+    public List<PlatformAccountSummaryResponseDTO> execute(Void unused) {
+        return userRepository.findByAccountKindAndActiveTrue(AccountKind.SALES_AGENT).stream()
                 .map(userResponseMapper::toResponse)
                 .toList();
     }

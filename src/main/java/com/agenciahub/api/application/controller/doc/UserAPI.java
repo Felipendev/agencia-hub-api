@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.application.usecases.user.create.CreateUserRequestDTO;
-import com.agenciahub.api.application.usecases.user.update.UpdateUserRequestDTO;
-import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
+import com.agenciahub.api.application.usecases.platformaccount.create.CreatePlatformAccountRequestDTO;
+import com.agenciahub.api.application.usecases.platformaccount.update.UpdatePlatformAccountRequestDTO;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,24 +28,24 @@ public interface UserAPI {
 
     @GetMapping
     @Operation(summary = "Lista usuários", description = "Ordenação alfabética por nome.")
-    List<UserSummaryResponseDTO> list();
+    List<PlatformAccountSummaryResponseDTO> list();
 
-    @GetMapping("/sellers")
-    @Operation(summary = "Lista vendedores ativos", description = "Usado em combos de atribuição de cotação.")
-    List<UserSummaryResponseDTO> sellers();
+    @GetMapping("/sales-agents")
+    @Operation(summary = "Lista agentes de venda ativos", description = "Usado em combos de atribuição de cotação.")
+    List<PlatformAccountSummaryResponseDTO> listSalesAgents();
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtém usuário por id")
-    UserSummaryResponseDTO get(@Parameter(description = "id do usuário") @PathVariable UUID id);
+    PlatformAccountSummaryResponseDTO get(@Parameter(description = "id do usuário") @PathVariable UUID id);
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cria usuário", description = "Owner ou vendedor conforme corpo da requisição.")
-    UserSummaryResponseDTO create(@Valid @RequestBody CreateUserRequestDTO request);
+    PlatformAccountSummaryResponseDTO create(@Valid @RequestBody CreatePlatformAccountRequestDTO request);
 
     @PatchMapping("/{id}")
     @Operation(summary = "Atualiza usuário", description = "Nome, senha, ativo, comissão percentual ou fixa.")
-    UserSummaryResponseDTO patch(
+    PlatformAccountSummaryResponseDTO patch(
             @Parameter(description = "id do usuário") @PathVariable UUID id,
-            @RequestBody UpdateUserRequestDTO request);
+            @RequestBody UpdatePlatformAccountRequestDTO request);
 }

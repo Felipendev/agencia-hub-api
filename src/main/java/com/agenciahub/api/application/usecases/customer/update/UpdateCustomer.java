@@ -1,13 +1,13 @@
 package com.agenciahub.api.application.usecases.customer.update;
 
 import com.agenciahub.api.application.usecases.customer.shared.CustomerPhoneNormalizer;
-import com.agenciahub.api.application.usecases.customer.shared.CustomerResponseMapper;
+import com.agenciahub.api.application.usecases.customer.shared.OutputMapper;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerSummaryResponseDTO;
 import com.agenciahub.api.application.usecases.customer.update.UpdateCustomerRequestDTO;
-import com.agenciahub.api.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.CrmCustomerRepository;
+import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,6 @@ import java.util.UUID;
 public class UpdateCustomer implements UpdateCustomerUseCase {
 
     private final CrmCustomerRepository customerRepository;
-    private final CustomerResponseMapper customerResponseMapper;
 
     @Override
     public CustomerSummaryResponseDTO execute(UpdateCustomerCommand command) {
@@ -60,6 +59,6 @@ public class UpdateCustomer implements UpdateCustomerUseCase {
             entity.setNotes(request.notes());
         }
 
-        return customerResponseMapper.toResponse(customerRepository.save(entity));
+        return OutputMapper.toSummary(customerRepository.save(entity));
     }
 }

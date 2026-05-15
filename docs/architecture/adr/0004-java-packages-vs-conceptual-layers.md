@@ -2,9 +2,12 @@
 
 ## Status
 
-Aceito — descreve o estado desejado do repositório `agencia-hub-api` (incremental).
+**Aceito (histórico)** — mapeamento conceptual pacote → camada.
 
-> **Atualização (controllers):** a organização de pacotes HTTP descrita abaixo (`controller` na raiz + `application.controllers.docs`) **será substituída** por **`application.controller`** + **`application.controller.doc`** — ver **ADR 0007**. O restante mapeamento (use cases, integrations, entity/repository) mantém-se.
+> **Supersedido em parte:**
+> - **HTTP:** **ADR 0007** — `application.controller` + `application.controller.doc` (não mais `controller` na raiz nem `application.controllers.docs`).
+> - **Persistência JPA:** **ADR 0009** — `application.persistence.entity` / `.repository` (não mais `entity` / `repository` na raiz).
+> - **Serviços monolíticos:** eliminados (roadmap Fase 1); use cases em `application.usecases.*`.
 
 ## Contexto
 
@@ -22,7 +25,7 @@ Sem documentar essa escolha, parece **incoerência** entre o diagrama (API ≠ A
    - `com.agenciahub.api.application.controller.doc` → **contratos OpenAPI** (`*API`, meta-anotações partilhadas); os controllers **implementam** estas interfaces.
    - `com.agenciahub.api.application.<feature>` → **camada Application** (casos de uso, comandos de aplicação, mappers de resposta dedicados ao fluxo).
    - `com.agenciahub.api.service` → **orquestração + persistência via Spring** na transição incremental (fachadas chamadas pelos use cases; **não** é “domínio puro”).
-   - `com.agenciahub.api.entity` / `repository` → persistência acoplada ao JPA (evolução futura para ports/adapters exige **outro ADR** e piloto).
+   - `com.agenciahub.api.application.persistence.entity` / `.repository` → persistência JPA (**ADR 0009**); domínio rico separado continua fora de escopo.
    - `com.agenciahub.api.web`, `config`, `security` → infraestrutura transversal ou composição Spring, conforme já documentado noutros ficheiros.
 3. **Não mover classes `@RestController` para dentro de `application`** só para coincidir com um template externo. O subpacote `application.controllers.docs` existe **apenas** para contratos OpenAPI (interfaces), não para beans MVC. Qualquer reorganização maior (ex.: `application/controllers` com classes de runtime, renomear `service` em massa) exige **ADR novo**, plano de PRs e custo explícito — está **fora** do roadmap incremental salvo decisão do time.
 

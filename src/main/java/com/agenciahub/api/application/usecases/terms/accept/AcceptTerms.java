@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.usecases.terms.accept;
 
 import com.agenciahub.api.application.usecases.terms.shared.TermsConstants;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

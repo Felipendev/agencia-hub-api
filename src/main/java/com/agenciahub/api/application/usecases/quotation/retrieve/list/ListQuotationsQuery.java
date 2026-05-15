@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.quotation.retrieve.list;
 
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 
 import java.util.UUID;
 

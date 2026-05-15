@@ -4,8 +4,8 @@ import com.agenciahub.api.application.usecases.quotation.shared.QuotationSupport
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationResponseMapper;
 import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
-import com.agenciahub.api.entity.Quotation;
-import com.agenciahub.api.repository.QuotationRepository;
+import com.agenciahub.api.application.persistence.entity.Quotation;
+import com.agenciahub.api.application.persistence.repository.QuotationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class ListQuotations implements ListQuotationsUseCase {
     @Override
     public List<QuotationSummaryResponseDTO> execute(ListQuotationsQuery query) {
         UUID callerId = query.caller() != null ? query.caller().getId() : null;
-        AccountKind callerRole = query.caller() != null ? query.caller().getRole() : AccountKind.AGENCY_OWNER;
+        AccountKind callerRole = query.caller() != null ? query.caller().getAccountKind() : AccountKind.AGENCY_OWNER;
         UUID effectiveSellerId = (callerRole == AccountKind.SALES_AGENT) ? callerId : null;
 
         var spec = QuotationSupport.quotationSearchSpec(

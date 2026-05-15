@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.usecases.financial.shared;
 
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
-import com.agenciahub.api.entity.CrmCustomer;
-import com.agenciahub.api.entity.FinancialEntry;
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.entity.FinancialEntry;
 import org.springframework.stereotype.Component;
 
 @Component

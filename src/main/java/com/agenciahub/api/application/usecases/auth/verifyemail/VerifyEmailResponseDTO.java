@@ -9,7 +9,7 @@ public record VerifyEmailResponseDTO(
         UUID userId,
         String name,
         String email,
-        AccountKind role,
+        AccountKind accountKind,
         UUID agencyId,
         String agencyName,
         String publicLinkCode

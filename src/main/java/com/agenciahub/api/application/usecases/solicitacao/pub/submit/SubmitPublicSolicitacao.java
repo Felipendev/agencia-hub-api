@@ -3,13 +3,13 @@ package com.agenciahub.api.application.usecases.solicitacao.pub.submit;
 import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitRequestDTO;
 import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitResponseDTO;
-import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.SolicitacaoConfig;
-import com.agenciahub.api.entity.SolicitacaoSubmission;
-import com.agenciahub.api.entity.PlatformAccount;
-import com.agenciahub.api.repository.SolicitacaoConfigRepository;
-import com.agenciahub.api.repository.SolicitacaoSubmissionRepository;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.SolicitacaoConfig;
+import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRepository;
+import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.validation.PhoneValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +75,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
         if (u.getAgency() == null || !u.getAgency().getId().equals(agency.getId())) {
             throw new IllegalArgumentException("este código de vendedor não pertence à agência deste formulário.");
         }
-        if (u.getRole() != AccountKind.SALES_AGENT && u.getRole() != AccountKind.AGENCY_OWNER) {
+        if (u.getAccountKind() != AccountKind.SALES_AGENT && u.getAccountKind() != AccountKind.AGENCY_OWNER) {
             throw new IllegalArgumentException("apenas vendedor ou gestor podem ser indicados no link.");
         }
         return u;
@@ -95,7 +95,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
         if (u.getAgency() == null || !u.getAgency().getId().equals(agency.getId())) {
             throw new IllegalArgumentException("o indicador deve pertencer à mesma agência do formulário.");
         }
-        if (u.getRole() != AccountKind.SALES_AGENT && u.getRole() != AccountKind.AGENCY_OWNER) {
+        if (u.getAccountKind() != AccountKind.SALES_AGENT && u.getAccountKind() != AccountKind.AGENCY_OWNER) {
             throw new IllegalArgumentException("apenas vendedor ou gestor podem ser indicados no link.");
         }
         return u;

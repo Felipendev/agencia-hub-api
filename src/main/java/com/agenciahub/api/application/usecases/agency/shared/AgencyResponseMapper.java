@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.agency.shared;
 
 import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
-import com.agenciahub.api.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.Agency;
 import org.springframework.stereotype.Component;
 
 @Component

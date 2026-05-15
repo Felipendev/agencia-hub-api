@@ -2,9 +2,9 @@ package com.agenciahub.api.application.usecases.quotation.shared;
 
 import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
-import com.agenciahub.api.entity.CrmCustomer;
-import com.agenciahub.api.entity.Quotation;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.entity.Quotation;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

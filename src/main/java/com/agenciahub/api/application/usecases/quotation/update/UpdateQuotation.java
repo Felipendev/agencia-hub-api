@@ -4,10 +4,10 @@ import com.agenciahub.api.application.usecases.quotation.shared.QuotationSupport
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationResponseMapper;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationRequestDTO;
-import com.agenciahub.api.entity.Quotation;
+import com.agenciahub.api.application.persistence.entity.Quotation;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.QuotationRepository;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.repository.QuotationRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
