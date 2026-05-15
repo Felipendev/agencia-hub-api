@@ -139,6 +139,7 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - **Agência:** Fase 1 — **`AgencyService` removido**; `GetAgency` / `UpdateAgency` orquestram repositório + auditoria.
 - **Solicitação (config + submissões):** Fase 1 — **`SolicitacaoConfigService` e `SolicitacaoSubmissionService` removidos**; use cases + `SolicitacaoConfigSupport` (defaults/mapeamento).
 - **Convites:** Fase 1 — **`InvitationService` removido**; `InvitationTokenPolicy`, `InvitationLinkBuilder`; `AuthService.registerViaInvite` valida token via repositório + policy.
+- **Clientes:** Fase 1 — **`CustomerService` removido**; `CustomerResponseMapper` + `CustomerPhoneNormalizer`; CRUD/listagem/lookup nos use cases.
 - Erros globais, tenant, OpenAPI `ApiError`, `@WebMvcTest` alinhados aos controllers.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.
