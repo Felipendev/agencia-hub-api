@@ -1,7 +1,7 @@
 package com.agenciahub.api.controller.solicitacao.agency;
 
-import com.agenciahub.api.application.solicitacao.GetOrCreateSolicitacaoConfigForAgencyUseCase;
-import com.agenciahub.api.application.solicitacao.UpsertSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.getorcreatesolicitacaoconfigforagency.GetOrCreateSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.upsertsolicitacaoconfigforagency.UpsertSolicitacaoConfigForAgencyUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
 import com.agenciahub.api.security.JwtAuthFilter;

@@ -1,5 +1,6 @@
 package com.agenciahub.api.service;
 
+import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.domain.VerificationCodeType;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.entity.VerificationCode;

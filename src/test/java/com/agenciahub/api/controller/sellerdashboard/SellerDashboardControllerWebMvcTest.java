@@ -1,6 +1,6 @@
 package com.agenciahub.api.controller.sellerdashboard;
 
-import com.agenciahub.api.application.sellerdashboard.BuildSellerDashboardUseCase;
+import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.BuildSellerDashboardUseCase;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.seller.SellerDashboardResponse;
 import com.agenciahub.api.dto.user.UserResponse;
@@ -8,7 +8,7 @@ import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
-import com.agenciahub.api.application.user.GetUserEntityByIdUseCase;
+import com.agenciahub.api.application.usecases.user.getuserentitybyid.GetUserEntityByIdUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

@@ -69,11 +69,10 @@ sequenceDiagram
 
 **Inclui (checklist):**
 
-- [ ] Só entrar quando `application.<feature>` tiver **muitos** tipos ou várias operações em paralelo (equipa sente atrito de PR).
-- [ ] Migrar **uma feature** de cada vez (Convenção B no **05** §5.2); atualizar imports; `mvn test` verde.
-- [ ] Não obrigar rename de `dto.*` globais no mesmo PR (podem coexistir com DTOs colocados na pasta da operação).
+- [x] Migrar **uma feature** de cada vez (Convenção B no **05** §5.2); atualizar imports; `mvn test` verde. **Concluído:** todas as features HTTP em `usecases/...`.
+- [x] Não obrigar rename de `dto.*` globais no mesmo PR (podem coexistir com DTOs colocados na pasta da operação).
 
-**Pronto quando:** Pelo menos uma feature piloto está na estrutura `usecases/...` (**termos** migrado; outras features podem seguir o mesmo padrão).
+**Pronto quando:** Pelo menos uma feature piloto está na estrutura `usecases/...` (**todas** as features HTTP migradas para `application/usecases/{feature}/{ação}/`).
 
 **Depois:** Fase 1 nas features recém-reorganizadas (se ainda houver lógica no serviço) **ou** Fase 3 se integrações externas forem o gargalo.
 
@@ -87,10 +86,10 @@ sequenceDiagram
 
 **Inclui (checklist):**
 
-- [ ] Identificar um adaptador (ex.: e-mail, cliente REST).
-- [ ] Introduzir interface + implementação; injetar no use case; testes com duplo de teste ou cliente fake quando fizer sentido.
+- [x] Identificar um adaptador (ex.: e-mail, cliente REST). **Piloto: e-mail.**
+- [x] Introduzir interface + implementação; injetar no use case; testes com duplo de teste ou cliente fake quando fizer sentido.
 
-**Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro.
+**Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro. **E-mail:** `application.integrations.email` — **ADR 0005**.
 
 **Depois:** Fase 1 noutros fluxos que reutilizem a integração **ou** Fase 4 se a política de erros/retry for transversal.
 
@@ -102,7 +101,7 @@ sequenceDiagram
 
 **Inclui (checklist):**
 
-- [ ] Novo **ADR** + atualização pontual de `02` / `05` / `06` conforme o caso.
+- [x] Novo **ADR** (e-mail em `integrations`) + atualização pontual de `04` conforme o caso.
 - [ ] Itens grandes que **não** entram sem ADR (já fora do roadmap operacional): separação JPA vs entidade de domínio em **toda** a base; reescrita completa de `AuthService` / segurança; rename em massa de pacotes.
 
 **Pronto quando:** Leitor novo sabe o que mudou e porquê.
@@ -136,13 +135,15 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - Cotações, clientes, agência, convites, solicitação (pública + agência), termos, utilizadores, painel vendedor, auth: padrão `*API` + controller + `application.<feature>` + mappers onde aplicável, muitas rotas ainda com use case a delegar em `*Service`.
 - **Financeiro (`/financial-entries`):** Fase 1 — orquestração absorvida nos use cases; **`FinancialEntryService` removido.**
 - **Termos (`TermsConstants` + use cases):** Fase 1 — **`TermsService` removido**; registo de agência usa `TermsConstants` no use case `RegisterAgency`. **Fase 2 (piloto):** pacotes `application/usecases/terms/...` por acção (**06**).
-- **Auth (credenciais / registo / códigos):** Fase 1 — **`AuthService` removido**; orquestração nos use cases em `application.auth` + `AuthBetaWhitelist` (e-mails beta).
+- **Auth (credenciais / registo / códigos):** Fase 1 — **`AuthService` removido**; orquestração em `application.usecases.auth.*` + `AuthBetaWhitelist` (e-mails beta).
 - **Agência:** Fase 1 — **`AgencyService` removido**; `GetAgency` / `UpdateAgency` orquestram repositório + auditoria.
 - **Solicitação (config + submissões):** Fase 1 — **`SolicitacaoConfigService` e `SolicitacaoSubmissionService` removidos**; use cases + `SolicitacaoConfigSupport` (defaults/mapeamento).
 - **Convites:** Fase 1 — **`InvitationService` removido**; `InvitationTokenPolicy`, `InvitationLinkBuilder`; `RegisterViaInvite` valida convite no use case.
 - **Clientes:** Fase 1 — **`CustomerService` removido**; `CustomerResponseMapper` + `CustomerPhoneNormalizer`; CRUD/listagem/lookup nos use cases.
 - **Cotações + painel vendedor:** Fase 1 — **`QuotationService` removido**; use cases + `QuotationSupport`; `BuildSellerDashboard` usa `ListQuotationsUseCase`.
 - **Utilizadores:** Fase 1 — **`UserService` removido**; `GetUserEntityById` para painel vendedor (owner); CRUD/listagens nos use cases.
-- Erros globais, tenant, OpenAPI `ApiError`, `@WebMvcTest` alinhados aos controllers.
+- **Fase 2 (pacotes 06):** todas as features HTTP migradas para `application/usecases/{feature}/{ação}/` (além do piloto **termos** já feito).
+- **Fase 3 (integrações):** e-mail em `application/integrations/email` — ver **ADR 0005**.
+- **Fase 4 (ADR):** **ADR 0005** — pacote de integração de e-mail.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.

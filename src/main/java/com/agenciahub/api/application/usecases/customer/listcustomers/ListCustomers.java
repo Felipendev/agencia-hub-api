@@ -1,0 +1,37 @@
+package com.agenciahub.api.application.usecases.customer.listcustomers;
+
+import com.agenciahub.api.application.usecases.customer.CustomerResponseMapper;
+import com.agenciahub.api.domain.CustomerStatus;
+import com.agenciahub.api.dto.customer.CustomerResponse;
+import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.repository.CustomerRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ListCustomers implements ListCustomersUseCase {
+
+    private final CustomerRepository customerRepository;
+    private final CustomerResponseMapper customerResponseMapper;
+
+    @Override
+    public List<CustomerResponse> execute(ListCustomersQuery query) {
+        String name = query.name();
+        CustomerStatus status = query.status();
+        boolean hasName = name != null && !name.isBlank();
+        List<Customer> rows;
+        if (!hasName && status == null) {
+            rows = customerRepository.findAllByOrderByCreatedAtDesc();
+        } else if (hasName && status == null) {
+            rows = customerRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc(name.strip());
+        } else if (!hasName) {
+            rows = customerRepository.findByStatusOrderByCreatedAtDesc(status);
+        } else {
+            rows = customerRepository.findByNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(name.strip(), status);
+        }
+        return rows.stream().map(customerResponseMapper::toResponse).toList();
+    }
+}

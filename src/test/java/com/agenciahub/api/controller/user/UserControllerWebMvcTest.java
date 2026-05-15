@@ -1,10 +1,10 @@
 package com.agenciahub.api.controller.user;
 
-import com.agenciahub.api.application.user.CreateUserUseCase;
-import com.agenciahub.api.application.user.GetUserByIdUseCase;
-import com.agenciahub.api.application.user.ListActiveSellersUseCase;
-import com.agenciahub.api.application.user.ListUsersUseCase;
-import com.agenciahub.api.application.user.UpdateUserUseCase;
+import com.agenciahub.api.application.usecases.user.createuser.CreateUserUseCase;
+import com.agenciahub.api.application.usecases.user.getuserbyid.GetUserByIdUseCase;
+import com.agenciahub.api.application.usecases.user.listactivesellers.ListActiveSellersUseCase;
+import com.agenciahub.api.application.usecases.user.listusers.ListUsersUseCase;
+import com.agenciahub.api.application.usecases.user.updateuser.UpdateUserUseCase;
 import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.user.UserResponse;
 import com.agenciahub.api.exception.ResourceNotFoundException;

@@ -1,10 +1,10 @@
 package com.agenciahub.api.controller.invitation;
 
-import com.agenciahub.api.application.invitation.CreateInvitationCommand;
-import com.agenciahub.api.application.invitation.CreateInvitationUseCase;
-import com.agenciahub.api.application.invitation.ListInvitationsUseCase;
-import com.agenciahub.api.application.invitation.RevokeInvitationCommand;
-import com.agenciahub.api.application.invitation.RevokeInvitationUseCase;
+import com.agenciahub.api.application.usecases.invitation.createinvitation.CreateInvitationCommand;
+import com.agenciahub.api.application.usecases.invitation.createinvitation.CreateInvitationUseCase;
+import com.agenciahub.api.application.usecases.invitation.listinvitations.ListInvitationsUseCase;
+import com.agenciahub.api.application.usecases.invitation.revokeinvitation.RevokeInvitationCommand;
+import com.agenciahub.api.application.usecases.invitation.revokeinvitation.RevokeInvitationUseCase;
 import com.agenciahub.api.application.controllers.docs.InvitationAPI;
 import com.agenciahub.api.dto.invitation.CreateInvitationRequest;
 import com.agenciahub.api.dto.invitation.InvitationResponse;

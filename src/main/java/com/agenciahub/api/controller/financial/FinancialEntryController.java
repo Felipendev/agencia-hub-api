@@ -1,11 +1,11 @@
 package com.agenciahub.api.controller.financial;
 
-import com.agenciahub.api.application.financial.CreateFinancialEntryUseCase;
-import com.agenciahub.api.application.financial.GetFinancialEntryByIdUseCase;
-import com.agenciahub.api.application.financial.ListFinancialEntriesQuery;
-import com.agenciahub.api.application.financial.ListFinancialEntriesUseCase;
-import com.agenciahub.api.application.financial.UpdateFinancialEntryCommand;
-import com.agenciahub.api.application.financial.UpdateFinancialEntryUseCase;
+import com.agenciahub.api.application.usecases.financial.createfinancialentry.CreateFinancialEntryUseCase;
+import com.agenciahub.api.application.usecases.financial.getfinancialentrybyid.GetFinancialEntryByIdUseCase;
+import com.agenciahub.api.application.usecases.financial.listfinancialentries.ListFinancialEntriesQuery;
+import com.agenciahub.api.application.usecases.financial.listfinancialentries.ListFinancialEntriesUseCase;
+import com.agenciahub.api.application.usecases.financial.updatefinancialentry.UpdateFinancialEntryCommand;
+import com.agenciahub.api.application.usecases.financial.updatefinancialentry.UpdateFinancialEntryUseCase;
 import com.agenciahub.api.application.controllers.docs.FinancialEntryAPI;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;

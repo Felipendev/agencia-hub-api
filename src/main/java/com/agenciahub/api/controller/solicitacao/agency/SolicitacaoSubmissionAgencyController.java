@@ -1,8 +1,8 @@
 package com.agenciahub.api.controller.solicitacao.agency;
 
-import com.agenciahub.api.application.solicitacao.DeleteSolicitacaoSubmissionCommand;
-import com.agenciahub.api.application.solicitacao.DeleteSolicitacaoSubmissionForAgencyUseCase;
-import com.agenciahub.api.application.solicitacao.ListSolicitacaoSubmissionsForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.deletesolicitacaosubmissionforagency.DeleteSolicitacaoSubmissionCommand;
+import com.agenciahub.api.application.usecases.solicitacao.deletesolicitacaosubmissionforagency.DeleteSolicitacaoSubmissionForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.listsolicitacaosubmissionsforagency.ListSolicitacaoSubmissionsForAgencyUseCase;
 import com.agenciahub.api.application.controllers.docs.SolicitacaoSubmissionAgencyAPI;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoSubmissionResponse;
 import com.agenciahub.api.security.TenantContext;

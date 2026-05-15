@@ -1,14 +1,14 @@
 package com.agenciahub.api.controller.auth;
 
-import com.agenciahub.api.application.auth.ChangePasswordUseCase;
-import com.agenciahub.api.application.auth.ForgotPasswordUseCase;
-import com.agenciahub.api.application.auth.LoginUseCase;
-import com.agenciahub.api.application.auth.RegisterAgencyUseCase;
-import com.agenciahub.api.application.auth.RegisterViaInviteUseCase;
-import com.agenciahub.api.application.auth.ResendCodeUseCase;
-import com.agenciahub.api.application.auth.ResetPasswordUseCase;
-import com.agenciahub.api.application.auth.ValidateInviteTokenUseCase;
-import com.agenciahub.api.application.auth.VerifyEmailUseCase;
+import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswordUseCase;
+import com.agenciahub.api.application.usecases.auth.forgotpassword.ForgotPasswordUseCase;
+import com.agenciahub.api.application.usecases.auth.login.LoginUseCase;
+import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyUseCase;
+import com.agenciahub.api.application.usecases.auth.registerviainvite.RegisterViaInviteUseCase;
+import com.agenciahub.api.application.usecases.auth.resendcode.ResendCodeUseCase;
+import com.agenciahub.api.application.usecases.auth.resetpassword.ResetPasswordUseCase;
+import com.agenciahub.api.application.usecases.auth.validatetoken.ValidateInviteTokenUseCase;
+import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailUseCase;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.UserRole;

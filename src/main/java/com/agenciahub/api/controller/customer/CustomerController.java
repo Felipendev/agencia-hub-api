@@ -1,14 +1,14 @@
 package com.agenciahub.api.controller.customer;
 
-import com.agenciahub.api.application.customer.CreateCustomerUseCase;
-import com.agenciahub.api.application.customer.DeleteCustomerUseCase;
-import com.agenciahub.api.application.customer.GetCustomerByIdUseCase;
-import com.agenciahub.api.application.customer.ListCustomersQuery;
-import com.agenciahub.api.application.customer.ListCustomersUseCase;
-import com.agenciahub.api.application.customer.LookupCustomerQuery;
-import com.agenciahub.api.application.customer.LookupCustomerUseCase;
-import com.agenciahub.api.application.customer.UpdateCustomerCommand;
-import com.agenciahub.api.application.customer.UpdateCustomerUseCase;
+import com.agenciahub.api.application.usecases.customer.createcustomer.CreateCustomerUseCase;
+import com.agenciahub.api.application.usecases.customer.deletecustomer.DeleteCustomerUseCase;
+import com.agenciahub.api.application.usecases.customer.getcustomerbyid.GetCustomerByIdUseCase;
+import com.agenciahub.api.application.usecases.customer.listcustomers.ListCustomersQuery;
+import com.agenciahub.api.application.usecases.customer.listcustomers.ListCustomersUseCase;
+import com.agenciahub.api.application.usecases.customer.lookupcustomer.LookupCustomerQuery;
+import com.agenciahub.api.application.usecases.customer.lookupcustomer.LookupCustomerUseCase;
+import com.agenciahub.api.application.usecases.customer.updatecustomer.UpdateCustomerCommand;
+import com.agenciahub.api.application.usecases.customer.updatecustomer.UpdateCustomerUseCase;
 import com.agenciahub.api.application.controllers.docs.CustomerAPI;
 import com.agenciahub.api.domain.CustomerStatus;
 import com.agenciahub.api.dto.customer.CreateCustomerRequest;

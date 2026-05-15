@@ -1,6 +1,6 @@
 package com.agenciahub.api.controller.solicitacao.pub;
 
-import com.agenciahub.api.application.solicitacao.SubmitPublicSolicitacaoUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.submitpublicsolicitacao.SubmitPublicSolicitacaoUseCase;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
 import com.agenciahub.api.security.JwtAuthFilter;

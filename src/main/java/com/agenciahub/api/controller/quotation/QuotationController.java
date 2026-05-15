@@ -1,13 +1,13 @@
 package com.agenciahub.api.controller.quotation;
 
-import com.agenciahub.api.application.quotation.CreateQuotationCommand;
-import com.agenciahub.api.application.quotation.CreateQuotationUseCase;
-import com.agenciahub.api.application.quotation.GetQuotationByIdUseCase;
-import com.agenciahub.api.application.quotation.ListQuotationsQuery;
-import com.agenciahub.api.application.quotation.ListQuotationsUseCase;
-import com.agenciahub.api.application.quotation.DeleteQuotationUseCase;
-import com.agenciahub.api.application.quotation.UpdateQuotationCommand;
-import com.agenciahub.api.application.quotation.UpdateQuotationUseCase;
+import com.agenciahub.api.application.usecases.quotation.createquotation.CreateQuotationCommand;
+import com.agenciahub.api.application.usecases.quotation.createquotation.CreateQuotationUseCase;
+import com.agenciahub.api.application.usecases.quotation.getquotationbyid.GetQuotationByIdUseCase;
+import com.agenciahub.api.application.usecases.quotation.listquotations.ListQuotationsQuery;
+import com.agenciahub.api.application.usecases.quotation.listquotations.ListQuotationsUseCase;
+import com.agenciahub.api.application.usecases.quotation.deletequotation.DeleteQuotationUseCase;
+import com.agenciahub.api.application.usecases.quotation.updatequotation.UpdateQuotationCommand;
+import com.agenciahub.api.application.usecases.quotation.updatequotation.UpdateQuotationUseCase;
 import com.agenciahub.api.application.controllers.docs.QuotationAPI;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.dto.quotation.CreateQuotationRequest;

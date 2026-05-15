@@ -1,8 +1,8 @@
 package com.agenciahub.api.controller.solicitacao.agency;
 
-import com.agenciahub.api.application.solicitacao.GetOrCreateSolicitacaoConfigForAgencyUseCase;
-import com.agenciahub.api.application.solicitacao.UpsertSolicitacaoConfigCommand;
-import com.agenciahub.api.application.solicitacao.UpsertSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.getorcreatesolicitacaoconfigforagency.GetOrCreateSolicitacaoConfigForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.upsertsolicitacaoconfigforagency.UpsertSolicitacaoConfigCommand;
+import com.agenciahub.api.application.usecases.solicitacao.upsertsolicitacaoconfigforagency.UpsertSolicitacaoConfigForAgencyUseCase;
 import com.agenciahub.api.application.controllers.docs.SolicitacaoConfigAgencyAPI;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigRequest;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
