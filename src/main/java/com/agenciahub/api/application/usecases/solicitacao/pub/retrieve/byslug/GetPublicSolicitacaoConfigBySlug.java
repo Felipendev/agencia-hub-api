@@ -2,9 +2,9 @@ package com.agenciahub.api.application.usecases.solicitacao.pub.retrieve.byslug;
 
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSupport;
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
-import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.SolicitacaoConfig;
-import com.agenciahub.api.repository.SolicitacaoConfigRepository;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.SolicitacaoConfig;
+import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

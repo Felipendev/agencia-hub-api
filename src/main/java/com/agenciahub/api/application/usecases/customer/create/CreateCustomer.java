@@ -1,12 +1,13 @@
 package com.agenciahub.api.application.usecases.customer.create;
 
-import com.agenciahub.api.application.usecases.customer.shared.CustomerPhoneNormalizer;
-import com.agenciahub.api.application.usecases.customer.shared.CustomerResponseMapper;
-import com.agenciahub.api.application.usecases.customer.create.CreateCustomerRequestDTO;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
+import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerSummaryResponseDTO;
-import com.agenciahub.api.entity.CrmCustomer;
+import com.agenciahub.api.application.usecases.customer.shared.OutputMapper;
 import com.agenciahub.api.exception.DuplicateCustomerException;
-import com.agenciahub.api.repository.CrmCustomerRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateCustomer implements CreateCustomerUseCase {
 
     private final CrmCustomerRepository customerRepository;
-    private final CustomerResponseMapper customerResponseMapper;
+    private final AgencyRepository agencyRepository;
 
     @Override
     @Transactional
     public CustomerSummaryResponseDTO execute(CreateCustomerRequestDTO request) {
         String email = request.email().strip();
-        String phone = CustomerPhoneNormalizer.normalize(request.phone());
+        String phone = InputMapper.normalizedPhone(request);
 
         if (!email.isEmpty() && customerRepository.existsByEmailIgnoreCase(email)) {
             throw new DuplicateCustomerException("e-mail", email);
@@ -31,16 +32,10 @@ public class CreateCustomer implements CreateCustomerUseCase {
             throw new DuplicateCustomerException("telefone", request.phone().strip());
         }
 
-        String notes = request.notes() != null ? request.notes() : "";
-        CrmCustomer entity = CrmCustomer.builder()
-                .name(request.name().strip())
-                .email(email)
-                .phone(request.phone().strip())
-                .interestDestination(request.interestDestination().strip())
-                .status(request.status())
-                .notes(notes)
-                .build();
+        Agency agency = agencyRepository.getReferenceById(TenantContext.requireAgencyId());
+        CrmCustomer entity = InputMapper.toNewEntity(request);
+        entity.setAgency(agency);
         CrmCustomer saved = customerRepository.save(entity);
-        return customerResponseMapper.toResponse(saved);
+        return OutputMapper.toSummary(saved);
     }
 }

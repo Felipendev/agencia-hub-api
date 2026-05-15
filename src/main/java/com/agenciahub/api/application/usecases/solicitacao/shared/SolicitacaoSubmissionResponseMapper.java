@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.usecases.solicitacao.shared;
 
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
-import com.agenciahub.api.entity.SolicitacaoSubmission;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;

@@ -1,10 +1,10 @@
 package com.agenciahub.api.application.usecases.customer.delete;
 
-import com.agenciahub.api.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.CrmCustomerRepository;
-import com.agenciahub.api.repository.FinancialEntryRepository;
-import com.agenciahub.api.repository.QuotationRepository;
+import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
+import com.agenciahub.api.application.persistence.repository.FinancialEntryRepository;
+import com.agenciahub.api.application.persistence.repository.QuotationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

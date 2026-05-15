@@ -2,9 +2,9 @@ package com.agenciahub.api.application.integrations.verification;
 
 import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.entity.PlatformAccount;
-import com.agenciahub.api.entity.VerificationCode;
-import com.agenciahub.api.repository.VerificationCodeRepository;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.VerificationCode;
+import com.agenciahub.api.application.persistence.repository.VerificationCodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

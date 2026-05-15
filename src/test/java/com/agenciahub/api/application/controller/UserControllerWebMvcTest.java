@@ -1,12 +1,12 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.user.create.CreateUserUseCase;
-import com.agenciahub.api.application.usecases.user.retrieve.byid.GetUserByIdUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.create.CreatePlatformAccountUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.retrieve.byid.GetPlatformAccountByIdUseCase;
 import com.agenciahub.api.application.usecases.salesagent.retrieve.listactive.ListActiveSalesAgentsUseCase;
-import com.agenciahub.api.application.usecases.user.retrieve.list.ListUsersUseCase;
-import com.agenciahub.api.application.usecases.user.update.UpdateUserUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.retrieve.list.ListPlatformAccountsUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.update.UpdatePlatformAccountUseCase;
 import com.agenciahub.api.domain.enums.AccountKind;
-import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
@@ -52,25 +52,25 @@ class UserControllerWebMvcTest {
     private RateLimitFilter rateLimitFilter;
 
     @MockitoBean
-    private ListUsersUseCase listUsersUseCase;
+    private ListPlatformAccountsUseCase listUsersUseCase;
 
     @MockitoBean
     private ListActiveSalesAgentsUseCase listActiveSalesAgentsUseCase;
 
     @MockitoBean
-    private GetUserByIdUseCase getUserByIdUseCase;
+    private GetPlatformAccountByIdUseCase getUserByIdUseCase;
 
     @MockitoBean
-    private CreateUserUseCase createUserUseCase;
+    private CreatePlatformAccountUseCase createUserUseCase;
 
     @MockitoBean
-    private UpdateUserUseCase updateUserUseCase;
+    private UpdatePlatformAccountUseCase updateUserUseCase;
 
     @Test
     void list_returnsUsers() throws Exception {
         UUID id = UUID.randomUUID();
         when(listUsersUseCase.execute(isNull()))
-                .thenReturn(List.of(new UserSummaryResponseDTO(
+                .thenReturn(List.of(new PlatformAccountSummaryResponseDTO(
                         id,
                         "Ana",
                         "ana@test.com",

@@ -1,15 +1,15 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.user.create.CreateUserUseCase;
-import com.agenciahub.api.application.usecases.user.retrieve.byid.GetUserByIdUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.create.CreatePlatformAccountUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.retrieve.byid.GetPlatformAccountByIdUseCase;
 import com.agenciahub.api.application.usecases.salesagent.retrieve.listactive.ListActiveSalesAgentsUseCase;
-import com.agenciahub.api.application.usecases.user.retrieve.list.ListUsersUseCase;
-import com.agenciahub.api.application.usecases.user.update.UpdateUserCommand;
-import com.agenciahub.api.application.usecases.user.update.UpdateUserUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.retrieve.list.ListPlatformAccountsUseCase;
+import com.agenciahub.api.application.usecases.platformaccount.update.UpdatePlatformAccountCommand;
+import com.agenciahub.api.application.usecases.platformaccount.update.UpdatePlatformAccountUseCase;
 import com.agenciahub.api.application.controller.doc.UserAPI;
-import com.agenciahub.api.application.usecases.user.create.CreateUserRequestDTO;
-import com.agenciahub.api.application.usecases.user.update.UpdateUserRequestDTO;
-import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
+import com.agenciahub.api.application.usecases.platformaccount.create.CreatePlatformAccountRequestDTO;
+import com.agenciahub.api.application.usecases.platformaccount.update.UpdatePlatformAccountRequestDTO;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,34 +20,34 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserController implements UserAPI {
 
-    private final ListUsersUseCase listUsersUseCase;
+    private final ListPlatformAccountsUseCase listUsersUseCase;
     private final ListActiveSalesAgentsUseCase listActiveSalesAgentsUseCase;
-    private final GetUserByIdUseCase getUserByIdUseCase;
-    private final CreateUserUseCase createUserUseCase;
-    private final UpdateUserUseCase updateUserUseCase;
+    private final GetPlatformAccountByIdUseCase getUserByIdUseCase;
+    private final CreatePlatformAccountUseCase createUserUseCase;
+    private final UpdatePlatformAccountUseCase updateUserUseCase;
 
     @Override
-    public List<UserSummaryResponseDTO> list() {
+    public List<PlatformAccountSummaryResponseDTO> list() {
         return listUsersUseCase.execute(null);
     }
 
     @Override
-    public List<UserSummaryResponseDTO> sellers() {
+    public List<PlatformAccountSummaryResponseDTO> listSalesAgents() {
         return listActiveSalesAgentsUseCase.execute(null);
     }
 
     @Override
-    public UserSummaryResponseDTO get(UUID id) {
+    public PlatformAccountSummaryResponseDTO get(UUID id) {
         return getUserByIdUseCase.execute(id);
     }
 
     @Override
-    public UserSummaryResponseDTO create(CreateUserRequestDTO request) {
+    public PlatformAccountSummaryResponseDTO create(CreatePlatformAccountRequestDTO request) {
         return createUserUseCase.execute(request);
     }
 
     @Override
-    public UserSummaryResponseDTO patch(UUID id, UpdateUserRequestDTO request) {
-        return updateUserUseCase.execute(new UpdateUserCommand(id, request));
+    public PlatformAccountSummaryResponseDTO patch(UUID id, UpdatePlatformAccountRequestDTO request) {
+        return updateUserUseCase.execute(new UpdatePlatformAccountCommand(id, request));
     }
 }

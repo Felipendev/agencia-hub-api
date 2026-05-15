@@ -8,7 +8,7 @@ import com.agenciahub.api.application.usecases.invitation.revoke.RevokeInvitatio
 import com.agenciahub.api.application.controller.doc.InvitationAPI;
 import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationRequestDTO;
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;

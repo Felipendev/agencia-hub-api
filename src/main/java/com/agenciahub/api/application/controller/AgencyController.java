@@ -6,7 +6,7 @@ import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyUseCase
 import com.agenciahub.api.application.controller.doc.AgencyAPI;
 import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
 import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyRequestDTO;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;

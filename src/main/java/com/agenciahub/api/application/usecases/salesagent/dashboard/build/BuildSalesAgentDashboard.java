@@ -2,11 +2,11 @@ package com.agenciahub.api.application.usecases.salesagent.dashboard.build;
 
 import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsQuery;
 import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsUseCase;
-import com.agenciahub.api.application.usecases.user.shared.UserResponseMapper;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountResponseMapper;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.application.usecases.salesagent.dashboard.build.SalesAgentDashboardResponseDTO;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +20,12 @@ import java.util.UUID;
 public class BuildSalesAgentDashboard implements BuildSalesAgentDashboardUseCase {
 
     private final ListQuotationsUseCase listQuotationsUseCase;
-    private final UserResponseMapper userResponseMapper;
+    private final PlatformAccountResponseMapper userResponseMapper;
 
     @Override
-    public SalesAgentDashboardResponseDTO execute(PlatformAccount sellerEntity) {
-        UUID sellerId = sellerEntity.getId();
+    public SalesAgentDashboardResponseDTO execute(PlatformAccount salesAgentEntity) {
         List<QuotationSummaryResponseDTO> all =
-                listQuotationsUseCase.execute(new ListQuotationsQuery(null, null, null, sellerEntity));
+                listQuotationsUseCase.execute(new ListQuotationsQuery(null, null, null, salesAgentEntity));
 
         List<QuotationSummaryResponseDTO> recent = all.stream()
                 .sorted((a, b) -> b.updatedAt().compareTo(a.updatedAt()))
@@ -38,13 +37,13 @@ public class BuildSalesAgentDashboard implements BuildSalesAgentDashboardUseCase
         long approved = all.stream().filter(q -> q.status() == QuotationStatus.ACCEPTED).count();
 
         BigDecimal earned = calculateCommission(
-                sellerEntity, all.stream().filter(q -> q.status() == QuotationStatus.ACCEPTED).toList());
+                salesAgentEntity, all.stream().filter(q -> q.status() == QuotationStatus.ACCEPTED).toList());
 
         BigDecimal pending =
-                calculateCommission(sellerEntity, all.stream().filter(q -> isOpen(q.status())).toList());
+                calculateCommission(salesAgentEntity, all.stream().filter(q -> isOpen(q.status())).toList());
 
         return new SalesAgentDashboardResponseDTO(
-                userResponseMapper.toResponse(sellerEntity),
+                userResponseMapper.toResponse(salesAgentEntity),
                 all.size(),
                 open,
                 approved,
@@ -59,20 +58,20 @@ public class BuildSalesAgentDashboard implements BuildSalesAgentDashboardUseCase
                 || status == QuotationStatus.AWAITING_CLIENT;
     }
 
-    private BigDecimal calculateCommission(PlatformAccount seller, List<QuotationSummaryResponseDTO> quotations) {
+    private BigDecimal calculateCommission(PlatformAccount salesAgent, List<QuotationSummaryResponseDTO> quotations) {
         if (quotations.isEmpty()) {
             return BigDecimal.ZERO;
         }
 
-        if (seller.getCommissionPct() != null) {
+        if (salesAgent.getCommissionPct() != null) {
             BigDecimal total = quotations.stream()
                     .map(QuotationSummaryResponseDTO::totalAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            return total.multiply(seller.getCommissionPct()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            return total.multiply(salesAgent.getCommissionPct()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         }
 
-        if (seller.getCommissionFixed() != null) {
-            return seller.getCommissionFixed().multiply(BigDecimal.valueOf(quotations.size()));
+        if (salesAgent.getCommissionFixed() != null) {
+            return salesAgent.getCommissionFixed().multiply(BigDecimal.valueOf(quotations.size()));
         }
 
         return BigDecimal.ZERO;

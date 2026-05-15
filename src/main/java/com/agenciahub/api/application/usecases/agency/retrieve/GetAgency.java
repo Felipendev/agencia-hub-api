@@ -2,9 +2,9 @@ package com.agenciahub.api.application.usecases.agency.retrieve;
 
 import com.agenciahub.api.application.usecases.agency.shared.AgencyResponseMapper;
 import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
-import com.agenciahub.api.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.Agency;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.AgencyRepository;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

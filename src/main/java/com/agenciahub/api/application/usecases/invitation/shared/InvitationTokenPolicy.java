@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.invitation.shared;
 
 import com.agenciahub.api.domain.InvitationStatus;
-import com.agenciahub.api.entity.Invitation;
+import com.agenciahub.api.application.persistence.entity.Invitation;
 
 import java.time.Instant;
 

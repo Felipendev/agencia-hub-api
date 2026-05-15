@@ -3,7 +3,7 @@ package com.agenciahub.api.application.usecases.quotation.retrieve.byid;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationResponseMapper;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.QuotationRepository;
+import com.agenciahub.api.application.persistence.repository.QuotationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

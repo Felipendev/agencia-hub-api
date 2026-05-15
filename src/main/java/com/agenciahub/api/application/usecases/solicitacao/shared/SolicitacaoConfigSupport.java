@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.usecases.solicitacao.shared;
 
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoConfigSummaryResponseDTO;
-import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.SolicitacaoConfig;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.SolicitacaoConfig;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;

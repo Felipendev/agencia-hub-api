@@ -1,7 +1,7 @@
 package com.agenciahub.api.security;
 
 import com.agenciahub.api.domain.enums.AccountKind;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.UnauthenticatedException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -109,7 +109,7 @@ class SecurityContextUsersTest {
                 .name("Tester")
                 .email("tester@example.com")
                 .passwordHash("hash")
-                .role(AccountKind.AGENCY_OWNER)
+                .accountKind(AccountKind.AGENCY_OWNER)
                 .build();
     }
 

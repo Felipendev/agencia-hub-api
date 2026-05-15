@@ -163,12 +163,13 @@ com.agenciahub.api/
 | Alvo (este documento) | Estado típico no código hoje |
 |------------------------|------------------------------|
 | `application/controllers/docs` | **Adotado:** `*API`, `StandardErrorApiResponses`. |
-| Controllers em `application/controllers/` | **Hoje:** `com.agenciahub.api.controller.<feature>` — alinhado ao ADR 0004; não obrigatório mover classes para `application.controllers`. |
-| `application/usecases/{feature}/{action}/` | **Parcial:** muitos casos em `application.<feature>/` (Convenção A no **05**); Convenção B é o mesmo espírito que `{feature}/{action}/`. |
-| DTO Request/Response por operação | `application.usecases.<feature>.<ação>` (**ADR 0008**); pacote global `dto.*` eliminado. |
-| `domain/` rico | **Hoje:** regras repartidas entre `entity`, `domain` (tipos), `service`; extrair domínio rico é **incremental**. |
-| `application/persistence/` | **Hoje:** `entity` + `repository` na raiz do módulo. |
-| `application/integrations/` | **Hoje:** p.ex. e-mail e outros em `service` — candidatos a extrair para `integrations`. |
+| Controllers | **Adotado:** `application.controller` + `application.controller.doc` (**ADR 0007**). |
+| `application/usecases/{feature}/{action}/` | **Adotado** para features HTTP (**Fase 2** / **ADR 0008**). |
+| DTO Request/Response por operação | `application.usecases.<feature>.<ação>` (**ADR 0008**). |
+| `InputMapper` / `OutputMapper` estáticos | **Piloto:** `customer` (**ADR 0009**); restantes features ainda com `*ResponseMapper` `@Component`. |
+| `domain/` rico | **Parcial:** enums/tipos em `domain/`; regras ainda em use cases + entidades JPA. |
+| `application/persistence/` | **Adotado:** `application.persistence.entity` + `.repository` (**ADR 0009**). |
+| `application/integrations/` | **Adotado:** e-mail, verificação (**ADR 0005**, **0006**). |
 | `common/`, `token/` | **Hoje:** `config`, `security`, `web`, `exception`, etc.; renomear pacotes só com passo explícito no roadmap. |
 
 ---

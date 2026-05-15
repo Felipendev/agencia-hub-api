@@ -3,12 +3,12 @@ package com.agenciahub.api.application.usecases.auth.login;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
 import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
-import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.security.JwtService;
-import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PublicLinkCodeSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class Login implements LoginUseCase {
 
         String token = jwtService.generate(
                 user.getId(),
-                user.getRole().name(),
+                user.getAccountKind().name(),
                 agency != null ? agency.getId() : null,
                 user.getPasswordChangedAt());
 
@@ -61,7 +61,7 @@ public class Login implements LoginUseCase {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRole(),
+                user.getAccountKind(),
                 agency != null ? agency.getId() : null,
                 agency != null ? agency.getName() : null,
                 agency != null ? agency.getStatus() : null,

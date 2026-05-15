@@ -21,7 +21,7 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 | `com.agenciahub.api.application.usecases.<feature>.<action>` | Interfaces `*UseCase`, implementações `@Service`, comandos/consultas; mappers partilhados no pacote da feature. |
 | `com.agenciahub.api.application.integrations.*` | Portas outbound (e-mail, códigos de verificação, …). |
 | `com.agenciahub.api.application.scheduling` | Jobs `@Scheduled` (ex.: expiração de trial). |
-| `com.agenciahub.api.repository` / `entity` | Persistência JPA. |
+| `com.agenciahub.api.application.persistence.repository` / `.entity` | Persistência JPA (**ADR 0009**). |
 | `com.agenciahub.api.web` | `GlobalExceptionHandler` e cross-cutting HTTP de erros. |
 
 **Regra:** código neste formato **não está “errado”** por existir; só deixa de ser o alvo quando uma feature for **deliberadamente** migrada para o modelo da secção 4.

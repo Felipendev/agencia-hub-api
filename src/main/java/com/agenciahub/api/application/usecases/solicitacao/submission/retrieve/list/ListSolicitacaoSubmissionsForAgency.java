@@ -2,7 +2,7 @@ package com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.
 
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionResponseMapper;
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
-import com.agenciahub.api.repository.SolicitacaoSubmissionRepository;
+import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

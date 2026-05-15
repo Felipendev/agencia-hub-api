@@ -2,9 +2,9 @@ package com.agenciahub.api.application.usecases.financial.retrieve.list;
 
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntryResponseMapper;
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
-import com.agenciahub.api.entity.FinancialEntry;
-import com.agenciahub.api.repository.FinancialEntryRepository;
-import com.agenciahub.api.repository.spec.FinancialEntrySpecifications;
+import com.agenciahub.api.application.persistence.entity.FinancialEntry;
+import com.agenciahub.api.application.persistence.repository.FinancialEntryRepository;
+import com.agenciahub.api.application.persistence.repository.spec.FinancialEntrySpecifications;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;

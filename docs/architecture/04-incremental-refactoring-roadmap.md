@@ -15,7 +15,7 @@ Este documento define a **sequência a executar a partir de agora**, alinhada a 
 Estado consolidado no `agencia-hub-api` (referência histórica; novos fluxos partem daqui):
 
 - **Documentação:** `01`–`03`, **`05`**, **`06`**, `02` alinhado; **ADR 0003** (erros, OpenAPI, tenant/segurança), **ADR 0004** (pacotes `controller` / `application`); `.cursor/rules.md`.
-- **Apresentação HTTP:** `*API` em `com.agenciahub.api.application.controllers.docs`; `@RestController` em `controller.<feature>`; `@StandardErrorApiResponses` em todos os `*API`; `GlobalExceptionHandler` em `web`.
+- **Apresentação HTTP (histórico):** `*API` passaram de `application.controllers.docs` para **`application.controller.doc`** — ver **ADR 0007**; `@RestController` em `application.controller`; `GlobalExceptionHandler` em `web`.
 - **Aplicação (primeira onda):** casos de uso em `application.<feature>` com interfaces `UseCase` / `VoidUseCase`, muitas operações ainda **delegando** a `*Service`; `*ResponseMapper` onde extraído; controllers finos; mensagens de erro em português/minúsculas nos fluxos alinhados; `SecurityContextUsers`, `TenantContext`, testes de controller (`WebMvcControllerTestImports`, `@MockitoBean` em filtros quando aplicável).
 
 **Isto substitui** o antigo encadeamento “Passo 0 → … → Passo 4” para este repositório: **não** voltar a abrir PRs só para refazer baseline, piloto de cotação isolado ou mover `*API` para `controller.*.docs`.
@@ -151,5 +151,9 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - **ADR 0008 (agentes):** `CreateUser` rejeita `AccountKind.SALES_AGENT` — agente só via convite + `register-invite`.
 - **ADR 0008 (DTO colocation):** `dto/*` eliminado — DTOs em `usecases.<feature>.*` (quotation, user, auth, solicitacao, agency, invitation, terms, financial, salesagent); pacote `solicitacao.pub.*` (evita palavra reservada `public`).
 - **ADR 0008 (identidade):** `AccountKind` (`AGENCY_OWNER`, `SALES_AGENT`); Flyway `V20`; `UserRole` removido; entidades `PlatformAccount` / `CrmCustomer`; `AgencyMemberProfile`; bounded context `usecases.salesagent` (listagem ativa + dashboard); roles Spring `ROLE_AGENCY_OWNER` / `ROLE_SALES_AGENT`.
+- **Organização:** pastas vazias (`dto`, `api`, `service`, etc.) removidas; rotas `/sales-agent/dashboard`; coluna/campo `accountKind` (JWT claim `accountKind`, legado `role`); controllers `SalesAgentDashboard*`.
+- **ADR 0009:** JPA em `application.persistence.entity` / `.repository`; piloto `InputMapper`/`OutputMapper` em **customer**; `usecases.platformaccount`; `GET /users/sales-agents`; JSON `salesAgent` no dashboard.
+
+**Roadmap incremental (Fases 1–4 + ADR 0007–0009): encerrado** para este repositório. Evoluções maiores (domínio rico, `InputMapper` em todas as features) exigem ADR novo.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.

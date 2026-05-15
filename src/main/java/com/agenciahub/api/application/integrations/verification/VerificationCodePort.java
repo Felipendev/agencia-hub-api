@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.integrations.verification;
 
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 
 /**
  * Geração, persistência e validação de códigos de verificação (e-mail / reset de senha).

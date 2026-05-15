@@ -1,13 +1,13 @@
 package com.agenciahub.api.application.usecases.salesagent.dashboard.build;
 
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
-import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
+import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public record SalesAgentDashboardResponseDTO(
-        UserSummaryResponseDTO seller,
+        PlatformAccountSummaryResponseDTO salesAgent,
         long totalQuotations,
         long openQuotations,
         long approvedQuotations,
