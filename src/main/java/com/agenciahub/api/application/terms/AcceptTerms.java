@@ -1,19 +1,33 @@
 package com.agenciahub.api.application.terms;
 
-import com.agenciahub.api.service.TermsService;
+import com.agenciahub.api.entity.User;
+import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AcceptTerms implements AcceptTermsUseCase {
 
-    private final TermsService termsService;
+    private final UserRepository userRepository;
 
     @Override
     public Map<String, String> execute(AcceptTermsCommand command) {
-        return termsService.acceptTerms(command.userId(), command.termsVersion());
+        UUID userId = command.userId();
+        String termsVersion = command.termsVersion();
+        if (!TermsConstants.CURRENT_TERMS_VERSION.equals(termsVersion)) {
+            throw new IllegalArgumentException("versão dos termos inválida");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + userId));
+        if (!Boolean.TRUE.equals(user.getTermsAccepted())) {
+            user.setTermsAccepted(true);
+            userRepository.save(user);
+        }
+        return Map.of("message", "termos aceitos com sucesso");
     }
 }

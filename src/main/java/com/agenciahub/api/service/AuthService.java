@@ -1,5 +1,6 @@
 package com.agenciahub.api.service;
 
+import com.agenciahub.api.application.terms.TermsConstants;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
@@ -143,7 +144,7 @@ public class AuthService {
         if (!Boolean.TRUE.equals(request.termsAccepted())) {
             throw new IllegalArgumentException("é necessário aceitar os termos de uso");
         }
-        if (!TermsService.CURRENT_TERMS_VERSION.equals(request.termsVersion())) {
+        if (!TermsConstants.CURRENT_TERMS_VERSION.equals(request.termsVersion())) {
             throw new IllegalArgumentException("versão dos termos inválida");
         }
 
