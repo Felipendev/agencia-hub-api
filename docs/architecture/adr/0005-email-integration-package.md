@@ -17,7 +17,7 @@ O roadmap **Fase 3** pede integrações outbound (e-mail, HTTP, filas) fora de `
 ## Consequências
 
 - Use cases que enviam e-mail (ex.: convites) importam `EmailService` a partir de `integrations.email`.
-- **`VerificationCodeService`** continua em `service` mas depende da porta `EmailService` em `integrations` (aceitável até eventual extração do próprio serviço de códigos).
+- Códigos de verificação passaram para **`application.integrations.verification`** — ver **ADR 0006**.
 
 ## Alternativas não escolhidas
 

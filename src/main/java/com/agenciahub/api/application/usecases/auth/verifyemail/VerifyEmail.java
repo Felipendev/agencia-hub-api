@@ -10,8 +10,8 @@ import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyRepository;
 import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.security.JwtService;
-import com.agenciahub.api.service.PublicLinkCodeService;
-import com.agenciahub.api.service.VerificationCodeService;
+import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
+import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +25,8 @@ public class VerifyEmail implements VerifyEmailUseCase {
 
     private final UserRepository userRepository;
     private final AgencyRepository agencyRepository;
-    private final VerificationCodeService verificationCodeService;
-    private final PublicLinkCodeService publicLinkCodeService;
+    private final VerificationCodePort verificationCodePort;
+    private final PublicLinkCodeSupport publicLinkCodeSupport;
     private final JwtService jwtService;
 
     @Override
@@ -35,7 +35,7 @@ public class VerifyEmail implements VerifyEmailUseCase {
         String email = request.email().trim().toLowerCase();
 
         boolean valid =
-                verificationCodeService.verify(email, request.code(), VerificationCodeType.EMAIL_VERIFICATION);
+                verificationCodePort.verify(email, request.code(), VerificationCodeType.EMAIL_VERIFICATION);
         if (!valid) {
             throw new IllegalArgumentException("código inválido ou expirado");
         }
@@ -52,7 +52,7 @@ public class VerifyEmail implements VerifyEmailUseCase {
         agency.setTrialEndsAt(Instant.now().plus(10, ChronoUnit.DAYS));
         agencyRepository.save(agency);
 
-        String publicLinkCode = publicLinkCodeService.ensurePersistedForUserId(user.getId());
+        String publicLinkCode = publicLinkCodeSupport.ensurePersistedForUserId(user.getId());
 
         String token = jwtService.generate(
                 user.getId(),

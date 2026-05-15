@@ -11,8 +11,8 @@ import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.InvitationRepository;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.service.PublicLinkCodeService;
-import com.agenciahub.api.service.VerificationCodeService;
+import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
+import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import com.agenciahub.api.validation.PhoneValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,8 +28,8 @@ public class RegisterViaInvite implements RegisterViaInviteUseCase {
     private final UserRepository userRepository;
     private final InvitationRepository invitationRepository;
     private final PasswordEncoder passwordEncoder;
-    private final VerificationCodeService verificationCodeService;
-    private final PublicLinkCodeService publicLinkCodeService;
+    private final VerificationCodePort verificationCodePort;
+    private final PublicLinkCodeSupport publicLinkCodeSupport;
 
     @Override
     @Transactional
@@ -64,7 +64,7 @@ public class RegisterViaInvite implements RegisterViaInviteUseCase {
                 .agency(invitation.getAgency())
                 .name(request.name())
                 .email(email)
-                .publicLinkCode(publicLinkCodeService.allocate())
+                .publicLinkCode(publicLinkCodeSupport.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(UserRole.SELLER)
                 .phone(validPhone ? PhoneValidator.formatForStorage(request.phone()) : null)
@@ -73,7 +73,7 @@ public class RegisterViaInvite implements RegisterViaInviteUseCase {
                 .build();
         user = userRepository.save(user);
 
-        verificationCodeService.generateAndSend(
+        verificationCodePort.generateAndSend(
                 email, VerificationCodeType.EMAIL_VERIFICATION, user, request.name());
 
         invitation.setStatus(InvitationStatus.ACCEPTED);

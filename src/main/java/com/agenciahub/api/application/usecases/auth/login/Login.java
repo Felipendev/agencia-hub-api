@@ -8,7 +8,7 @@ import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
 import com.agenciahub.api.security.JwtService;
-import com.agenciahub.api.service.PublicLinkCodeService;
+import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class Login implements LoginUseCase {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final PublicLinkCodeService publicLinkCodeService;
+    private final PublicLinkCodeSupport publicLinkCodeSupport;
 
     @Override
     public LoginResponse execute(LoginRequest request) {
@@ -48,7 +48,7 @@ public class Login implements LoginUseCase {
             throw new ResourceNotFoundException("credenciais inválidas");
         }
 
-        String publicLinkCode = publicLinkCodeService.ensurePersistedForUserId(user.getId());
+        String publicLinkCode = publicLinkCodeSupport.ensurePersistedForUserId(user.getId());
 
         String token = jwtService.generate(
                 user.getId(),

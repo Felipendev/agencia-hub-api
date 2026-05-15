@@ -12,8 +12,8 @@ import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.repository.AgencyRepository;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.service.PublicLinkCodeService;
-import com.agenciahub.api.service.VerificationCodeService;
+import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
+import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import com.agenciahub.api.validation.PhoneValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,8 +27,8 @@ public class RegisterAgency implements RegisterAgencyUseCase {
     private final UserRepository userRepository;
     private final AgencyRepository agencyRepository;
     private final PasswordEncoder passwordEncoder;
-    private final VerificationCodeService verificationCodeService;
-    private final PublicLinkCodeService publicLinkCodeService;
+    private final VerificationCodePort verificationCodePort;
+    private final PublicLinkCodeSupport publicLinkCodeSupport;
 
     @Override
     @Transactional
@@ -82,7 +82,7 @@ public class RegisterAgency implements RegisterAgencyUseCase {
                 .agency(agency)
                 .name(request.ownerName())
                 .email(email)
-                .publicLinkCode(publicLinkCodeService.allocate())
+                .publicLinkCode(publicLinkCodeSupport.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(UserRole.OWNER)
                 .phone(PhoneValidator.formatForStorage(request.ownerPhone()))
@@ -92,7 +92,7 @@ public class RegisterAgency implements RegisterAgencyUseCase {
                 .build();
         user = userRepository.save(user);
 
-        verificationCodeService.generateAndSend(
+        verificationCodePort.generateAndSend(
                 email, VerificationCodeType.EMAIL_VERIFICATION, user, request.ownerName());
 
         return new RegisterAgencyResponse(

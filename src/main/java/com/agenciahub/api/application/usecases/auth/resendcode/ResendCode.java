@@ -5,7 +5,7 @@ import com.agenciahub.api.dto.auth.ResendCodeRequest;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.service.VerificationCodeService;
+import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 public class ResendCode implements ResendCodeUseCase {
 
     private final UserRepository userRepository;
-    private final VerificationCodeService verificationCodeService;
+    private final VerificationCodePort verificationCodePort;
 
     @Override
     public Map<String, String> execute(ResendCodeRequest request) {
@@ -26,7 +26,7 @@ public class ResendCode implements ResendCodeUseCase {
                 .findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + email));
 
-        boolean sent = verificationCodeService.generateAndSend(
+        boolean sent = verificationCodePort.generateAndSend(
                 email, VerificationCodeType.EMAIL_VERIFICATION, user, user.getName());
 
         if (!sent) {

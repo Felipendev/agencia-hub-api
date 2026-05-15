@@ -46,7 +46,7 @@ public class User {
     @Column(nullable = false, length = 320, unique = true)
     private String email;
 
-    /** Código público curto para links; preenchido pela aplicação (ver PublicLinkCodeService). */
+    /** Código público curto para links; preenchido pela aplicação (ver PublicLinkCodeSupport). */
     @Column(name = "public_link_code", length = 16)
     private String publicLinkCode;
 

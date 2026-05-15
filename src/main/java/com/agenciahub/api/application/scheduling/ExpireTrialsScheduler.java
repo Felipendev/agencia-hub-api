@@ -1,4 +1,4 @@
-package com.agenciahub.api.service;
+package com.agenciahub.api.application.scheduling;
 
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
@@ -8,31 +8,26 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
 
 /**
- * Scheduled service that checks for expired trial agencies daily at 2:00 AM
- * and transitions them to SUSPENDED status.
+ * Job diário: agências em trial expirado passam a SUSPENDED.
  */
-@Service
+@Component
 @RequiredArgsConstructor
-public class TrialSchedulerService {
+public class ExpireTrialsScheduler {
 
-    private static final Logger log = LoggerFactory.getLogger(TrialSchedulerService.class);
+    private static final Logger log = LoggerFactory.getLogger(ExpireTrialsScheduler.class);
 
     private final AgencyRepository agencyRepository;
 
-    /**
-     * Runs daily at 2:00 AM. Queries agencies with TRIAL subscription status
-     * and trial_ends_at in the past, then transitions them to SUSPENDED.
-     */
     @Scheduled(cron = "0 0 2 * * *")
     public void expireTrials() {
-        List<Agency> expiredAgencies = agencyRepository
-                .findBySubscriptionStatusAndTrialEndsAtBefore(SubscriptionStatus.TRIAL, Instant.now());
+        List<Agency> expiredAgencies = agencyRepository.findBySubscriptionStatusAndTrialEndsAtBefore(
+                SubscriptionStatus.TRIAL, Instant.now());
 
         if (expiredAgencies.isEmpty()) {
             log.debug("No expired trial agencies found");

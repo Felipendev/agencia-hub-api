@@ -5,7 +5,7 @@ import com.agenciahub.api.dto.auth.ResetPasswordRequest;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.service.VerificationCodeService;
+import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class ResetPassword implements ResetPasswordUseCase {
 
     private final UserRepository userRepository;
-    private final VerificationCodeService verificationCodeService;
+    private final VerificationCodePort verificationCodePort;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -36,7 +36,7 @@ public class ResetPassword implements ResetPasswordUseCase {
         }
 
         boolean valid =
-                verificationCodeService.verify(email, request.code(), VerificationCodeType.PASSWORD_RESET);
+                verificationCodePort.verify(email, request.code(), VerificationCodeType.PASSWORD_RESET);
         if (!valid) {
             throw new IllegalArgumentException("código inválido ou expirado");
         }

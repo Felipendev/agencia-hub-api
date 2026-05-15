@@ -5,7 +5,7 @@ import com.agenciahub.api.dto.user.CreateUserRequest;
 import com.agenciahub.api.dto.user.UserResponse;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.repository.UserRepository;
-import com.agenciahub.api.service.PublicLinkCodeService;
+import com.agenciahub.api.application.usecases.user.PublicLinkCodeSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class CreateUser implements CreateUserUseCase {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final PublicLinkCodeService publicLinkCodeService;
+    private final PublicLinkCodeSupport publicLinkCodeSupport;
     private final UserResponseMapper userResponseMapper;
 
     @Override
@@ -29,7 +29,7 @@ public class CreateUser implements CreateUserUseCase {
         User user = User.builder()
                 .name(request.name().strip())
                 .email(request.email().trim().toLowerCase())
-                .publicLinkCode(publicLinkCodeService.allocate())
+                .publicLinkCode(publicLinkCodeSupport.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(request.role())
                 .active(Boolean.TRUE)

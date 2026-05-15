@@ -18,8 +18,9 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 |----------------|------------|
 | `com.agenciahub.api.controller.<feature>` | `@RestController` (implementa `*API`). |
 | `com.agenciahub.api.application.controllers.docs` | Interfaces `*API` + OpenAPI (`StandardErrorApiResponses`, etc.). |
-| `com.agenciahub.api.application.<feature>` | Interfaces `*UseCase`, implementações `@Service`, comandos/consultas, `*ResponseMapper`. |
-| `com.agenciahub.api.service` | Fachadas transacionais com repositórios JPA, muitas operações por agregado (`QuotationService`, `CustomerService`, …). |
+| `com.agenciahub.api.application.usecases.<feature>.<action>` | Interfaces `*UseCase`, implementações `@Service`, comandos/consultas; mappers partilhados no pacote da feature. |
+| `com.agenciahub.api.application.integrations.*` | Portas outbound (e-mail, códigos de verificação, …). |
+| `com.agenciahub.api.application.scheduling` | Jobs `@Scheduled` (ex.: expiração de trial). |
 | `com.agenciahub.api.repository` / `entity` | Persistência JPA. |
 | `com.agenciahub.api.web` | `GlobalExceptionHandler` e cross-cutting HTTP de erros. |
 

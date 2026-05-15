@@ -49,13 +49,13 @@ sequenceDiagram
 
 **Inclui (checklist por PR / por operação):**
 
-- [ ] Escolher um método ou um conjunto coeso num `*Service` (evitar auth completo num único PR).
-- [ ] Mover orquestração para `Xxx implements XxxUseCase` (ou criar use case se ainda for só delegação de uma linha **com** plano de absorção no mesmo PR ou no seguinte).
-- [ ] Manter DTOs HTTP e contrato REST; ajustar apenas o wiring (controller → use case).
-- [ ] `@Transactional` só onde for estritamente necessário (**05** §4.3); justificar no PR se mantiver/adicionar.
-- [ ] `mvn test` verde.
+- [x] Escolher um método ou um conjunto coeso num `*Service` (evitar auth completo num único PR).
+- [x] Mover orquestração para `Xxx implements XxxUseCase` (ou criar use case se ainda for só delegação de uma linha **com** plano de absorção no mesmo PR ou no seguinte).
+- [x] Manter DTOs HTTP e contrato REST; ajustar apenas o wiring (controller → use case).
+- [x] `@Transactional` só onde for estritamente necessário (**05** §4.3); justificar no PR se mantiver/adicionar.
+- [x] `mvn test` verde.
 
-**Pronto quando:** O fluxo tocado não depende do `*Service` para essa operação (ou o serviço ficou só como fachada mínima documentada até remoção).
+**Pronto quando:** O fluxo tocado não depende do `*Service` para essa operação. **Concluído neste repo:** pacote `com.agenciahub.api.service` **eliminado**; restantes auxiliares em `integrations`, `usecases.user` e `scheduling` (**ADR 0006**).
 
 **Depois:** Continuar Fase 1 noutra operação/agregado **ou** iniciar Fase 2 numa feature onde o pacote `application.<feature>` ficou grande.
 
@@ -89,7 +89,7 @@ sequenceDiagram
 - [x] Identificar um adaptador (ex.: e-mail, cliente REST). **Piloto: e-mail.**
 - [x] Introduzir interface + implementação; injetar no use case; testes com duplo de teste ou cliente fake quando fizer sentido.
 
-**Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro. **E-mail:** `application.integrations.email` — **ADR 0005**.
+**Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro. **E-mail:** `application.integrations.email` (**ADR 0005**). **Códigos:** `application.integrations.verification` (**ADR 0006**).
 
 **Depois:** Fase 1 noutros fluxos que reutilizem a integração **ou** Fase 4 se a política de erros/retry for transversal.
 
@@ -144,6 +144,7 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - **Utilizadores:** Fase 1 — **`UserService` removido**; `GetUserEntityById` para painel vendedor (owner); CRUD/listagens nos use cases.
 - **Fase 2 (pacotes 06):** todas as features HTTP migradas para `application/usecases/{feature}/{ação}/` (além do piloto **termos** já feito).
 - **Fase 3 (integrações):** e-mail em `application/integrations/email` — ver **ADR 0005**.
-- **Fase 4 (ADR):** **ADR 0005** — pacote de integração de e-mail.
+- **Fase 4 (ADR):** **ADR 0005** (e-mail), **ADR 0006** (verificação, link público, scheduling).
+- **Refatoração incremental concluída:** sem `com.agenciahub.api.service`; HTTP em `usecases/...`; integrações em `integrations/...`.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.
