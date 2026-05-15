@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.customer.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.domain.CustomerStatus;
 import com.agenciahub.api.dto.customer.CreateCustomerRequest;
 import com.agenciahub.api.dto.customer.CustomerResponse;

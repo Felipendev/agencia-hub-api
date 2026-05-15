@@ -1,4 +1,4 @@
-package com.agenciahub.api.api.docs;
+package com.agenciahub.api.application.controllers.docs;
 
 import com.agenciahub.api.exception.ApiError;
 import io.swagger.v3.oas.annotations.media.Content;

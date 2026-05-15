@@ -1,7 +1,7 @@
 package com.agenciahub.api.controller.sellerdashboard;
 
 import com.agenciahub.api.application.sellerdashboard.BuildSellerDashboardUseCase;
-import com.agenciahub.api.controller.sellerdashboard.docs.SellerDashboardAPI;
+import com.agenciahub.api.application.controllers.docs.SellerDashboardAPI;
 import com.agenciahub.api.dto.seller.SellerDashboardResponse;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.service.UserService;

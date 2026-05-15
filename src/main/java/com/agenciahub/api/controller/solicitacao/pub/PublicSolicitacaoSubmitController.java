@@ -1,7 +1,7 @@
 package com.agenciahub.api.controller.solicitacao.pub;
 
 import com.agenciahub.api.application.solicitacao.SubmitPublicSolicitacaoUseCase;
-import com.agenciahub.api.controller.solicitacao.pub.docs.PublicSolicitacaoSubmitAPI;
+import com.agenciahub.api.application.controllers.docs.PublicSolicitacaoSubmitAPI;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitRequest;
 import com.agenciahub.api.dto.solicitacao.PublicSolicitacaoSubmitResponse;
 import lombok.RequiredArgsConstructor;

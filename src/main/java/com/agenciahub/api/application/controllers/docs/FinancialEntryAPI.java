@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.financial.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
 import com.agenciahub.api.domain.FinancialEntryType;

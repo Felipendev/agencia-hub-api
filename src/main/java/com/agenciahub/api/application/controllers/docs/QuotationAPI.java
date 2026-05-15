@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.quotation.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.dto.quotation.CreateQuotationRequest;
 import com.agenciahub.api.dto.quotation.QuotationResponse;

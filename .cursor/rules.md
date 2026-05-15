@@ -59,7 +59,7 @@ When rules conflict, follow this order:
 
 ## Documentação OpenAPI (`*API`)
 
-- Contrato e documentação rica do REST ficam em **interfaces públicas** nomeadas `*API` (ex.: `QuotationAPI` quando extraída), preferencialmente no subpacote `docs` dentro do agrupamento da feature (ex.: `controller.quotation.docs`).
+- Contrato e documentação rica do REST ficam em **interfaces públicas** nomeadas `*API` (ex.: `QuotationAPI`) no pacote **`com.agenciahub.api.application.controllers.docs`**; o `@RestController` em `controller.<feature>` implementa a interface.
 - O `@RestController` **implementa** a interface `*API`; evita duplicar `@Operation` / `@ApiResponses` no controller quando já estiverem na interface.
 - Textos de `@Tag`, `@Operation` (summary e description), `@ApiResponse` e descrições correlatas: **português**, no estilo rico acordado para este repositório (descrição em bloco de texto, regras em lista quando fizer sentido, códigos de resposta documentados).
 

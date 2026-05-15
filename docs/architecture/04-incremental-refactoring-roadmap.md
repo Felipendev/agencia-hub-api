@@ -27,7 +27,7 @@ Princípios gerais (sempre válidos):
 - **Erros HTTP globais:** `GlobalExceptionHandler` em `com.agenciahub.api.web` (fora de `controller`); respostas genéricas e fallbacks de integridade em **português / minúsculas** onde aplicável; código `INTERNAL_ERROR` com mensagem `erro interno do servidor`.
 - **404 por lookup:** mensagens `ResourceNotFoundException` em `AuthService`, `TermsService`, `AgencyService`, `InvitationService` e `SolicitacaoSubmissionService` passam a incluir **identificador** (e-mail, id ou token) no texto, alinhado a `UserService` / `QuotationService`.
 - **OpenAPI — erros:** `OpenApiConfig` define o schema global **`ApiError`** e descreve no **info** os códigos `code` e HTTP associados (`UNAUTHENTICATED`, `MISSING_AGENCY_CONTEXT`, `NOT_FOUND`, etc.).
-- **OpenAPI — respostas de erro por recurso:** meta-anotação `@StandardErrorApiResponses` (`api.docs`) documenta 400/401/403/404/409/500 com schema `ApiError`; aplicada em **todos** os `*API` (auth, termos, usuários, agência, clientes, cotações, financeiro, convites, painel vendedor, solicitação pública e agência).
+- **OpenAPI — respostas de erro por recurso:** meta-anotação `@StandardErrorApiResponses` (`application.controllers.docs`) documenta 400/401/403/404/409/500 com schema `ApiError`; aplicada em **todos** os `*API` (auth, termos, usuários, agência, clientes, cotações, financeiro, convites, painel vendedor, solicitação pública e agência).
 - **Passo 7 (ADRs):** **ADR 0003** (erros HTTP, OpenAPI, tenant/segurança); **ADR 0004** (mapeamento **pacotes Java** ↔ camadas conceptuais: `controller` + `application.<feature>` sem `application/controllers`); `02-backend-architecture.md` referencia ambos onde aplicável.
 - **Definições de refatoração (pacotes + classes):** `05-package-refactoring-and-class-responsibilities.md` — modelo alvo por operação, convenções de pacote (flat vs `usecases/<feature>/<verbo>`), papel do use case vs legado `*Service`, transações e anti-padrões.
 - **Testes de controller (`@WebMvcTest`):** cobertura alinhada a todos os `@RestController` — inclui **painel do vendedor** (`SellerDashboardControllerWebMvcTest`) e endpoints **públicos de solicitação** (`PublicSolicitacaoConfigControllerWebMvcTest`, `PublicSolicitacaoSubmitControllerWebMvcTest`); `SellerDashboardController` repete `@AuthenticationPrincipal` / `@PathVariable` na implementação (como `QuotationController`) para resolução correta do utilizador autenticado.
@@ -70,7 +70,7 @@ sequenceDiagram
 
 - [ ] `docs/architecture/*` e `docs/architecture/adr/*` no Git (se ainda forem só locais).
 - [ ] `.cursor/rules.md` no Git (se aplicável ao time).
-- [ ] Pacotes de apoio já acordados: `com.agenciahub.api.application` (ex.: `UseCase`), `com.agenciahub.api.api`, `com.agenciahub.api.infrastructure` (apenas `package-info` até haver classes).
+- [ ] Pacotes de apoio já acordados: `com.agenciahub.api.application` (ex.: `UseCase`, `application.controllers.docs` para `*API` / OpenAPI), `com.agenciahub.api.infrastructure` (apenas `package-info` até haver classes).
 
 **Pronto quando:** `git status` limpo no que diz respeito a baseline; outra pessoa clona e vê a mesma estrutura.
 
@@ -142,7 +142,7 @@ sequenceDiagram
 
 - [ ] Mover validações que não são só “formato HTTP/Bean Validation” para o serviço/use case.
 - [ ] Controller: `@Valid`, parâmetros, delegação, resposta.
-- [ ] Extrair documentação OpenAPI para interface pública `*API` no subpacote `docs` da feature (ex.: `controller.quotation.docs.QuotationAPI`); o `@RestController` implementa essa interface (ver `.cursor/rules.md`).
+- [ ] Extrair documentação OpenAPI para interface pública `*API` em `com.agenciahub.api.application.controllers.docs` (ex.: `QuotationAPI`); o `@RestController` em `controller.<feature>` implementa essa interface (ver `.cursor/rules.md`).
 - [ ] Mensagens de exceção no fluxo tocado: **português** e **minúsculas** (ver `02-backend-architecture.md` e `.cursor/rules.md`).
 - [ ] (Opcional neste passo) Repetir o **agrupamento por feature** em outros controllers (`controller.<feature>`, `application.<feature>`), um agregado por PR.
 

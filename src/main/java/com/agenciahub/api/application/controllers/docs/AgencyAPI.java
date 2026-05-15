@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.agency.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.agency.AgencyResponse;
 import com.agenciahub.api.dto.agency.UpdateAgencyRequest;
 import io.swagger.v3.oas.annotations.Operation;

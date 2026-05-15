@@ -1,7 +1,7 @@
 package com.agenciahub.api.controller.solicitacao.pub;
 
 import com.agenciahub.api.application.solicitacao.GetPublicSolicitacaoConfigBySlugUseCase;
-import com.agenciahub.api.controller.solicitacao.pub.docs.PublicSolicitacaoConfigAPI;
+import com.agenciahub.api.application.controllers.docs.PublicSolicitacaoConfigAPI;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;

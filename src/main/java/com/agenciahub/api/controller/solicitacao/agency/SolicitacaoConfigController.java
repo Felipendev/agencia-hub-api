@@ -3,7 +3,7 @@ package com.agenciahub.api.controller.solicitacao.agency;
 import com.agenciahub.api.application.solicitacao.GetOrCreateSolicitacaoConfigForAgencyUseCase;
 import com.agenciahub.api.application.solicitacao.UpsertSolicitacaoConfigCommand;
 import com.agenciahub.api.application.solicitacao.UpsertSolicitacaoConfigForAgencyUseCase;
-import com.agenciahub.api.controller.solicitacao.agency.docs.SolicitacaoConfigAgencyAPI;
+import com.agenciahub.api.application.controllers.docs.SolicitacaoConfigAgencyAPI;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigRequest;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoConfigResponse;
 import com.agenciahub.api.security.TenantContext;

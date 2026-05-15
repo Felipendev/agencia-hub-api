@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.user.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.user.CreateUserRequest;
 import com.agenciahub.api.dto.user.UpdateUserRequest;
 import com.agenciahub.api.dto.user.UserResponse;

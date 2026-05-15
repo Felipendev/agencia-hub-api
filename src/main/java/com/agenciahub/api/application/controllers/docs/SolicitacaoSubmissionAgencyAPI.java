@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.solicitacao.agency.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.solicitacao.SolicitacaoSubmissionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

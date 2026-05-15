@@ -3,7 +3,7 @@ package com.agenciahub.api.controller.terms;
 import com.agenciahub.api.application.terms.AcceptTermsCommand;
 import com.agenciahub.api.application.terms.AcceptTermsUseCase;
 import com.agenciahub.api.application.terms.GetLatestTermsPublicUseCase;
-import com.agenciahub.api.controller.terms.docs.TermsAPI;
+import com.agenciahub.api.application.controllers.docs.TermsAPI;
 import com.agenciahub.api.dto.terms.AcceptTermsRequest;
 import com.agenciahub.api.security.SecurityContextUsers;
 import lombok.RequiredArgsConstructor;

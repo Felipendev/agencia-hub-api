@@ -10,7 +10,7 @@ import com.agenciahub.api.application.auth.ResendCodeUseCase;
 import com.agenciahub.api.application.auth.ResetPasswordUseCase;
 import com.agenciahub.api.application.auth.ValidateInviteTokenUseCase;
 import com.agenciahub.api.application.auth.VerifyEmailUseCase;
-import com.agenciahub.api.controller.auth.docs.AuthAPI;
+import com.agenciahub.api.application.controllers.docs.AuthAPI;
 import com.agenciahub.api.dto.auth.ChangePasswordRequest;
 import com.agenciahub.api.dto.auth.ForgotPasswordRequest;
 import com.agenciahub.api.dto.auth.InviteValidationResponse;

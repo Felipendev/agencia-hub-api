@@ -6,7 +6,7 @@ import com.agenciahub.api.application.financial.ListFinancialEntriesQuery;
 import com.agenciahub.api.application.financial.ListFinancialEntriesUseCase;
 import com.agenciahub.api.application.financial.UpdateFinancialEntryCommand;
 import com.agenciahub.api.application.financial.UpdateFinancialEntryUseCase;
-import com.agenciahub.api.controller.financial.docs.FinancialEntryAPI;
+import com.agenciahub.api.application.controllers.docs.FinancialEntryAPI;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
 import com.agenciahub.api.domain.FinancialEntryType;

@@ -16,7 +16,8 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 
 | Pacote (raiz) | Papel hoje |
 |----------------|------------|
-| `com.agenciahub.api.controller.<feature>` | `@RestController` + `*API` em `…docs`. |
+| `com.agenciahub.api.controller.<feature>` | `@RestController` (implementa `*API`). |
+| `com.agenciahub.api.application.controllers.docs` | Interfaces `*API` + OpenAPI (`StandardErrorApiResponses`, etc.). |
 | `com.agenciahub.api.application.<feature>` | Interfaces `*UseCase`, implementações `@Service`, comandos/consultas, `*ResponseMapper`. |
 | `com.agenciahub.api.service` | Fachadas transacionais com repositórios JPA, muitas operações por agregado (`QuotationService`, `CustomerService`, …). |
 | `com.agenciahub.api.repository` / `entity` | Persistência JPA. |
@@ -50,7 +51,7 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 
 | Tipo | Pacote sugerido (ver secção 5) | Responsabilidade |
 |------|--------------------------------|------------------|
-| **`*API`** | `controller.<feature>.docs` | Contrato REST + OpenAPI; sem lógica de negócio. |
+| **`*API`** | `application.controllers.docs` | Contrato REST + OpenAPI; sem lógica de negócio. |
 | **`*Controller`** | `controller.<feature>` | Implementa `*API`; delega a `*UseCase`; liga `@AuthenticationPrincipal`, headers, `@Valid`. |
 | **`*UseCase` (interface)** | `application…` | Contrato da operação (`execute(Input)` ou `void`). |
 | **Implementação do use case** (`@Service`, nome = verbo/ação) | `application…` | **Todo** o fluxo da operação que hoje estaria “escondido” num `*Service` monolítico **desta** operação. |
@@ -115,7 +116,7 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 
 - **`<verbo>`:** `create`, `update`, `delete`, `list`, `getbyid`, etc. (inglês, minúsculas, consistente com nomes de classes).
 - **Quando usar:** muitas operações, DTOs e mappers por operação; paralelismo de PRs por pasta sem conflitos constantes.
-- **Regra:** o **controller** continua em `controller.<feature>`; **não** mover controllers para dentro de `application` (mantém-se alinhado ao **ADR 0004** e ao `02-backend-architecture.md`).
+- **Regra:** o **controller** continua em `controller.<feature>`; **não** mover `@RestController` para dentro de `application` (mantém-se alinhado ao **ADR 0004** e ao `02-backend-architecture.md`). As interfaces `*API` vivem em `application.controllers.docs`.
 
 ### 5.3 Transição A → B
 
