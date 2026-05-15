@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.user;
 
-import com.agenciahub.api.dto.user.UserResponse;
+import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,16 +10,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class GetUserById implements GetUserByIdUseCase {
+public class GetUserEntityById implements GetUserEntityByIdUseCase {
 
     private final UserRepository userRepository;
-    private final UserResponseMapper userResponseMapper;
 
     @Override
-    public UserResponse execute(UUID id) {
+    public User execute(UUID id) {
         return userRepository
                 .findById(id)
-                .map(userResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }
 }

@@ -1,7 +1,8 @@
 package com.agenciahub.api.application.user;
 
+import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.user.UserResponse;
-import com.agenciahub.api.service.UserService;
+import com.agenciahub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ListActiveSellers implements ListActiveSellersUseCase {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
+    private final UserResponseMapper userResponseMapper;
 
     @Override
     public List<UserResponse> execute(Void unused) {
-        return userService.listSellers();
+        return userRepository.findByRoleAndActiveTrue(UserRole.SELLER).stream()
+                .map(userResponseMapper::toResponse)
+                .toList();
     }
 }
