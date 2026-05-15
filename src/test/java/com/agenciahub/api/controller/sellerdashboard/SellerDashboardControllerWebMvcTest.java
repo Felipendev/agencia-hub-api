@@ -8,7 +8,7 @@ import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
-import com.agenciahub.api.service.UserService;
+import com.agenciahub.api.application.user.GetUserEntityByIdUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class SellerDashboardControllerWebMvcTest {
     private BuildSellerDashboardUseCase buildSellerDashboardUseCase;
 
     @MockitoBean
-    private UserService userService;
+    private GetUserEntityByIdUseCase getUserEntityByIdUseCase;
 
     @AfterEach
     void clearSecurity() {
@@ -144,7 +144,7 @@ class SellerDashboardControllerWebMvcTest {
                 null,
                 List.of(new SimpleGrantedAuthority("ROLE_OWNER"))));
 
-        when(userService.getEntityById(sellerId)).thenReturn(seller);
+        when(getUserEntityByIdUseCase.execute(sellerId)).thenReturn(seller);
 
         var sellerResp = new UserResponse(
                 sellerId,

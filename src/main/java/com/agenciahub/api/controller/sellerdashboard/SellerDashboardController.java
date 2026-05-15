@@ -2,9 +2,9 @@ package com.agenciahub.api.controller.sellerdashboard;
 
 import com.agenciahub.api.application.sellerdashboard.BuildSellerDashboardUseCase;
 import com.agenciahub.api.application.controllers.docs.SellerDashboardAPI;
+import com.agenciahub.api.application.user.GetUserEntityByIdUseCase;
 import com.agenciahub.api.dto.seller.SellerDashboardResponse;
 import com.agenciahub.api.entity.User;
-import com.agenciahub.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class SellerDashboardController implements SellerDashboardAPI {
 
     private final BuildSellerDashboardUseCase buildSellerDashboardUseCase;
-    private final UserService userService;
+    private final GetUserEntityByIdUseCase getUserEntityByIdUseCase;
 
     @Override
     public SellerDashboardResponse myDashboard(@AuthenticationPrincipal User caller) {
@@ -30,7 +30,7 @@ public class SellerDashboardController implements SellerDashboardAPI {
     public SellerDashboardResponse sellerDashboard(
             @PathVariable UUID sellerId,
             @AuthenticationPrincipal User caller) {
-        User seller = userService.getEntityById(sellerId);
+        User seller = getUserEntityByIdUseCase.execute(sellerId);
         return buildSellerDashboardUseCase.execute(seller);
     }
 }
