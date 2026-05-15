@@ -1,6 +1,6 @@
 package com.agenciahub.api.security;
 
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.UnauthenticatedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Resolves the authenticated user from {@link SecurityContextHolder} (JWT filter sets {@link User} as principal).
+ * Resolves the authenticated user from {@link SecurityContextHolder} (JWT filter sets {@link PlatformAccount} as principal).
  */
 public final class SecurityContextUsers {
 
@@ -17,14 +17,14 @@ public final class SecurityContextUsers {
     }
 
     /**
-     * When the principal is the persisted {@link User} entity (typical for this API after JWT validation).
+     * When the principal is the persisted {@link PlatformAccount} entity (typical for this API after JWT validation).
      */
-    public static Optional<User> optionalUser() {
+    public static Optional<PlatformAccount> optionalUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication.getPrincipal() == null) {
             return Optional.empty();
         }
-        if (authentication.getPrincipal() instanceof User user) {
+        if (authentication.getPrincipal() instanceof PlatformAccount user) {
             return Optional.of(user);
         }
         return Optional.empty();
@@ -32,7 +32,7 @@ public final class SecurityContextUsers {
 
     public static UUID requireUserId() {
         return optionalUser()
-                .map(User::getId)
+                .map(PlatformAccount::getId)
                 .orElseGet(() -> {
                     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                     if (authentication == null || authentication.getPrincipal() == null) {
@@ -46,7 +46,7 @@ public final class SecurityContextUsers {
                 });
     }
 
-    public static User requireUser() {
+    public static PlatformAccount requireUser() {
         return optionalUser()
                 .orElseThrow(() -> new UnauthenticatedException("usuário não autenticado"));
     }

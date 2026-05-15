@@ -2,7 +2,7 @@ package com.agenciahub.api.application.controller;
 
 import com.agenciahub.api.application.usecases.user.create.CreateUserUseCase;
 import com.agenciahub.api.application.usecases.user.retrieve.byid.GetUserByIdUseCase;
-import com.agenciahub.api.application.usecases.user.retrieve.listactive.ListActiveSellersUseCase;
+import com.agenciahub.api.application.usecases.salesagent.retrieve.listactive.ListActiveSalesAgentsUseCase;
 import com.agenciahub.api.application.usecases.user.retrieve.list.ListUsersUseCase;
 import com.agenciahub.api.application.usecases.user.update.UpdateUserCommand;
 import com.agenciahub.api.application.usecases.user.update.UpdateUserUseCase;
@@ -21,7 +21,7 @@ import java.util.UUID;
 public class UserController implements UserAPI {
 
     private final ListUsersUseCase listUsersUseCase;
-    private final ListActiveSellersUseCase listActiveSellersUseCase;
+    private final ListActiveSalesAgentsUseCase listActiveSalesAgentsUseCase;
     private final GetUserByIdUseCase getUserByIdUseCase;
     private final CreateUserUseCase createUserUseCase;
     private final UpdateUserUseCase updateUserUseCase;
@@ -33,7 +33,7 @@ public class UserController implements UserAPI {
 
     @Override
     public List<UserSummaryResponseDTO> sellers() {
-        return listActiveSellersUseCase.execute(null);
+        return listActiveSalesAgentsUseCase.execute(null);
     }
 
     @Override

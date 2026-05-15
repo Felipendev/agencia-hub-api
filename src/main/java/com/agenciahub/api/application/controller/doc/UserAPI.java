@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequestMapping("/users")
 @Tag(
         name = "Usuários",
-        description = "Gestão de usuários da agência. Acesso restrito a papel **OWNER** (ver filtro de segurança).")
+        description = "Gestão de usuários da agência. Acesso restrito a papel **AGENCY_OWNER** (ver filtro de segurança).")
 @StandardErrorApiResponses
 public interface UserAPI {
 

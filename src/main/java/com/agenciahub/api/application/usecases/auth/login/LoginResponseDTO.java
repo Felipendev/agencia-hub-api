@@ -2,7 +2,7 @@ package com.agenciahub.api.application.usecases.auth.login;
 
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -12,7 +12,7 @@ public record LoginResponseDTO(
         UUID userId,
         String name,
         String email,
-        UserRole role,
+        AccountKind role,
         UUID agencyId,
         String agencyName,
         AgencyStatus agencyStatus,

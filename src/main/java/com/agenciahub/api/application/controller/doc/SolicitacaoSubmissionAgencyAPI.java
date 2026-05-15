@@ -22,7 +22,7 @@ import java.util.UUID;
 public interface SolicitacaoSubmissionAgencyAPI {
 
     @GetMapping
-    @Operation(summary = "Lista submissões", description = "Ordenação: mais recentes primeiro. Requer papel **OWNER**.")
+    @Operation(summary = "Lista submissões", description = "Ordenação: mais recentes primeiro. Requer papel **AGENCY_OWNER**.")
     List<SolicitacaoSubmissionSummaryResponseDTO> list();
 
     @DeleteMapping("/{id}")

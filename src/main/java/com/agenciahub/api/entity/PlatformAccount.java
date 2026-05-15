@@ -1,6 +1,6 @@
 package com.agenciahub.api.entity;
 
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,7 +30,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class PlatformAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -55,7 +55,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private UserRole role;
+    private AccountKind role;
 
     @Column(nullable = false)
     @Builder.Default

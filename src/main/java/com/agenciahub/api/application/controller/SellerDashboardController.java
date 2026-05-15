@@ -1,10 +1,10 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.BuildSellerDashboardUseCase;
+import com.agenciahub.api.application.usecases.salesagent.dashboard.build.BuildSalesAgentDashboardUseCase;
 import com.agenciahub.api.application.controller.doc.SellerDashboardAPI;
 import com.agenciahub.api.application.usecases.user.retrieve.entity.GetUserEntityByIdUseCase;
-import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.SellerDashboardResponseDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.application.usecases.salesagent.dashboard.build.SalesAgentDashboardResponseDTO;
+import com.agenciahub.api.entity.PlatformAccount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,20 +17,20 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SellerDashboardController implements SellerDashboardAPI {
 
-    private final BuildSellerDashboardUseCase buildSellerDashboardUseCase;
+    private final BuildSalesAgentDashboardUseCase buildSellerDashboardUseCase;
     private final GetUserEntityByIdUseCase getUserEntityByIdUseCase;
 
     @Override
-    public SellerDashboardResponseDTO myDashboard(@AuthenticationPrincipal User caller) {
+    public SalesAgentDashboardResponseDTO myDashboard(@AuthenticationPrincipal PlatformAccount caller) {
         return buildSellerDashboardUseCase.execute(caller);
     }
 
     @Override
-    @PreAuthorize("hasRole('OWNER')")
-    public SellerDashboardResponseDTO sellerDashboard(
+    @PreAuthorize("hasRole('AGENCY_OWNER')")
+    public SalesAgentDashboardResponseDTO sellerDashboard(
             @PathVariable UUID sellerId,
-            @AuthenticationPrincipal User caller) {
-        User seller = getUserEntityByIdUseCase.execute(sellerId);
+            @AuthenticationPrincipal PlatformAccount caller) {
+        PlatformAccount seller = getUserEntityByIdUseCase.execute(sellerId);
         return buildSellerDashboardUseCase.execute(seller);
     }
 }

@@ -4,14 +4,14 @@ import com.agenciahub.api.application.usecases.auth.shared.AuthBetaWhitelist;
 import com.agenciahub.api.application.usecases.terms.shared.TermsConstants;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.domain.VerificationCodeType;
 import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyRequestDTO;
 import com.agenciahub.api.application.usecases.auth.shared.RegisterAgencyResultDTO;
 import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.repository.AgencyRepository;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import com.agenciahub.api.validation.PhoneValidator;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class RegisterAgency implements RegisterAgencyUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final AgencyRepository agencyRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationCodePort verificationCodePort;
@@ -78,13 +78,13 @@ public class RegisterAgency implements RegisterAgencyUseCase {
                 .build();
         agency = agencyRepository.save(agency);
 
-        User user = User.builder()
+        PlatformAccount user = PlatformAccount.builder()
                 .agency(agency)
                 .name(request.ownerName())
                 .email(email)
                 .publicLinkCode(publicLinkCodeSupport.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .role(UserRole.OWNER)
+                .role(AccountKind.AGENCY_OWNER)
                 .phone(PhoneValidator.formatForStorage(request.ownerPhone()))
                 .emailVerified(false)
                 .active(true)

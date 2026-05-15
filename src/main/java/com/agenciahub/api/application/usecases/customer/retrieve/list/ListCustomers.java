@@ -3,8 +3,8 @@ package com.agenciahub.api.application.usecases.customer.retrieve.list;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerResponseMapper;
 import com.agenciahub.api.domain.CustomerStatus;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerSummaryResponseDTO;
-import com.agenciahub.api.entity.Customer;
-import com.agenciahub.api.repository.CustomerRepository;
+import com.agenciahub.api.entity.CrmCustomer;
+import com.agenciahub.api.repository.CrmCustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ListCustomers implements ListCustomersUseCase {
 
-    private final CustomerRepository customerRepository;
+    private final CrmCustomerRepository customerRepository;
     private final CustomerResponseMapper customerResponseMapper;
 
     @Override
@@ -22,7 +22,7 @@ public class ListCustomers implements ListCustomersUseCase {
         String name = query.name();
         CustomerStatus status = query.status();
         boolean hasName = name != null && !name.isBlank();
-        List<Customer> rows;
+        List<CrmCustomer> rows;
         if (!hasName && status == null) {
             rows = customerRepository.findAllByOrderByCreatedAtDesc();
         } else if (hasName && status == null) {

@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.usecases.auth.verifyemail;
 
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 
 import java.util.UUID;
 
@@ -9,7 +9,7 @@ public record VerifyEmailResponseDTO(
         UUID userId,
         String name,
         String email,
-        UserRole role,
+        AccountKind role,
         UUID agencyId,
         String agencyName,
         String publicLinkCode

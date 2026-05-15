@@ -5,10 +5,10 @@ import com.agenciahub.api.application.usecases.invitation.shared.InvitationLinkB
 import com.agenciahub.api.domain.InvitationStatus;
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
 import com.agenciahub.api.entity.Invitation;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.InvitationRepository;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.integrations.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class CreateInvitation implements CreateInvitationUseCase {
 
     private final InvitationRepository invitationRepository;
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final EmailService emailService;
     private final InvitationLinkBuilder invitationLinkBuilder;
     private final InvitationResponseMapper invitationResponseMapper;
@@ -31,8 +31,8 @@ public class CreateInvitation implements CreateInvitationUseCase {
     @Override
     @Transactional
     public InvitationSummaryResponseDTO execute(CreateInvitationCommand command) {
-        User inviter = command.inviter();
-        User managedInviter = userRepository
+        PlatformAccount inviter = command.inviter();
+        PlatformAccount managedInviter = userRepository
                 .findById(inviter.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + inviter.getId()));
 

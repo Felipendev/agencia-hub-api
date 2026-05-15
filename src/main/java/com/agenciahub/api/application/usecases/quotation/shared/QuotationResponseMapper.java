@@ -2,9 +2,9 @@ package com.agenciahub.api.application.usecases.quotation.shared;
 
 import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
-import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.entity.CrmCustomer;
 import com.agenciahub.api.entity.Quotation;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,9 +14,9 @@ import java.util.UUID;
 public class QuotationResponseMapper {
 
     public QuotationSummaryResponseDTO toResponse(Quotation q) {
-        Customer c = q.getCustomer();
-        User s = q.getSeller();
-        User createdBy = q.getCreatedByUser();
+        CrmCustomer c = q.getCustomer();
+        PlatformAccount s = q.getSeller();
+        PlatformAccount createdBy = q.getCreatedByUser();
         QuotationCreationSource src = q.getCreationSource() != null
                 ? q.getCreationSource()
                 : QuotationCreationSource.INTERNAL;

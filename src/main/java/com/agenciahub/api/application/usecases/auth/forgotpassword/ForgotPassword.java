@@ -2,7 +2,7 @@ package com.agenciahub.api.application.usecases.auth.forgotpassword;
 
 import com.agenciahub.api.domain.VerificationCodeType;
 import com.agenciahub.api.application.usecases.auth.forgotpassword.ForgotPasswordRequestDTO;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ForgotPassword implements ForgotPasswordUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final VerificationCodePort verificationCodePort;
 
     @Override

@@ -2,7 +2,7 @@ package com.agenciahub.api.application.usecases.solicitacao.shared;
 
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
 import com.agenciahub.api.entity.SolicitacaoSubmission;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -11,7 +11,7 @@ import java.util.UUID;
 public class SolicitacaoSubmissionResponseMapper {
 
     public SolicitacaoSubmissionSummaryResponseDTO toResponse(SolicitacaoSubmission s) {
-        User ref = s.getReferralSeller();
+        PlatformAccount ref = s.getReferralSeller();
         UUID refId = ref != null ? ref.getId() : null;
         String refName = ref != null ? ref.getName() : null;
         return new SolicitacaoSubmissionSummaryResponseDTO(

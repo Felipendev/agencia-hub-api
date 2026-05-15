@@ -1,11 +1,11 @@
 package com.agenciahub.api.application.usecases.user.create;
 
 import com.agenciahub.api.application.usecases.user.shared.UserResponseMapper;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.user.create.CreateUserRequestDTO;
 import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
-import com.agenciahub.api.entity.User;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.entity.PlatformAccount;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreateUser implements CreateUserUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final PublicLinkCodeSupport publicLinkCodeSupport;
     private final UserResponseMapper userResponseMapper;
@@ -24,14 +24,14 @@ public class CreateUser implements CreateUserUseCase {
     @Override
     @Transactional
     public UserSummaryResponseDTO execute(CreateUserRequestDTO request) {
-        if (request.role() == UserRole.SELLER) {
+        if (request.role() == AccountKind.SALES_AGENT) {
             throw new IllegalArgumentException(
                     "agente de venda deve ser criado via convite; use POST /invitations e o registo com token");
         }
         if (userRepository.existsByEmail(request.email().trim().toLowerCase())) {
             throw new IllegalArgumentException("este e-mail já está cadastrado");
         }
-        User user = User.builder()
+        PlatformAccount user = PlatformAccount.builder()
                 .name(request.name().strip())
                 .email(request.email().trim().toLowerCase())
                 .publicLinkCode(publicLinkCodeSupport.allocate())

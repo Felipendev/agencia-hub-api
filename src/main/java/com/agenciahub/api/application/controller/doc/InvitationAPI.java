@@ -25,7 +25,7 @@ import java.util.UUID;
         description = """
                 Gestão de convites de vendedores para a agência (criação, listagem e revogação).
 
-                Acesso restrito a usuários com papel **OWNER**. O convite envia e-mail com link público `/convite/{token}`.""")
+                Acesso restrito a usuários com papel **AGENCY_OWNER**. O convite envia e-mail com link público `/convite/{token}`.""")
 @RequestMapping("/invitations")
 @StandardErrorApiResponses
 public interface InvitationAPI {

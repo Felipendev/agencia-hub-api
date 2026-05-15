@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.usecases.user.shared;
 
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -10,7 +10,7 @@ public record UserSummaryResponseDTO(
         UUID id,
         String name,
         String email,
-        UserRole role,
+        AccountKind role,
         boolean active,
         BigDecimal commissionPct,
         BigDecimal commissionFixed,

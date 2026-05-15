@@ -4,18 +4,18 @@ import com.agenciahub.api.application.usecases.quotation.shared.QuotationSupport
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationResponseMapper;
 import com.agenciahub.api.domain.QuotationCreationSource;
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationRequestDTO;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
-import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.entity.CrmCustomer;
 import com.agenciahub.api.entity.Quotation;
 import com.agenciahub.api.entity.SolicitacaoSubmission;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.CustomerRepository;
+import com.agenciahub.api.repository.CrmCustomerRepository;
 import com.agenciahub.api.repository.QuotationRepository;
 import com.agenciahub.api.repository.SolicitacaoSubmissionRepository;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,17 +28,17 @@ import java.util.UUID;
 public class CreateQuotation implements CreateQuotationUseCase {
 
     private final QuotationRepository quotationRepository;
-    private final CustomerRepository customerRepository;
-    private final UserRepository userRepository;
+    private final CrmCustomerRepository customerRepository;
+    private final PlatformAccountRepository userRepository;
     private final SolicitacaoSubmissionRepository solicitacaoSubmissionRepository;
     private final QuotationResponseMapper quotationResponseMapper;
 
     @Override
     public QuotationSummaryResponseDTO execute(CreateQuotationCommand command) {
         CreateQuotationRequestDTO request = command.request();
-        User caller = command.caller();
+        PlatformAccount caller = command.caller();
 
-        if (caller != null && caller.getRole() == UserRole.SELLER && request.sellerId() == null) {
+        if (caller != null && caller.getRole() == AccountKind.SALES_AGENT && request.sellerId() == null) {
             request = new CreateQuotationRequestDTO(
                     request.customerId(),
                     caller.getId(),
@@ -62,12 +62,12 @@ public class CreateQuotation implements CreateQuotationUseCase {
 
         final CreateQuotationRequestDTO effective = request;
 
-        Customer customer = customerRepository
+        CrmCustomer customer = customerRepository
                 .findById(effective.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + effective.customerId()));
 
         UUID agencyId = customer.getAgency().getId();
-        User seller = QuotationSupport.resolveSellerInAgency(userRepository, effective.sellerId(), agencyId);
+        PlatformAccount seller = QuotationSupport.resolveSellerInAgency(userRepository, effective.sellerId(), agencyId);
 
         SolicitacaoSubmission publicSub = null;
         if (effective.publicSubmissionId() != null) {

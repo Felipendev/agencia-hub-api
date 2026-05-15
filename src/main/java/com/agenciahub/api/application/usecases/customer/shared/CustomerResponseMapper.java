@@ -1,12 +1,12 @@
 package com.agenciahub.api.application.usecases.customer.shared;
 
-import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.entity.CrmCustomer;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CustomerResponseMapper {
 
-    public CustomerSummaryResponseDTO toResponse(Customer c) {
+    public CustomerSummaryResponseDTO toResponse(CrmCustomer c) {
         return new CustomerSummaryResponseDTO(
                 c.getId(),
                 c.getName(),

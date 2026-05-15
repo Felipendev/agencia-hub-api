@@ -8,7 +8,7 @@ import com.agenciahub.api.application.usecases.invitation.revoke.RevokeInvitatio
 import com.agenciahub.api.application.controller.doc.InvitationAPI;
 import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationRequestDTO;
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationSummaryResponseDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('OWNER')")
+@PreAuthorize("hasRole('AGENCY_OWNER')")
 public class InvitationController implements InvitationAPI {
 
     private final CreateInvitationUseCase createInvitationUseCase;
@@ -29,7 +29,7 @@ public class InvitationController implements InvitationAPI {
 
     @Override
     public InvitationSummaryResponseDTO create(CreateInvitationRequestDTO request) {
-        User inviter = SecurityContextUsers.requireUser();
+        PlatformAccount inviter = SecurityContextUsers.requireUser();
         return createInvitationUseCase.execute(new CreateInvitationCommand(request, inviter));
     }
 

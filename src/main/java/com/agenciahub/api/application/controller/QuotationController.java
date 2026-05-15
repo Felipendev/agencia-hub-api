@@ -13,7 +13,7 @@ import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationRequestDTO;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationRequestDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,7 +36,7 @@ public class QuotationController implements QuotationAPI {
             UUID customerId,
             QuotationStatus status,
             String search,
-            @AuthenticationPrincipal User caller) {
+            @AuthenticationPrincipal PlatformAccount caller) {
         return listQuotationsUseCase.execute(new ListQuotationsQuery(customerId, status, search, caller));
     }
 
@@ -47,7 +47,7 @@ public class QuotationController implements QuotationAPI {
 
     @Override
     public QuotationSummaryResponseDTO create(
-            CreateQuotationRequestDTO request, @AuthenticationPrincipal User caller) {
+            CreateQuotationRequestDTO request, @AuthenticationPrincipal PlatformAccount caller) {
         return createQuotationUseCase.execute(new CreateQuotationCommand(request, caller));
     }
 

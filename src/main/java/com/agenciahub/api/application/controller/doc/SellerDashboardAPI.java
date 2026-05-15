@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.SellerDashboardResponseDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.application.usecases.salesagent.dashboard.build.SalesAgentDashboardResponseDTO;
+import com.agenciahub.api.entity.PlatformAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,11 +19,11 @@ public interface SellerDashboardAPI {
 
     @GetMapping("/me")
     @Operation(summary = "Painel do vendedor autenticado")
-    SellerDashboardResponseDTO myDashboard(@AuthenticationPrincipal User caller);
+    SalesAgentDashboardResponseDTO myDashboard(@AuthenticationPrincipal PlatformAccount caller);
 
     @GetMapping("/{sellerId}")
     @Operation(summary = "Painel de um vendedor (apenas owner)")
-    SellerDashboardResponseDTO sellerDashboard(
+    SalesAgentDashboardResponseDTO sellerDashboard(
             @Parameter(description = "id do vendedor") @PathVariable UUID sellerId,
-            @AuthenticationPrincipal User caller);
+            @AuthenticationPrincipal PlatformAccount caller);
 }

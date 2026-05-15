@@ -2,7 +2,7 @@ package com.agenciahub.api.application.integrations.verification;
 
 import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.domain.VerificationCodeType;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.entity.VerificationCode;
 import com.agenciahub.api.repository.VerificationCodeRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class DefaultVerificationCodeService implements VerificationCodePort {
 
     @Override
     @Transactional
-    public boolean generateAndSend(String email, VerificationCodeType type, User user, String userName) {
+    public boolean generateAndSend(String email, VerificationCodeType type, PlatformAccount user, String userName) {
         Instant oneHourAgo = Instant.now().minus(1, ChronoUnit.HOURS);
         long recentCount = verificationCodeRepository.countByEmailAndCreatedAtAfter(email, oneHourAgo);
         if (recentCount >= MAX_CODES_PER_HOUR) {

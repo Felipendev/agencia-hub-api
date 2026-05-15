@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.usecases.user.shared;
 
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +16,10 @@ public class PublicLinkCodeSupport {
 
     private static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final SecureRandom random = new SecureRandom();
 
-    public PublicLinkCodeSupport(UserRepository userRepository) {
+    public PublicLinkCodeSupport(PlatformAccountRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -39,7 +39,7 @@ public class PublicLinkCodeSupport {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String ensurePersistedForUserId(UUID userId) {
-        User user = userRepository
+        PlatformAccount user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + userId));
         if (user.getPublicLinkCode() != null && !user.getPublicLinkCode().isBlank()) {

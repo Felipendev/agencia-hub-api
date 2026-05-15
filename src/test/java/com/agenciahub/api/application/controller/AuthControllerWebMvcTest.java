@@ -11,7 +11,7 @@ import com.agenciahub.api.application.usecases.auth.validatetoken.ValidateInvite
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailUseCase;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
 import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
@@ -94,7 +94,7 @@ class AuthControllerWebMvcTest {
                         uid,
                         "Nome",
                         "a@b.com",
-                        UserRole.OWNER,
+                        AccountKind.AGENCY_OWNER,
                         aid,
                         "Agência",
                         AgencyStatus.ACTIVE,

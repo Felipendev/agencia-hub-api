@@ -1,11 +1,11 @@
 package com.agenciahub.api.application.usecases.quotation.shared;
 
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.entity.Quotation;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -62,17 +62,17 @@ public final class QuotationSupport {
         };
     }
 
-    public static User resolveSellerInAgency(UserRepository userRepository, UUID sellerId, UUID agencyId) {
+    public static PlatformAccount resolveSellerInAgency(PlatformAccountRepository userRepository, UUID sellerId, UUID agencyId) {
         if (sellerId == null) {
             return null;
         }
-        User u = userRepository
+        PlatformAccount u = userRepository
                 .findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("vendedor não encontrado: " + sellerId));
         if (u.getAgency() == null || !u.getAgency().getId().equals(agencyId)) {
             throw new IllegalArgumentException("vendedor não pertence à agência deste cliente.");
         }
-        if (u.getRole() != UserRole.SELLER && u.getRole() != UserRole.OWNER) {
+        if (u.getRole() != AccountKind.SALES_AGENT && u.getRole() != AccountKind.AGENCY_OWNER) {
             throw new IllegalArgumentException("usuário inválido como vendedor.");
         }
         return u;

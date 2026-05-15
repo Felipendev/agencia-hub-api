@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.quotation.create;
 
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationRequestDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 
-public record CreateQuotationCommand(CreateQuotationRequestDTO request, User caller) {
+public record CreateQuotationCommand(CreateQuotationRequestDTO request, PlatformAccount caller) {
 }

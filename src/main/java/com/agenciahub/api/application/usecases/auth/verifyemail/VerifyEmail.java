@@ -5,10 +5,10 @@ import com.agenciahub.api.domain.VerificationCodeType;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailRequestDTO;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailResponseDTO;
 import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyRepository;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.security.JwtService;
 import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
@@ -23,7 +23,7 @@ import java.time.temporal.ChronoUnit;
 @RequiredArgsConstructor
 public class VerifyEmail implements VerifyEmailUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final AgencyRepository agencyRepository;
     private final VerificationCodePort verificationCodePort;
     private final PublicLinkCodeSupport publicLinkCodeSupport;
@@ -40,7 +40,7 @@ public class VerifyEmail implements VerifyEmailUseCase {
             throw new IllegalArgumentException("código inválido ou expirado");
         }
 
-        User user = userRepository
+        PlatformAccount user = userRepository
                 .findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + email));
 

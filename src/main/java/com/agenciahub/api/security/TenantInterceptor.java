@@ -1,6 +1,6 @@
 package com.agenciahub.api.security;
 
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ public class TenantInterceptor implements HandlerInterceptor {
                              HttpServletResponse response,
                              Object handler) {
         SecurityContextUsers.optionalUser()
-                .map(User::getAgency)
+                .map(PlatformAccount::getAgency)
                 .ifPresent(agency -> TenantContext.set(agency.getId()));
 
         return true;

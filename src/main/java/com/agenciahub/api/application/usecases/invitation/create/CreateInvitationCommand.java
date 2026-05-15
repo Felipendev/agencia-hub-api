@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.invitation.create;
 
 import com.agenciahub.api.application.usecases.invitation.create.CreateInvitationRequestDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 
-public record CreateInvitationCommand(CreateInvitationRequestDTO request, User inviter) {
+public record CreateInvitationCommand(CreateInvitationRequestDTO request, PlatformAccount inviter) {
 }

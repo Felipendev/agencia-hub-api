@@ -32,7 +32,7 @@ import java.util.UUID;
         description = """
                 Listagem, consulta, criação e atualização parcial de lançamentos financeiros da agência.
 
-                Acesso restrito a usuários com papel **OWNER**.""")
+                Acesso restrito a usuários com papel **AGENCY_OWNER**.""")
 @RequestMapping("/financial-entries")
 @StandardErrorApiResponses
 public interface FinancialEntryAPI {

@@ -38,7 +38,7 @@ public class JwtService {
      * Generates a JWT token with agency_id and password_changed_at claims.
      *
      * @param userId           the user's UUID
-     * @param role             the user's role (OWNER, SELLER)
+     * @param role             the user's role (AGENCY_OWNER, SALES_AGENT)
      * @param agencyId         the user's agency UUID
      * @param passwordChangedAt the timestamp of the last password change (nullable)
      * @return signed JWT token string

@@ -1,12 +1,12 @@
-package com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard;
+package com.agenciahub.api.application.usecases.salesagent.dashboard.build;
 
 import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsQuery;
 import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsUseCase;
 import com.agenciahub.api.application.usecases.user.shared.UserResponseMapper;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
-import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.SellerDashboardResponseDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.application.usecases.salesagent.dashboard.build.SalesAgentDashboardResponseDTO;
+import com.agenciahub.api.entity.PlatformAccount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,13 +17,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
+public class BuildSalesAgentDashboard implements BuildSalesAgentDashboardUseCase {
 
     private final ListQuotationsUseCase listQuotationsUseCase;
     private final UserResponseMapper userResponseMapper;
 
     @Override
-    public SellerDashboardResponseDTO execute(User sellerEntity) {
+    public SalesAgentDashboardResponseDTO execute(PlatformAccount sellerEntity) {
         UUID sellerId = sellerEntity.getId();
         List<QuotationSummaryResponseDTO> all =
                 listQuotationsUseCase.execute(new ListQuotationsQuery(null, null, null, sellerEntity));
@@ -43,7 +43,7 @@ public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
         BigDecimal pending =
                 calculateCommission(sellerEntity, all.stream().filter(q -> isOpen(q.status())).toList());
 
-        return new SellerDashboardResponseDTO(
+        return new SalesAgentDashboardResponseDTO(
                 userResponseMapper.toResponse(sellerEntity),
                 all.size(),
                 open,
@@ -59,7 +59,7 @@ public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
                 || status == QuotationStatus.AWAITING_CLIENT;
     }
 
-    private BigDecimal calculateCommission(User seller, List<QuotationSummaryResponseDTO> quotations) {
+    private BigDecimal calculateCommission(PlatformAccount seller, List<QuotationSummaryResponseDTO> quotations) {
         if (quotations.isEmpty()) {
             return BigDecimal.ZERO;
         }

@@ -2,15 +2,15 @@ package com.agenciahub.api.application.usecases.auth.registerviainvite;
 
 import com.agenciahub.api.application.usecases.invitation.shared.InvitationTokenPolicy;
 import com.agenciahub.api.domain.InvitationStatus;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.domain.VerificationCodeType;
 import com.agenciahub.api.application.usecases.auth.shared.RegisterAgencyResultDTO;
 import com.agenciahub.api.application.usecases.auth.registerviainvite.RegisterViaInviteRequestDTO;
 import com.agenciahub.api.entity.Invitation;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.InvitationRepository;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import com.agenciahub.api.application.integrations.verification.VerificationCodePort;
 import com.agenciahub.api.validation.PhoneValidator;
@@ -25,7 +25,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class RegisterViaInvite implements RegisterViaInviteUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final InvitationRepository invitationRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationCodePort verificationCodePort;
@@ -60,13 +60,13 @@ public class RegisterViaInvite implements RegisterViaInviteUseCase {
             throw new IllegalArgumentException("este e-mail já está cadastrado");
         }
 
-        User user = User.builder()
+        PlatformAccount user = PlatformAccount.builder()
                 .agency(invitation.getAgency())
                 .name(request.name())
                 .email(email)
                 .publicLinkCode(publicLinkCodeSupport.allocate())
                 .passwordHash(passwordEncoder.encode(request.password()))
-                .role(UserRole.SELLER)
+                .role(AccountKind.SALES_AGENT)
                 .phone(validPhone ? PhoneValidator.formatForStorage(request.phone()) : null)
                 .emailVerified(false)
                 .active(true)

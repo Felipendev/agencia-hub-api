@@ -4,9 +4,9 @@ import com.agenciahub.api.application.usecases.customer.shared.CustomerPhoneNorm
 import com.agenciahub.api.application.usecases.customer.shared.CustomerResponseMapper;
 import com.agenciahub.api.application.usecases.customer.create.CreateCustomerRequestDTO;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerSummaryResponseDTO;
-import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.entity.CrmCustomer;
 import com.agenciahub.api.exception.DuplicateCustomerException;
-import com.agenciahub.api.repository.CustomerRepository;
+import com.agenciahub.api.repository.CrmCustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreateCustomer implements CreateCustomerUseCase {
 
-    private final CustomerRepository customerRepository;
+    private final CrmCustomerRepository customerRepository;
     private final CustomerResponseMapper customerResponseMapper;
 
     @Override
@@ -32,7 +32,7 @@ public class CreateCustomer implements CreateCustomerUseCase {
         }
 
         String notes = request.notes() != null ? request.notes() : "";
-        Customer entity = Customer.builder()
+        CrmCustomer entity = CrmCustomer.builder()
                 .name(request.name().strip())
                 .email(email)
                 .phone(request.phone().strip())
@@ -40,7 +40,7 @@ public class CreateCustomer implements CreateCustomerUseCase {
                 .status(request.status())
                 .notes(notes)
                 .build();
-        Customer saved = customerRepository.save(entity);
+        CrmCustomer saved = customerRepository.save(entity);
         return customerResponseMapper.toResponse(saved);
     }
 }

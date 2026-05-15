@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/agency")
 @Tag(
         name = "Agência",
-        description = "Dados e atualização da agência do tenant atual. Acesso restrito a usuários com papel **OWNER**.")
+        description = "Dados e atualização da agência do tenant atual. Acesso restrito a usuários com papel **AGENCY_OWNER**.")
 @StandardErrorApiResponses
 public interface AgencyAPI {
 

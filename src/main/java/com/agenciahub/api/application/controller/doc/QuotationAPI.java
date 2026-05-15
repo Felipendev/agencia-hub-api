@@ -4,7 +4,7 @@ import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationRequestDTO;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationRequestDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -46,7 +46,7 @@ public interface QuotationAPI {
             @RequestParam(required = false) UUID customerId,
             @RequestParam(required = false) QuotationStatus status,
             @RequestParam(required = false) String search,
-            @AuthenticationPrincipal User caller);
+            @AuthenticationPrincipal PlatformAccount caller);
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtém uma cotação pelo id")
@@ -66,7 +66,7 @@ public interface QuotationAPI {
                     Demais validações de agência, cliente e submissão pública permanecem no caso de uso / serviço de aplicação.""")
     QuotationSummaryResponseDTO create(
             @Valid @RequestBody CreateQuotationRequestDTO request,
-            @AuthenticationPrincipal User caller);
+            @AuthenticationPrincipal PlatformAccount caller);
 
     @PatchMapping("/{id}")
     @Operation(summary = "Atualiza parcialmente uma cotação")

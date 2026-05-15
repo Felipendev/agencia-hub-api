@@ -1,13 +1,13 @@
 package com.agenciahub.api.application.usecases.user.shared;
 
 import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserResponseMapper {
 
-    public UserSummaryResponseDTO toResponse(User u) {
+    public UserSummaryResponseDTO toResponse(PlatformAccount u) {
         return new UserSummaryResponseDTO(
                 u.getId(),
                 u.getName(),

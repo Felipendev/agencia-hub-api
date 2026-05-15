@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.usecases.auth.changepassword;
 
 import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswordRequestDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ChangePassword implements ChangePasswordUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -24,7 +24,7 @@ public class ChangePassword implements ChangePasswordUseCase {
         ChangePasswordRequestDTO request = command.request();
         UUID currentUserId = command.userId();
 
-        User user = userRepository
+        PlatformAccount user = userRepository
                 .findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + currentUserId));
 

@@ -24,7 +24,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('OWNER')")
+@PreAuthorize("hasRole('AGENCY_OWNER')")
 public class FinancialEntryController implements FinancialEntryAPI {
 
     private final ListFinancialEntriesUseCase listFinancialEntriesUseCase;

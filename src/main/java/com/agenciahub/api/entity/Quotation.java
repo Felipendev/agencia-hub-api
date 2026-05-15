@@ -50,12 +50,12 @@ public class Quotation {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    private CrmCustomer customer;
 
     /** Sales associate responsible for this quotation (commission target). */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
-    private User seller;
+    private PlatformAccount seller;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "creation_source", nullable = false, length = 32)
@@ -64,7 +64,7 @@ public class Quotation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
-    private User createdByUser;
+    private PlatformAccount createdByUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "public_submission_id")

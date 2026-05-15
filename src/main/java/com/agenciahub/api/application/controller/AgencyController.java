@@ -6,7 +6,7 @@ import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyUseCase
 import com.agenciahub.api.application.controller.doc.AgencyAPI;
 import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryResponseDTO;
 import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyRequestDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('OWNER')")
+@PreAuthorize("hasRole('AGENCY_OWNER')")
 public class AgencyController implements AgencyAPI {
 
     private final GetAgencyUseCase getAgencyUseCase;
@@ -31,7 +31,7 @@ public class AgencyController implements AgencyAPI {
 
     @Override
     public AgencySummaryResponseDTO updateAgency(UpdateAgencyRequestDTO request) {
-        User currentUser = SecurityContextUsers.requireUser();
+        PlatformAccount currentUser = SecurityContextUsers.requireUser();
         return updateAgencyUseCase.execute(new UpdateAgencyCommand(request, currentUser));
     }
 }

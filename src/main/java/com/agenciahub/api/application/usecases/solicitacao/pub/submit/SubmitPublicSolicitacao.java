@@ -1,15 +1,15 @@
 package com.agenciahub.api.application.usecases.solicitacao.pub.submit;
 
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitRequestDTO;
 import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitResponseDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.SolicitacaoConfig;
 import com.agenciahub.api.entity.SolicitacaoSubmission;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.repository.SolicitacaoConfigRepository;
 import com.agenciahub.api.repository.SolicitacaoSubmissionRepository;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.validation.PhoneValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
 
     private final SolicitacaoSubmissionRepository submissionRepository;
     private final SolicitacaoConfigRepository configRepository;
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
 
     @Override
     public PublicSolicitacaoSubmitResponseDTO execute(PublicSolicitacaoSubmitRequestDTO request) {
@@ -39,7 +39,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
 
         var configOpt = configRepository.findFirstBySlug(request.slug().trim());
         Agency agency = configOpt.map(SolicitacaoConfig::getAgency).orElse(null);
-        User referral = resolveReferral(request, agency);
+        PlatformAccount referral = resolveReferral(request, agency);
 
         var submission = SolicitacaoSubmission.builder()
                 .agency(agency)
@@ -56,7 +56,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
         return new PublicSolicitacaoSubmitResponseDTO(true, submission.getId());
     }
 
-    private User resolveReferral(PublicSolicitacaoSubmitRequestDTO request, Agency agency) {
+    private PlatformAccount resolveReferral(PublicSolicitacaoSubmitRequestDTO request, Agency agency) {
         String code = request.sellerPublicCode() != null ? request.sellerPublicCode().trim() : "";
         if (!code.isEmpty()) {
             return resolveReferralByPublicCode(code, agency);
@@ -64,24 +64,24 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
         return resolveReferralSeller(request.referralSellerId(), agency);
     }
 
-    private User resolveReferralByPublicCode(String code, Agency agency) {
+    private PlatformAccount resolveReferralByPublicCode(String code, Agency agency) {
         if (agency == null) {
             throw new IllegalArgumentException(
                     "não é possível atribuir vendedor sem configuração de agência para este link.");
         }
-        User u = userRepository
+        PlatformAccount u = userRepository
                 .findByPublicLinkCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("código de vendedor inválido ou inexistente."));
         if (u.getAgency() == null || !u.getAgency().getId().equals(agency.getId())) {
             throw new IllegalArgumentException("este código de vendedor não pertence à agência deste formulário.");
         }
-        if (u.getRole() != UserRole.SELLER && u.getRole() != UserRole.OWNER) {
+        if (u.getRole() != AccountKind.SALES_AGENT && u.getRole() != AccountKind.AGENCY_OWNER) {
             throw new IllegalArgumentException("apenas vendedor ou gestor podem ser indicados no link.");
         }
         return u;
     }
 
-    private User resolveReferralSeller(UUID referralSellerId, Agency agency) {
+    private PlatformAccount resolveReferralSeller(UUID referralSellerId, Agency agency) {
         if (referralSellerId == null) {
             return null;
         }
@@ -89,13 +89,13 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
             throw new IllegalArgumentException(
                     "não é possível atribuir vendedor sem configuração de agência para este link.");
         }
-        User u = userRepository
+        PlatformAccount u = userRepository
                 .findById(referralSellerId)
                 .orElseThrow(() -> new IllegalArgumentException("usuário de indicação inválido."));
         if (u.getAgency() == null || !u.getAgency().getId().equals(agency.getId())) {
             throw new IllegalArgumentException("o indicador deve pertencer à mesma agência do formulário.");
         }
-        if (u.getRole() != UserRole.SELLER && u.getRole() != UserRole.OWNER) {
+        if (u.getRole() != AccountKind.SALES_AGENT && u.getRole() != AccountKind.AGENCY_OWNER) {
             throw new IllegalArgumentException("apenas vendedor ou gestor podem ser indicados no link.");
         }
         return u;

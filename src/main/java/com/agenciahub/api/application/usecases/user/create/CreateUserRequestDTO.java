@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.usecases.user.create;
 
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,7 @@ public record CreateUserRequestDTO(
         @NotBlank String name,
         @NotBlank @Email String email,
         @NotBlank @Size(min = 6) String password,
-        @NotNull UserRole role,
+        @NotNull AccountKind role,
         BigDecimal commissionPct,
         BigDecimal commissionFixed
 ) {

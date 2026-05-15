@@ -1,8 +1,8 @@
 package com.agenciahub.api.application.usecases.user.create;
 
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.user.create.CreateUserRequestDTO;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 class CreateUserTest {
 
     @Mock
-    private UserRepository userRepository;
+    private PlatformAccountRepository userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -37,7 +37,7 @@ class CreateUserTest {
                 "Vendedor",
                 "vendedor@test.com",
                 "password1",
-                UserRole.SELLER,
+                AccountKind.SALES_AGENT,
                 null,
                 null);
 

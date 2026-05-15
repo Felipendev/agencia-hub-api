@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('OWNER')")
+@PreAuthorize("hasRole('AGENCY_OWNER')")
 public class SolicitacaoSubmissionAgencyController implements SolicitacaoSubmissionAgencyAPI {
 
     private final ListSolicitacaoSubmissionsForAgencyUseCase listSolicitacaoSubmissionsForAgencyUseCase;

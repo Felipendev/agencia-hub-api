@@ -5,7 +5,7 @@ import com.agenciahub.api.application.usecases.agency.shared.AgencySummaryRespon
 import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyRequestDTO;
 import com.agenciahub.api.entity.Agency;
 import com.agenciahub.api.entity.AgencyAuditLog;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.AgencyAuditLogRepository;
 import com.agenciahub.api.repository.AgencyRepository;
@@ -28,7 +28,7 @@ public class UpdateAgency implements UpdateAgencyUseCase {
     @Override
     @Transactional
     public AgencySummaryResponseDTO execute(UpdateAgencyCommand command) {
-        User user = command.currentUser();
+        PlatformAccount user = command.currentUser();
         UUID id = user.getAgency().getId();
         Agency agency = agencyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("agência não encontrada: " + id));
@@ -123,7 +123,7 @@ public class UpdateAgency implements UpdateAgencyUseCase {
         }
     }
 
-    private void auditField(Agency agency, User user, String fieldName, String oldValue, String newValue) {
+    private void auditField(Agency agency, PlatformAccount user, String fieldName, String oldValue, String newValue) {
         if (Objects.equals(oldValue, newValue)) {
             return;
         }

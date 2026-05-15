@@ -149,7 +149,7 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - **ADR 0007 (pacotes HTTP):** `@RestController` + `*API` em `application.controller` (plano) + `application.controller.doc` — **concluído**.
 - **ADR 0008 (piloto customer):** DTOs em `usecases.customer.*`; `dto/customer` removido.
 - **ADR 0008 (agentes):** `CreateUser` rejeita `UserRole.SELLER` — agente só via convite + `register-invite`.
-- **ADR 0008 (DTO colocation):** `dto/*` eliminado — DTOs em `usecases.<feature>.*` (quotation, user, auth, solicitacao, agency, invitation, terms, financial, sellerdashboard); pacote `solicitacao.pub.*` (evita palavra reservada `public`).
-- **Próximo:** **ADR 0008** — `AccountKind` / bounded context `salesagent`, renomes `PlatformAccount` / `CrmCustomer`.
+- **ADR 0008 (DTO colocation):** `dto/*` eliminado — DTOs em `usecases.<feature>.*` (quotation, user, auth, solicitacao, agency, invitation, terms, financial, salesagent); pacote `solicitacao.pub.*` (evita palavra reservada `public`).
+- **ADR 0008 (identidade):** `AccountKind` (`AGENCY_OWNER`, `SALES_AGENT`); Flyway `V20`; `UserRole` removido; entidades `PlatformAccount` / `CrmCustomer`; bounded context `usecases.salesagent` (listagem ativa + dashboard); roles Spring `ROLE_AGENCY_OWNER` / `ROLE_SALES_AGENT`.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.

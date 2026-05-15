@@ -3,10 +3,10 @@ package com.agenciahub.api.application.usecases.financial.create;
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntryResponseMapper;
 import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryRequestDTO;
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
-import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.entity.CrmCustomer;
 import com.agenciahub.api.entity.FinancialEntry;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.CustomerRepository;
+import com.agenciahub.api.repository.CrmCustomerRepository;
 import com.agenciahub.api.repository.FinancialEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,12 +18,12 @@ import java.util.UUID;
 public class CreateFinancialEntry implements CreateFinancialEntryUseCase {
 
     private final FinancialEntryRepository financialEntryRepository;
-    private final CustomerRepository customerRepository;
+    private final CrmCustomerRepository customerRepository;
     private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Override
     public FinancialEntrySummaryResponseDTO execute(CreateFinancialEntryRequestDTO request) {
-        Customer customer = resolveCustomer(request.customerId());
+        CrmCustomer customer = resolveCustomer(request.customerId());
         FinancialEntry entity = FinancialEntry.builder()
                 .description(request.description().strip())
                 .type(request.type())
@@ -46,7 +46,7 @@ public class CreateFinancialEntry implements CreateFinancialEntryUseCase {
         return t.isEmpty() ? null : t;
     }
 
-    private Customer resolveCustomer(UUID customerId) {
+    private CrmCustomer resolveCustomer(UUID customerId) {
         if (customerId == null) {
             return null;
         }

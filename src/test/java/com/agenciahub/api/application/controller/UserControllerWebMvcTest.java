@@ -2,10 +2,10 @@ package com.agenciahub.api.application.controller;
 
 import com.agenciahub.api.application.usecases.user.create.CreateUserUseCase;
 import com.agenciahub.api.application.usecases.user.retrieve.byid.GetUserByIdUseCase;
-import com.agenciahub.api.application.usecases.user.retrieve.listactive.ListActiveSellersUseCase;
+import com.agenciahub.api.application.usecases.salesagent.retrieve.listactive.ListActiveSalesAgentsUseCase;
 import com.agenciahub.api.application.usecases.user.retrieve.list.ListUsersUseCase;
 import com.agenciahub.api.application.usecases.user.update.UpdateUserUseCase;
-import com.agenciahub.api.domain.UserRole;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.security.JwtAuthFilter;
@@ -55,7 +55,7 @@ class UserControllerWebMvcTest {
     private ListUsersUseCase listUsersUseCase;
 
     @MockitoBean
-    private ListActiveSellersUseCase listActiveSellersUseCase;
+    private ListActiveSalesAgentsUseCase listActiveSalesAgentsUseCase;
 
     @MockitoBean
     private GetUserByIdUseCase getUserByIdUseCase;
@@ -74,7 +74,7 @@ class UserControllerWebMvcTest {
                         id,
                         "Ana",
                         "ana@test.com",
-                        UserRole.SELLER,
+                        AccountKind.SALES_AGENT,
                         true,
                         null,
                         null,

@@ -7,7 +7,7 @@ import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationR
 import com.agenciahub.api.entity.Quotation;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.QuotationRepository;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class UpdateQuotation implements UpdateQuotationUseCase {
 
     private final QuotationRepository quotationRepository;
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final QuotationResponseMapper quotationResponseMapper;
 
     @Override

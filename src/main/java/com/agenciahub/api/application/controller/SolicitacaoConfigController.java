@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('OWNER')")
+@PreAuthorize("hasRole('AGENCY_OWNER')")
 public class SolicitacaoConfigController implements SolicitacaoConfigAgencyAPI {
 
     private final GetOrCreateSolicitacaoConfigForAgencyUseCase getOrCreateSolicitacaoConfigForAgencyUseCase;

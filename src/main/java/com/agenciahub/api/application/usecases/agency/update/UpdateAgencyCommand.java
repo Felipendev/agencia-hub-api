@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.agency.update;
 
 import com.agenciahub.api.application.usecases.agency.update.UpdateAgencyRequestDTO;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 
-public record UpdateAgencyCommand(UpdateAgencyRequestDTO request, User currentUser) {
+public record UpdateAgencyCommand(UpdateAgencyRequestDTO request, PlatformAccount currentUser) {
 }

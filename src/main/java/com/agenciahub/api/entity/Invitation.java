@@ -41,7 +41,7 @@ public class Invitation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invited_by", nullable = false)
-    private User invitedBy;
+    private PlatformAccount invitedBy;
 
     @Column(nullable = false, length = 320)
     private String email;

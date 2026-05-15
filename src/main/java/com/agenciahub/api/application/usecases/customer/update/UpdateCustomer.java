@@ -4,10 +4,10 @@ import com.agenciahub.api.application.usecases.customer.shared.CustomerPhoneNorm
 import com.agenciahub.api.application.usecases.customer.shared.CustomerResponseMapper;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerSummaryResponseDTO;
 import com.agenciahub.api.application.usecases.customer.update.UpdateCustomerRequestDTO;
-import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.entity.CrmCustomer;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.CustomerRepository;
+import com.agenciahub.api.repository.CrmCustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +17,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UpdateCustomer implements UpdateCustomerUseCase {
 
-    private final CustomerRepository customerRepository;
+    private final CrmCustomerRepository customerRepository;
     private final CustomerResponseMapper customerResponseMapper;
 
     @Override
     public CustomerSummaryResponseDTO execute(UpdateCustomerCommand command) {
         UUID id = command.id();
         UpdateCustomerRequestDTO request = command.request();
-        Customer entity = customerRepository
+        CrmCustomer entity = customerRepository
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
 

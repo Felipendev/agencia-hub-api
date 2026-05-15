@@ -37,7 +37,7 @@ public class VerificationCode {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private PlatformAccount user;
 
     @Column(nullable = false, length = 320)
     private String email;

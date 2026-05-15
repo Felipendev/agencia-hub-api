@@ -65,7 +65,7 @@ public class FinancialEntry {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
-    private Customer customer;
+    private CrmCustomer customer;
 
     @Column(name = "bank_account", length = 128)
     private String bankAccount;

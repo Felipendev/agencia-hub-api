@@ -2,7 +2,7 @@
 
 ## Status
 
-**Proposta** — decisão de modelo e pacotes; migração incremental (feature a feature).
+**Aceita** — migração concluída (DTO colocation, `AccountKind`, `PlatformAccount` / `CrmCustomer`, `salesagent`).
 
 ## Contexto
 
@@ -221,7 +221,7 @@ domain/
 7. Restringir ou remover `CreateUser` conforme secção D.
 8. Actualizar `05`, `06`, `04`, `.cursor/rules.md`.
 
-**Pronto quando:** `com.agenciahub.api.dto` inexistente; grep sem `UserRole`/`SELLER` salvo migração DB pendente documentada.
+**Pronto quando:** `com.agenciahub.api.dto` inexistente; grep sem `UserRole`/`SELLER` em código Java (migração DB: `V20__account_kind_role_values.sql`).
 
 ## Relação com outros ADRs
 

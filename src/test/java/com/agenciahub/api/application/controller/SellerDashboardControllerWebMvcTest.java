@@ -1,11 +1,11 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.BuildSellerDashboardUseCase;
-import com.agenciahub.api.domain.UserRole;
-import com.agenciahub.api.application.usecases.sellerdashboard.buildsellerdashboard.SellerDashboardResponseDTO;
+import com.agenciahub.api.application.usecases.salesagent.dashboard.build.BuildSalesAgentDashboardUseCase;
+import com.agenciahub.api.domain.enums.AccountKind;
+import com.agenciahub.api.application.usecases.salesagent.dashboard.build.SalesAgentDashboardResponseDTO;
 import com.agenciahub.api.application.usecases.user.shared.UserSummaryResponseDTO;
 import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
 import com.agenciahub.api.application.usecases.user.retrieve.entity.GetUserEntityByIdUseCase;
@@ -56,7 +56,7 @@ class SellerDashboardControllerWebMvcTest {
     private RateLimitFilter rateLimitFilter;
 
     @MockitoBean
-    private BuildSellerDashboardUseCase buildSellerDashboardUseCase;
+    private BuildSalesAgentDashboardUseCase buildSellerDashboardUseCase;
 
     @MockitoBean
     private GetUserEntityByIdUseCase getUserEntityByIdUseCase;
@@ -70,13 +70,13 @@ class SellerDashboardControllerWebMvcTest {
     void myDashboard_returnsPayload() throws Exception {
         UUID agencyId = UUID.randomUUID();
         Agency agency = Agency.builder().id(agencyId).name("Ag").build();
-        User seller = User.builder()
+        PlatformAccount seller = PlatformAccount.builder()
                 .id(UUID.randomUUID())
                 .agency(agency)
                 .name("Vendedor")
                 .email("seller@test.com")
                 .passwordHash("x")
-                .role(UserRole.SELLER)
+                .role(AccountKind.SALES_AGENT)
                 .active(true)
                 .emailVerified(true)
                 .build();
@@ -84,20 +84,20 @@ class SellerDashboardControllerWebMvcTest {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 seller,
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_SELLER"))));
+                List.of(new SimpleGrantedAuthority("ROLE_SALES_AGENT"))));
 
         var sellerResp = new UserSummaryResponseDTO(
                 seller.getId(),
                 seller.getName(),
                 seller.getEmail(),
-                UserRole.SELLER,
+                AccountKind.SALES_AGENT,
                 true,
                 null,
                 null,
                 Instant.parse("2026-01-01T00:00:00Z"),
                 true);
-        when(buildSellerDashboardUseCase.execute(any(User.class)))
-                .thenReturn(new SellerDashboardResponseDTO(
+        when(buildSellerDashboardUseCase.execute(any(PlatformAccount.class)))
+                .thenReturn(new SalesAgentDashboardResponseDTO(
                         sellerResp,
                         2L,
                         1L,
@@ -116,25 +116,25 @@ class SellerDashboardControllerWebMvcTest {
     void sellerDashboard_whenOwner_returnsPayload() throws Exception {
         UUID agencyId = UUID.randomUUID();
         Agency agency = Agency.builder().id(agencyId).name("Ag").build();
-        User owner = User.builder()
+        PlatformAccount owner = PlatformAccount.builder()
                 .id(UUID.randomUUID())
                 .agency(agency)
                 .name("Owner")
                 .email("owner@test.com")
                 .passwordHash("x")
-                .role(UserRole.OWNER)
+                .role(AccountKind.AGENCY_OWNER)
                 .active(true)
                 .emailVerified(true)
                 .build();
 
         UUID sellerId = UUID.randomUUID();
-        User seller = User.builder()
+        PlatformAccount seller = PlatformAccount.builder()
                 .id(sellerId)
                 .agency(agency)
                 .name("Outro")
                 .email("other@test.com")
                 .passwordHash("x")
-                .role(UserRole.SELLER)
+                .role(AccountKind.SALES_AGENT)
                 .active(true)
                 .emailVerified(true)
                 .build();
@@ -142,7 +142,7 @@ class SellerDashboardControllerWebMvcTest {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 owner,
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_OWNER"))));
+                List.of(new SimpleGrantedAuthority("ROLE_AGENCY_OWNER"))));
 
         when(getUserEntityByIdUseCase.execute(sellerId)).thenReturn(seller);
 
@@ -150,14 +150,14 @@ class SellerDashboardControllerWebMvcTest {
                 sellerId,
                 "Outro",
                 "other@test.com",
-                UserRole.SELLER,
+                AccountKind.SALES_AGENT,
                 true,
                 null,
                 null,
                 Instant.parse("2026-01-01T00:00:00Z"),
                 true);
         when(buildSellerDashboardUseCase.execute(eq(seller)))
-                .thenReturn(new SellerDashboardResponseDTO(
+                .thenReturn(new SalesAgentDashboardResponseDTO(
                         sellerResp,
                         0L,
                         0L,

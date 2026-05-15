@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.financial.shared;
 
 import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
-import com.agenciahub.api.entity.Customer;
+import com.agenciahub.api.entity.CrmCustomer;
 import com.agenciahub.api.entity.FinancialEntry;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class FinancialEntryResponseMapper {
 
     public FinancialEntrySummaryResponseDTO toResponse(FinancialEntry e) {
-        Customer c = e.getCustomer();
+        CrmCustomer c = e.getCustomer();
         return new FinancialEntrySummaryResponseDTO(
                 e.getId(),
                 e.getDescription(),

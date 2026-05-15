@@ -1,9 +1,9 @@
 package com.agenciahub.api.application.usecases.terms.accept;
 
 import com.agenciahub.api.application.usecases.terms.shared.TermsConstants;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AcceptTerms implements AcceptTermsUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
 
     @Override
     public Map<String, String> execute(AcceptTermsCommand command) {
@@ -23,7 +23,7 @@ public class AcceptTerms implements AcceptTermsUseCase {
         if (!TermsConstants.CURRENT_TERMS_VERSION.equals(termsVersion)) {
             throw new IllegalArgumentException("versão dos termos inválida");
         }
-        User user = userRepository
+        PlatformAccount user = userRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + userId));
         if (!Boolean.TRUE.equals(user.getTermsAccepted())) {

@@ -4,9 +4,9 @@ import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
 import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
 import com.agenciahub.api.entity.Agency;
-import com.agenciahub.api.entity.User;
+import com.agenciahub.api.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.repository.PlatformAccountRepository;
 import com.agenciahub.api.security.JwtService;
 import com.agenciahub.api.application.usecases.user.shared.PublicLinkCodeSupport;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +17,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class Login implements LoginUseCase {
 
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final PublicLinkCodeSupport publicLinkCodeSupport;
 
     @Override
     public LoginResponseDTO execute(LoginRequestDTO request) {
-        User user = userRepository
+        PlatformAccount user = userRepository
                 .findByEmail(request.email().trim().toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException("credenciais inválidas"));
 
