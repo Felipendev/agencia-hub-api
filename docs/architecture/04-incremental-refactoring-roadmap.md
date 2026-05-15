@@ -136,6 +136,8 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - Cotações, clientes, agência, convites, solicitação (pública + agência), termos, utilizadores, painel vendedor, auth: padrão `*API` + controller + `application.<feature>` + mappers onde aplicável, muitas rotas ainda com use case a delegar em `*Service`.
 - **Financeiro (`/financial-entries`):** Fase 1 — orquestração absorvida nos use cases; **`FinancialEntryService` removido.**
 - **Termos (`TermsConstants` + use cases):** Fase 1 — **`TermsService` removido**; `AuthService` usa `TermsConstants.CURRENT_TERMS_VERSION` para validação no registo.
+- **Agência:** Fase 1 — **`AgencyService` removido**; `GetAgency` / `UpdateAgency` orquestram repositório + auditoria.
+- **Solicitação (config + submissões):** Fase 1 — **`SolicitacaoConfigService` e `SolicitacaoSubmissionService` removidos**; use cases + `SolicitacaoConfigSupport` (defaults/mapeamento).
 - Erros globais, tenant, OpenAPI `ApiError`, `@WebMvcTest` alinhados aos controllers.
 
 Atualize esta lista **só** quando uma entrega mudar o baseline (ex.: “`CustomerService` removido por completo”) — não é obrigação a cada PR da Fase 1.
