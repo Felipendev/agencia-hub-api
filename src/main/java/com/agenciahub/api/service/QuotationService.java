@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,6 @@ public class QuotationService {
      * Search quotations.
      * If {@code callerRole} is SELLER, results are automatically scoped to {@code callerId}.
      */
-    @Transactional(readOnly = true)
     public List<QuotationResponse> search(UUID customerId, QuotationStatus status, String search,
                                           UUID callerId, UserRole callerRole) {
         // Sellers can only see their own quotations
@@ -90,14 +88,12 @@ public class QuotationService {
         return s.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
 
-    @Transactional(readOnly = true)
     public QuotationResponse getById(UUID id) {
         return quotationRepository.findById(id)
                 .map(quotationResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));
     }
 
-    @Transactional
     public QuotationResponse create(CreateQuotationRequest request, User caller) {
         Customer customer = customerRepository.findById(request.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + request.customerId()));
@@ -153,7 +149,6 @@ public class QuotationService {
         return quotationResponseMapper.toResponse(quotationRepository.save(entity));
     }
 
-    @Transactional
     public QuotationResponse update(UUID id, UpdateQuotationRequest request) {
         Quotation entity = quotationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));
@@ -178,10 +173,9 @@ public class QuotationService {
         if (request.assignee()      != null) entity.setAssignee(blankToNull(request.assignee()));
         if (request.internalNotes() != null) entity.setInternalNotes(request.internalNotes().strip());
 
-        return quotationResponseMapper.toResponse(entity);
+        return quotationResponseMapper.toResponse(quotationRepository.save(entity));
     }
 
-    @Transactional
     public void delete(UUID id) {
         Quotation entity = quotationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));

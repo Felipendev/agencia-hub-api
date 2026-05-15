@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,7 +30,6 @@ public class TrialSchedulerService {
      * and trial_ends_at in the past, then transitions them to SUSPENDED.
      */
     @Scheduled(cron = "0 0 2 * * *")
-    @Transactional
     public void expireTrials() {
         List<Agency> expiredAgencies = agencyRepository
                 .findBySubscriptionStatusAndTrialEndsAtBefore(SubscriptionStatus.TRIAL, Instant.now());

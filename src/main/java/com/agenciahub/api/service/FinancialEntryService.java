@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +29,6 @@ public class FinancialEntryService {
     private final CustomerRepository customerRepository;
     private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
-    @Transactional(readOnly = true)
     public List<FinancialEntryResponse> search(
             java.time.LocalDate from,
             java.time.LocalDate to,
@@ -47,14 +45,12 @@ public class FinancialEntryService {
         return rows.stream().map(financialEntryResponseMapper::toResponse).toList();
     }
 
-    @Transactional(readOnly = true)
     public FinancialEntryResponse getById(UUID id) {
         return financialEntryRepository.findById(id)
                 .map(financialEntryResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
     }
 
-    @Transactional
     public FinancialEntryResponse create(CreateFinancialEntryRequest request) {
         Customer customer = resolveCustomer(request.customerId());
         FinancialEntry entity = FinancialEntry.builder()
@@ -71,7 +67,6 @@ public class FinancialEntryService {
         return financialEntryResponseMapper.toResponse(saved);
     }
 
-    @Transactional
     public FinancialEntryResponse update(UUID id, UpdateFinancialEntryRequest request) {
         FinancialEntry entity = financialEntryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
@@ -99,7 +94,7 @@ public class FinancialEntryService {
         if (request.bankAccount() != null) {
             entity.setBankAccount(blankToNull(request.bankAccount()));
         }
-        return financialEntryResponseMapper.toResponse(entity);
+        return financialEntryResponseMapper.toResponse(financialEntryRepository.save(entity));
     }
 
     private static String blankToNull(String value) {

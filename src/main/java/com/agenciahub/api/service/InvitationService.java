@@ -31,6 +31,7 @@ public class InvitationService {
     /**
      * Creates a new invitation, generates a UUID token, sets 72h expiration,
      * saves the invitation, sends email, and returns the invitation with invite URL.
+     * Transação única: sessão para lazy da agência + commit só após envio (rollback se e-mail falhar).
      */
     @Transactional
     public Invitation createInvitation(String email, User inviter) {
@@ -66,7 +67,6 @@ public class InvitationService {
      * Validates a token: checks existence, expiration, and status (PENDING).
      * Returns the invitation or throws an appropriate error.
      */
-    @Transactional(readOnly = true)
     public Invitation validateToken(String token) {
         Invitation invitation = invitationRepository.findWithAgencyByToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + token));
@@ -74,7 +74,6 @@ public class InvitationService {
         return invitation;
     }
 
-    @Transactional(readOnly = true)
     public InviteValidationResponse validateTokenDetails(String token) {
         Invitation invitation = invitationRepository.findWithAgencyByToken(token)
                 .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + token));
@@ -85,7 +84,6 @@ public class InvitationService {
     /**
      * Returns all invitations for the given agency, ordered by createdAt desc.
      */
-    @Transactional(readOnly = true)
     public List<Invitation> listByAgency(UUID agencyId) {
         return invitationRepository.findByAgency_IdOrderByCreatedAtDesc(agencyId);
     }
@@ -93,7 +91,6 @@ public class InvitationService {
     /**
      * Revokes a pending invitation by setting its status to REVOKED.
      */
-    @Transactional
     public void revoke(UUID invitationId, UUID agencyId) {
         Invitation invitation = invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + invitationId));

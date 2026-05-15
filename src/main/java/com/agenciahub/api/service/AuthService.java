@@ -55,7 +55,6 @@ public class AuthService {
     private final InvitationService invitationService;
     private final PublicLinkCodeService publicLinkCodeService;
 
-    @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email().trim().toLowerCase())
                 .orElseThrow(() -> new ResourceNotFoundException("credenciais inválidas"));
@@ -110,6 +109,7 @@ public class AuthService {
 
     // ─── Registration (Task 11.1) ────────────────────────────────────────────────
 
+    /** Transação única: agência + utilizador + envio de código na mesma unidade de persistência. */
     @Transactional
     public RegisterAgencyResponse register(RegisterAgencyRequest request) {
         String email = request.email().trim().toLowerCase();
@@ -192,6 +192,7 @@ public class AuthService {
         );
     }
 
+    /** Transação única: verificação do código + utilizador + agência + código público. */
     @Transactional
     public VerifyEmailResponse verifyEmail(VerifyEmailRequest request) {
         String email = request.email().trim().toLowerCase();
@@ -240,7 +241,6 @@ public class AuthService {
 
     // ─── Resend Code (Task 11.3) ─────────────────────────────────────────────────
 
-    @Transactional
     public Map<String, String> resendCode(ResendCodeRequest request) {
         String email = request.email().trim().toLowerCase();
 
@@ -263,7 +263,6 @@ public class AuthService {
 
     // ─── Forgot Password (Task 13.1) ─────────────────────────────────────────────
 
-    @Transactional
     public Map<String, String> forgotPassword(ForgotPasswordRequest request) {
         String email = request.email().trim().toLowerCase();
 
@@ -282,6 +281,7 @@ public class AuthService {
 
     // ─── Reset Password (Task 13.2) ──────────────────────────────────────────────
 
+    /** Transação única: consumo do código de reset + atualização da senha. */
     @Transactional
     public Map<String, String> resetPassword(ResetPasswordRequest request) {
         String email = request.email().trim().toLowerCase();
@@ -315,7 +315,6 @@ public class AuthService {
 
     // ─── Change Password (Task 13.3) ─────────────────────────────────────────────
 
-    @Transactional
     public Map<String, String> changePassword(ChangePasswordRequest request, UUID currentUserId) {
         User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + currentUserId));
@@ -346,6 +345,7 @@ public class AuthService {
 
     // ─── Register via Invite (Task 15.2) ─────────────────────────────────────────
 
+    /** Transação única: utilizador + convite aceite + envio de código. */
     @Transactional
     public RegisterAgencyResponse registerViaInvite(RegisterViaInviteRequest request) {
         // Validate token

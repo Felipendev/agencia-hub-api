@@ -46,6 +46,9 @@ public class VerificationCodeService {
      * @param userName display name for the email
      * @return true if code was generated and sent, false if rate limited
      */
+    /**
+     * Invalidação em lote + insert + e-mail na mesma unidade (rollback se persistência falhar antes do envio).
+     */
     @Transactional
     public boolean generateAndSend(String email, VerificationCodeType type, User user, String userName) {
         // Rate limiting: max 5 codes per hour per email
@@ -94,6 +97,9 @@ public class VerificationCodeService {
      * @param code  the plain-text code to verify
      * @param type  the type of verification
      * @return true if the code is valid, not expired, and within attempt limits
+     */
+    /**
+     * Leitura + várias atualizações de tentativas/used numa única transação.
      */
     @Transactional
     public boolean verify(String email, String code, VerificationCodeType type) {
@@ -148,6 +154,7 @@ public class VerificationCodeService {
      * @param email the email to invalidate codes for
      * @param type  the type of verification codes to invalidate
      */
+    /** Query {@code @Modifying} — requer contexto transacional. */
     @Transactional
     public void invalidatePrevious(String email, VerificationCodeType type) {
         verificationCodeRepository.invalidateAllByEmailAndType(email, type);

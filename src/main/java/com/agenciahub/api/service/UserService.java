@@ -25,7 +25,6 @@ public class UserService {
     private final PublicLinkCodeService publicLinkCodeService;
     private final UserResponseMapper userResponseMapper;
 
-    @Transactional(readOnly = true)
     public List<UserResponse> listAll() {
         return userRepository.findAllByOrderByNameAsc()
                 .stream()
@@ -33,7 +32,6 @@ public class UserService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<UserResponse> listSellers() {
         return userRepository.findByRoleAndActiveTrue(UserRole.SELLER)
                 .stream()
@@ -41,19 +39,18 @@ public class UserService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public UserResponse getById(UUID id) {
         return userRepository.findById(id)
                 .map(userResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }
 
-    @Transactional(readOnly = true)
     public User getEntityById(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }
 
+    /** Transação única: checagem de e-mail + insert evitam corrida óbvia entre chamadas. */
     @Transactional
     public UserResponse create(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.email().trim().toLowerCase())) {
@@ -72,7 +69,6 @@ public class UserService {
         return userResponseMapper.toResponse(userRepository.save(user));
     }
 
-    @Transactional
     public UserResponse update(UUID id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
@@ -90,6 +86,6 @@ public class UserService {
             user.setCommissionFixed(request.commissionFixed());
             user.setCommissionPct(null); // mutually exclusive
         }
-        return userResponseMapper.toResponse(user);
+        return userResponseMapper.toResponse(userRepository.save(user));
     }
 }
