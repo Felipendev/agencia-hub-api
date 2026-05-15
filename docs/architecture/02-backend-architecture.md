@@ -111,6 +111,8 @@ A **single class** that implements `UseCase<I, O>` directly (e.g. `ListBookingsU
 
 Do **not** copy class or package names from external sample repositories; only the **shape** (interface + implementing service + logging discipline) is prescriptive.
 
+**Refactoring definitions (packages + class roles, target vs legacy `*Service`):** see `docs/architecture/05-package-refactoring-and-class-responsibilities.md`.
+
 ## Domain Layer
 
 Responsible for:
