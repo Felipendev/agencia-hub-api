@@ -1,6 +1,6 @@
 # Refatoração de pacotes e responsabilidades de classes
 
-Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de classe no backend `agencia-hub-api`, para orientar refatorações **sem** ambiguidade entre “use case” e “service”. Complementa `02-backend-architecture.md`, o roadmap `04-incremental-refactoring-roadmap.md` e o **ADR 0004** (mapeamento pacotes Java ↔ camadas conceptuais).
+Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de classe no backend `agencia-hub-api`, para orientar refatorações **sem** ambiguidade entre “use case” e “service”. Complementa `02-backend-architecture.md`, o roadmap `04-incremental-refactoring-roadmap.md` e o **ADR 0004** (mapeamento pacotes Java ↔ camadas conceptuais). Para a visão **Clean Architecture / use case driven** (diagrama de camadas, `InputMapper`/`OutputMapper`, persistência vs domínio, pirâmide de testes), ver **`06-clean-architecture-use-case-driven.md`**.
 
 ---
 
@@ -152,6 +152,7 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 |-----------|--------|
 | `02-backend-architecture.md` | Camadas gerais, contratos `UseCase` / `VoidUseCase`, layout HTTP. |
 | `04-incremental-refactoring-roadmap.md` | Ordem de trabalho e princípio “sem rename em massa”. |
+| `06-clean-architecture-use-case-driven.md` | Referência detalhada: camadas, pacotes alvo, mappers, repositório domínio/persistência, pirâmide de testes. |
 | ADR 0004 | Por que `controller` e `application` são irmãos no pacote Java. |
 | Este `05-…` | **Definições** de pacotes evolutivos e **papel** de cada classe no refator. |
 

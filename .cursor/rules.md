@@ -63,9 +63,10 @@ When rules conflict, follow this order:
 - O `@RestController` **implementa** a interface `*API`; evita duplicar `@Operation` / `@ApiResponses` no controller quando já estiverem na interface.
 - Textos de `@Tag`, `@Operation` (summary e description), `@ApiResponse` e descrições correlatas: **português**, no estilo rico acordado para este repositório (descrição em bloco de texto, regras em lista quando fizer sentido, códigos de resposta documentados).
 
-## Organização de pacotes (api / controller)
+## Organização de pacotes (API / controller / aplicação)
 
-- **Alvo incremental** (equivalente à referência por feature): `com.agenciahub.api.controller.<feature>.docs` para interfaces `*API`; `com.agenciahub.api.controller.<feature>` para o controller; use cases em `com.agenciahub.api.application.<feature>`. Não renomear pacotes em massa fora de um passo de roadmap explícito.
+- **Alvo incremental:** interfaces `*API` e meta-anotações OpenAPI em **`com.agenciahub.api.application.controllers.docs`**; `@RestController` em **`com.agenciahub.api.controller.<feature>`**; casos de uso em **`com.agenciahub.api.application.<feature>`** (ou `application.usecases.<feature>.<action>/` conforme **05**). Não renomear pacotes em massa fora de um passo de roadmap explícito.
+- Modelo detalhado (camadas, mappers estáticos, persistência vs domínio, pirâmide de testes): **`docs/architecture/06-clean-architecture-use-case-driven.md`**.
 
 ## Backend Architecture
 
