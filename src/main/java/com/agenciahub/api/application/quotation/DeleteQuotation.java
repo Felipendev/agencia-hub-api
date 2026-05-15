@@ -1,6 +1,8 @@
 package com.agenciahub.api.application.quotation;
 
-import com.agenciahub.api.service.QuotationService;
+import com.agenciahub.api.entity.Quotation;
+import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.repository.QuotationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +12,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DeleteQuotation implements DeleteQuotationUseCase {
 
-    private final QuotationService quotationService;
+    private final QuotationRepository quotationRepository;
 
     @Override
     public void execute(UUID id) {
-        quotationService.delete(id);
+        Quotation entity = quotationRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));
+        quotationRepository.delete(entity);
     }
 }

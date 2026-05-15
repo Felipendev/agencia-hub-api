@@ -1,12 +1,12 @@
 package com.agenciahub.api.application.sellerdashboard;
 
+import com.agenciahub.api.application.quotation.ListQuotationsQuery;
+import com.agenciahub.api.application.quotation.ListQuotationsUseCase;
 import com.agenciahub.api.application.user.UserResponseMapper;
 import com.agenciahub.api.domain.QuotationStatus;
-import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.quotation.QuotationResponse;
 import com.agenciahub.api.dto.seller.SellerDashboardResponse;
 import com.agenciahub.api.entity.User;
-import com.agenciahub.api.service.QuotationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,33 +19,29 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
 
-    private final QuotationService quotationService;
+    private final ListQuotationsUseCase listQuotationsUseCase;
     private final UserResponseMapper userResponseMapper;
 
     @Override
     public SellerDashboardResponse execute(User sellerEntity) {
         UUID sellerId = sellerEntity.getId();
-        List<QuotationResponse> all = quotationService.search(
-                null, null, null, sellerId, UserRole.SELLER);
+        List<QuotationResponse> all =
+                listQuotationsUseCase.execute(new ListQuotationsQuery(null, null, null, sellerEntity));
 
         List<QuotationResponse> recent = all.stream()
                 .sorted((a, b) -> b.updatedAt().compareTo(a.updatedAt()))
                 .limit(10)
                 .toList();
 
-        long open = all.stream()
-                .filter(q -> isOpen(q.status()))
-                .count();
+        long open = all.stream().filter(q -> isOpen(q.status())).count();
 
-        long approved = all.stream()
-                .filter(q -> q.status() == QuotationStatus.ACCEPTED)
-                .count();
+        long approved = all.stream().filter(q -> q.status() == QuotationStatus.ACCEPTED).count();
 
-        BigDecimal earned = calculateCommission(sellerEntity,
-                all.stream().filter(q -> q.status() == QuotationStatus.ACCEPTED).toList());
+        BigDecimal earned = calculateCommission(
+                sellerEntity, all.stream().filter(q -> q.status() == QuotationStatus.ACCEPTED).toList());
 
-        BigDecimal pending = calculateCommission(sellerEntity,
-                all.stream().filter(q -> isOpen(q.status())).toList());
+        BigDecimal pending =
+                calculateCommission(sellerEntity, all.stream().filter(q -> isOpen(q.status())).toList());
 
         return new SellerDashboardResponse(
                 userResponseMapper.toResponse(sellerEntity),
@@ -54,8 +50,7 @@ public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
                 approved,
                 earned,
                 pending,
-                recent
-        );
+                recent);
     }
 
     private boolean isOpen(QuotationStatus status) {
@@ -73,13 +68,11 @@ public class BuildSellerDashboard implements BuildSellerDashboardUseCase {
             BigDecimal total = quotations.stream()
                     .map(QuotationResponse::totalAmount)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            return total.multiply(seller.getCommissionPct())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            return total.multiply(seller.getCommissionPct()).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
         }
 
         if (seller.getCommissionFixed() != null) {
-            return seller.getCommissionFixed()
-                    .multiply(BigDecimal.valueOf(quotations.size()));
+            return seller.getCommissionFixed().multiply(BigDecimal.valueOf(quotations.size()));
         }
 
         return BigDecimal.ZERO;

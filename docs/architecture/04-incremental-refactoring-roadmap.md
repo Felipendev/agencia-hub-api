@@ -140,6 +140,7 @@ Se um módulo **não** tiver o histórico deste repo: antes da Fase 1, garantir 
 - **Solicitação (config + submissões):** Fase 1 — **`SolicitacaoConfigService` e `SolicitacaoSubmissionService` removidos**; use cases + `SolicitacaoConfigSupport` (defaults/mapeamento).
 - **Convites:** Fase 1 — **`InvitationService` removido**; `InvitationTokenPolicy`, `InvitationLinkBuilder`; `AuthService.registerViaInvite` valida token via repositório + policy.
 - **Clientes:** Fase 1 — **`CustomerService` removido**; `CustomerResponseMapper` + `CustomerPhoneNormalizer`; CRUD/listagem/lookup nos use cases.
+- **Cotações + painel vendedor:** Fase 1 — **`QuotationService` removido**; use cases + `QuotationSupport`; `BuildSellerDashboard` usa `ListQuotationsUseCase`.
 - **Utilizadores:** Fase 1 — **`UserService` removido**; `GetUserEntityById` para painel vendedor (owner); CRUD/listagens nos use cases.
 - Erros globais, tenant, OpenAPI `ApiError`, `@WebMvcTest` alinhados aos controllers.
 
