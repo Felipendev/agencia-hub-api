@@ -1,8 +1,12 @@
 package com.agenciahub.api.application.financial;
 
 import com.agenciahub.api.dto.financial.FinancialEntryResponse;
-import com.agenciahub.api.service.FinancialEntryService;
+import com.agenciahub.api.entity.FinancialEntry;
+import com.agenciahub.api.repository.FinancialEntryRepository;
+import com.agenciahub.api.repository.spec.FinancialEntrySpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,11 +15,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ListFinancialEntries implements ListFinancialEntriesUseCase {
 
-    private final FinancialEntryService financialEntryService;
+    private final FinancialEntryRepository financialEntryRepository;
+    private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Override
     public List<FinancialEntryResponse> execute(ListFinancialEntriesQuery query) {
-        return financialEntryService.search(
+        Specification<FinancialEntry> spec = FinancialEntrySpecifications.withFilters(
                 query.from(),
                 query.to(),
                 query.type(),
@@ -23,5 +28,8 @@ public class ListFinancialEntries implements ListFinancialEntriesUseCase {
                 query.status(),
                 query.customerId(),
                 query.bankAccount());
+        List<FinancialEntry> rows = financialEntryRepository.findAll(
+                spec, Sort.by(Sort.Direction.DESC, "entryDate"));
+        return rows.stream().map(financialEntryResponseMapper::toResponse).toList();
     }
 }
