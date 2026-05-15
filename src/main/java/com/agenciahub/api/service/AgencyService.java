@@ -26,7 +26,6 @@ public class AgencyService {
     /**
      * Creates a new agency with the given parameters.
      */
-    @Transactional
     public Agency create(String name, String phone, AgencyStatus status, SubscriptionStatus subStatus) {
         Agency agency = Agency.builder()
                 .name(name)
@@ -47,6 +46,7 @@ public class AgencyService {
 
     /**
      * Updates agency fields and records audit log entries for each change.
+     * Transação única: agência + linhas de auditoria devem persistir juntas.
      */
     @Transactional
     public Agency update(UUID id, UpdateAgencyRequest request, User currentUser) {

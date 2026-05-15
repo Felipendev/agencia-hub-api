@@ -1,6 +1,7 @@
 package com.agenciahub.api.service;
 
 import com.agenciahub.api.entity.User;
+import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class PublicLinkCodeService {
                 return code;
             }
         }
-        throw new IllegalStateException("Não foi possível gerar código público único para o usuário.");
+        throw new IllegalStateException("não foi possível gerar um código público único para o usuário");
     }
 
     /**
@@ -41,7 +42,7 @@ public class PublicLinkCodeService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public String ensurePersistedForUserId(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("Usuário não encontrado: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + userId));
         if (user.getPublicLinkCode() != null && !user.getPublicLinkCode().isBlank()) {
             return user.getPublicLinkCode();
         }

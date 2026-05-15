@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -27,7 +26,6 @@ public class SolicitacaoConfigService {
      * Each agency has exactly one solicitacao config.
      * Falls back to agency logo if config has no specific logo.
      */
-    @Transactional
     public SolicitacaoConfigResponse getOrCreateForAgency(UUID agencyId) {
         if (agencyId == null) {
             throw new IllegalStateException("nenhuma agência no contexto do tenant");
@@ -40,7 +38,6 @@ public class SolicitacaoConfigService {
         // If config has no logo, use agency logo as fallback
         if (response.logoDataUrl() == null || response.logoDataUrl().isBlank()) {
             Agency agency = config.getAgency();
-            if (agency == null) agency = agencyService.getById(agencyId);
             if (agency.getLogoUrl() != null && !agency.getLogoUrl().isBlank()) {
                 return new SolicitacaoConfigResponse(
                         response.slug(),
@@ -55,7 +52,6 @@ public class SolicitacaoConfigService {
         return response;
     }
 
-    @Transactional
     public SolicitacaoConfigResponse upsertForAgency(UUID agencyId, SolicitacaoConfigRequest request) {
         if (agencyId == null) {
             throw new IllegalStateException("nenhuma agência no contexto do tenant");
@@ -88,7 +84,6 @@ public class SolicitacaoConfigService {
      * Returns config by slug only (no tenant context needed) — for public access.
      * Falls back to agency logo if config has no specific logo.
      */
-    @Transactional(readOnly = true)
     public SolicitacaoConfigResponse getPublicBySlug(String slug) {
         return repository.findFirstBySlug(slug)
                 .map(config -> {

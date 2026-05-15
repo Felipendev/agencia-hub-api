@@ -56,8 +56,8 @@ Examples of API concerns:
 
 - Prefer **public interfaces** named `*API` that declare REST paths and carry **OpenAPI** annotations (`@Tag`, `@Operation` with summary and multiline description, `@ApiResponses` / `@ApiResponse`). Documentation strings must be **Portuguese**, in the agreed rich style (rule lists where helpful, HTTP status descriptions in Portuguese).
 - Controllers **`implements`** the feature `*API` interface; avoid duplicating Swagger annotations on the class when they already live on the interface.
-- **Standard error responses in OpenAPI:** apply `@StandardErrorApiResponses` (`com.agenciahub.api.api.docs`) at the `*API` type (and optionally per method) so 400/401/403/404/409/500 are documented with the shared **`ApiError`** schema. Rationale and HTTP/`code` policy: **ADR 0003** (`docs/architecture/adr/0003-api-errors-openapi-tenant-security.md`).
-- **Target package layout** (incremental; same structural idea as grouping by feature in a reference project): `com.agenciahub.api.controller.<feature>.docs` for `*API`, and `com.agenciahub.api.controller.<feature>` for the `@RestController`. Pair with use cases under `com.agenciahub.api.application.<feature>`. Avoid mass-moving unrelated controllers outside an explicit roadmap step.
+- **Standard error responses in OpenAPI:** apply `@StandardErrorApiResponses` (`com.agenciahub.api.application.controllers.docs`) at the `*API` type (and optionally per method) so 400/401/403/404/409/500 are documented with the shared **`ApiError`** schema. Rationale and HTTP/`code` policy: **ADR 0003** (`docs/architecture/adr/0003-api-errors-openapi-tenant-security.md`).
+- **Target package layout** (incremental): `com.agenciahub.api.application.controllers.docs` for `*API` (OpenAPI contracts), and `com.agenciahub.api.controller.<feature>` for the `@RestController` that **implements** `*API`. Pair with use cases under `com.agenciahub.api.application.<feature>` (or `application.usecases.<feature>.<action>/` per **05** / **06**). Avoid mass-moving unrelated controllers outside an explicit roadmap step. **Why `controller` is not under `application`:** the conceptual API layer maps to the `controller` Java package by deliberate choice — see **ADR 0004** (`docs/architecture/adr/0004-java-packages-vs-conceptual-layers.md`). **Detailed target model (layers, mappers, persistence split, tests):** `docs/architecture/06-clean-architecture-use-case-driven.md`.
 - **Global HTTP error mapping:** `GlobalExceptionHandler` lives in `com.agenciahub.api.web` (not under `controller`). Tenant and security resolution patterns (`TenantContext.requireAgencyId`, `SecurityContextUsers`, `UnauthenticatedException`, `MissingAgencyContextException`) are part of the same contract; see **ADR 0003**.
 
 ### Application-facing error messages
@@ -70,11 +70,11 @@ Responsible for:
 
 - use cases
 - workflow orchestration
-- transaction boundaries
+- transaction boundaries (see `05-package-refactoring-and-class-responsibilities.md` §4.3 for `@Transactional` policy: avoid unless strictly necessary)
 - calling domain behavior
 - coordinating repositories, gateways or external ports
 
-Must avoid:
+Detailed orchestration style (linear flow, static Input/Output mappers, persistence vs domain split, test pyramid): **`06-clean-architecture-use-case-driven.md`**.
 
 - owning domain rules
 - framework-specific persistence details
@@ -110,6 +110,8 @@ A **single class** that implements `UseCase<I, O>` directly (e.g. `ListBookingsU
 **Logging:** implementations may use `@Slf4j` and `log.info` at clear boundaries (for example, start of `execute` with a correlation or entity id, and a single success line). Keep volume reasonable—avoid logging inside tight loops or for every trivial step.
 
 Do **not** copy class or package names from external sample repositories; only the **shape** (interface + implementing service + logging discipline) is prescriptive.
+
+**Refactoring definitions (packages + class roles, target vs legacy `*Service`):** see `docs/architecture/05-package-refactoring-and-class-responsibilities.md`.
 
 ## Domain Layer
 

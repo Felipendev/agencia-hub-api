@@ -5,7 +5,7 @@ import com.agenciahub.api.application.invitation.CreateInvitationUseCase;
 import com.agenciahub.api.application.invitation.ListInvitationsUseCase;
 import com.agenciahub.api.application.invitation.RevokeInvitationCommand;
 import com.agenciahub.api.application.invitation.RevokeInvitationUseCase;
-import com.agenciahub.api.controller.invitation.docs.InvitationAPI;
+import com.agenciahub.api.application.controllers.docs.InvitationAPI;
 import com.agenciahub.api.dto.invitation.CreateInvitationRequest;
 import com.agenciahub.api.dto.invitation.InvitationResponse;
 import com.agenciahub.api.entity.User;

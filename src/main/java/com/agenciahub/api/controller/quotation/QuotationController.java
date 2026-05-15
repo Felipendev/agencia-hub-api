@@ -8,7 +8,7 @@ import com.agenciahub.api.application.quotation.ListQuotationsUseCase;
 import com.agenciahub.api.application.quotation.DeleteQuotationUseCase;
 import com.agenciahub.api.application.quotation.UpdateQuotationCommand;
 import com.agenciahub.api.application.quotation.UpdateQuotationUseCase;
-import com.agenciahub.api.controller.quotation.docs.QuotationAPI;
+import com.agenciahub.api.application.controllers.docs.QuotationAPI;
 import com.agenciahub.api.domain.QuotationStatus;
 import com.agenciahub.api.dto.quotation.CreateQuotationRequest;
 import com.agenciahub.api.dto.quotation.QuotationResponse;

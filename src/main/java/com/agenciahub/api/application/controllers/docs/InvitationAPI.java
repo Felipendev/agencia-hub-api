@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.invitation.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.invitation.CreateInvitationRequest;
 import com.agenciahub.api.dto.invitation.InvitationResponse;
 import io.swagger.v3.oas.annotations.Operation;

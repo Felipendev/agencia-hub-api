@@ -3,7 +3,7 @@ package com.agenciahub.api.controller.agency;
 import com.agenciahub.api.application.agency.GetAgencyUseCase;
 import com.agenciahub.api.application.agency.UpdateAgencyCommand;
 import com.agenciahub.api.application.agency.UpdateAgencyUseCase;
-import com.agenciahub.api.controller.agency.docs.AgencyAPI;
+import com.agenciahub.api.application.controllers.docs.AgencyAPI;
 import com.agenciahub.api.dto.agency.AgencyResponse;
 import com.agenciahub.api.dto.agency.UpdateAgencyRequest;
 import com.agenciahub.api.entity.User;

@@ -26,7 +26,6 @@ public class CustomerService {
     private final QuotationRepository quotationRepository;
     private final FinancialEntryRepository financialEntryRepository;
 
-    @Transactional(readOnly = true)
     public List<CustomerResponse> search(String name, CustomerStatus status) {
         boolean hasName = name != null && !name.isBlank();
         List<Customer> rows;
@@ -43,14 +42,12 @@ public class CustomerService {
         return rows.stream().map(this::toResponse).toList();
     }
 
-    @Transactional(readOnly = true)
     public CustomerResponse getById(UUID id) {
         return customerRepository.findById(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
     }
 
-    @Transactional(readOnly = true)
     public Optional<CustomerResponse> lookupActiveByContact(String email, String phone) {
         if (email != null && !email.isBlank()) {
             Optional<Customer> byEmail =
@@ -71,6 +68,7 @@ public class CustomerService {
         return Optional.empty();
     }
 
+    /** Transação única: checagens de duplicidade + insert. */
     @Transactional
     public CustomerResponse create(CreateCustomerRequest request) {
         String email = request.email().strip();
@@ -96,7 +94,6 @@ public class CustomerService {
         return toResponse(saved);
     }
 
-    @Transactional
     public CustomerResponse update(UUID id, UpdateCustomerRequest request) {
         Customer entity = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
@@ -127,9 +124,10 @@ public class CustomerService {
         if (request.status() != null) entity.setStatus(request.status());
         if (request.notes() != null) entity.setNotes(request.notes());
 
-        return toResponse(entity);
+        return toResponse(customerRepository.save(entity));
     }
 
+    /** Transação única: exclusões relacionadas + cliente. */
     @Transactional
     public void delete(UUID id) {
         Customer entity = customerRepository.findById(id)

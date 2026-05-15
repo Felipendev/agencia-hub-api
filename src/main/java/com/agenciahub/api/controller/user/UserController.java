@@ -6,7 +6,7 @@ import com.agenciahub.api.application.user.ListActiveSellersUseCase;
 import com.agenciahub.api.application.user.ListUsersUseCase;
 import com.agenciahub.api.application.user.UpdateUserCommand;
 import com.agenciahub.api.application.user.UpdateUserUseCase;
-import com.agenciahub.api.controller.user.docs.UserAPI;
+import com.agenciahub.api.application.controllers.docs.UserAPI;
 import com.agenciahub.api.dto.user.CreateUserRequest;
 import com.agenciahub.api.dto.user.UpdateUserRequest;
 import com.agenciahub.api.dto.user.UserResponse;

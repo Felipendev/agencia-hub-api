@@ -5,7 +5,6 @@ import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
@@ -25,7 +24,6 @@ public class TermsService {
                 "url", "/termos");
     }
 
-    @Transactional
     public Map<String, String> acceptTerms(UUID userId, String termsVersion) {
         if (!CURRENT_TERMS_VERSION.equals(termsVersion)) {
             throw new IllegalArgumentException("versão dos termos inválida");

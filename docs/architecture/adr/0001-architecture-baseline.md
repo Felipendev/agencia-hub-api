@@ -51,3 +51,5 @@ Detailed rules are documented in:
 - `docs/architecture/01-architecture-principles.md`
 - `docs/architecture/02-backend-architecture.md`
 - `docs/architecture/03-domain-rules.md`
+- `docs/architecture/05-package-refactoring-and-class-responsibilities.md`
+- `docs/architecture/06-clean-architecture-use-case-driven.md`

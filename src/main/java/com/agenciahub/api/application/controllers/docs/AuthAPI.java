@@ -1,6 +1,5 @@
-package com.agenciahub.api.controller.auth.docs;
+package com.agenciahub.api.application.controllers.docs;
 
-import com.agenciahub.api.api.docs.StandardErrorApiResponses;
 import com.agenciahub.api.dto.auth.ChangePasswordRequest;
 import com.agenciahub.api.dto.auth.ForgotPasswordRequest;
 import com.agenciahub.api.dto.auth.InviteValidationResponse;

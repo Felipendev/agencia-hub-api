@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -33,7 +32,6 @@ public class SolicitacaoSubmissionService {
     private final UserRepository userRepository;
     private final SolicitacaoSubmissionResponseMapper solicitacaoSubmissionResponseMapper;
 
-    @Transactional
     public PublicSolicitacaoSubmitResponse submit(PublicSolicitacaoSubmitRequest request) {
         String telefoneDigits = PhoneValidator.normalize(request.telefone());
         if (!PhoneValidator.isValid(telefoneDigits)) {
@@ -107,7 +105,6 @@ public class SolicitacaoSubmissionService {
         return u;
     }
 
-    @Transactional(readOnly = true)
     public List<SolicitacaoSubmissionResponse> listForAgency(UUID agencyId) {
         if (agencyId == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
@@ -117,7 +114,6 @@ public class SolicitacaoSubmissionService {
                 .toList();
     }
 
-    @Transactional
     public void deleteForAgency(UUID id, UUID agencyId) {
         if (agencyId == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");

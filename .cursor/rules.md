@@ -59,13 +59,14 @@ When rules conflict, follow this order:
 
 ## Documentação OpenAPI (`*API`)
 
-- Contrato e documentação rica do REST ficam em **interfaces públicas** nomeadas `*API` (ex.: `QuotationAPI` quando extraída), preferencialmente no subpacote `docs` dentro do agrupamento da feature (ex.: `controller.quotation.docs`).
+- Contrato e documentação rica do REST ficam em **interfaces públicas** nomeadas `*API` (ex.: `QuotationAPI`) no pacote **`com.agenciahub.api.application.controllers.docs`**; o `@RestController` em `controller.<feature>` implementa a interface.
 - O `@RestController` **implementa** a interface `*API`; evita duplicar `@Operation` / `@ApiResponses` no controller quando já estiverem na interface.
 - Textos de `@Tag`, `@Operation` (summary e description), `@ApiResponse` e descrições correlatas: **português**, no estilo rico acordado para este repositório (descrição em bloco de texto, regras em lista quando fizer sentido, códigos de resposta documentados).
 
-## Organização de pacotes (api / controller)
+## Organização de pacotes (API / controller / aplicação)
 
-- **Alvo incremental** (equivalente à referência por feature): `com.agenciahub.api.controller.<feature>.docs` para interfaces `*API`; `com.agenciahub.api.controller.<feature>` para o controller; use cases em `com.agenciahub.api.application.<feature>`. Não renomear pacotes em massa fora de um passo de roadmap explícito.
+- **Alvo incremental:** interfaces `*API` e meta-anotações OpenAPI em **`com.agenciahub.api.application.controllers.docs`**; `@RestController` em **`com.agenciahub.api.controller.<feature>`**; casos de uso em **`com.agenciahub.api.application.<feature>`** (ou `application.usecases.<feature>.<action>/` conforme **05**). Não renomear pacotes em massa fora de um passo de roadmap explícito.
+- Modelo detalhado (camadas, mappers estáticos, persistência vs domínio, pirâmide de testes): **`docs/architecture/06-clean-architecture-use-case-driven.md`**.
 
 ## Backend Architecture
 
@@ -99,13 +100,6 @@ When rules conflict, follow this order:
 - Do not spread domain validation across controllers or infrastructure.
 - Request validation may use Bean Validation or the framework validation tool.
 - Business validation belongs in the domain or domain services when appropriate.
-
-## Time
-
-- Do not use real current time directly in business logic when time affects behavior or test stability.
-- Prefer TimeProvider, Clock or an equivalent abstraction when needed.
-- Tests must use fixed time when validating date/time behavior.
-- Do not compare expected dates using the real current processing time.
 
 ## Clean Code
 

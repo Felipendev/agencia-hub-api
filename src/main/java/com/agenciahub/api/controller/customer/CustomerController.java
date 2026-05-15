@@ -9,7 +9,7 @@ import com.agenciahub.api.application.customer.LookupCustomerQuery;
 import com.agenciahub.api.application.customer.LookupCustomerUseCase;
 import com.agenciahub.api.application.customer.UpdateCustomerCommand;
 import com.agenciahub.api.application.customer.UpdateCustomerUseCase;
-import com.agenciahub.api.controller.customer.docs.CustomerAPI;
+import com.agenciahub.api.application.controllers.docs.CustomerAPI;
 import com.agenciahub.api.domain.CustomerStatus;
 import com.agenciahub.api.dto.customer.CreateCustomerRequest;
 import com.agenciahub.api.dto.customer.CustomerResponse;
