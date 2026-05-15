@@ -1,5 +1,6 @@
 package com.agenciahub.api.service;
 
+import com.agenciahub.api.application.invitation.InvitationTokenPolicy;
 import com.agenciahub.api.application.terms.TermsConstants;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.InvitationStatus;
@@ -53,7 +54,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final VerificationCodeService verificationCodeService;
-    private final InvitationService invitationService;
     private final PublicLinkCodeService publicLinkCodeService;
 
     public LoginResponse login(LoginRequest request) {
@@ -350,7 +350,10 @@ public class AuthService {
     @Transactional
     public RegisterAgencyResponse registerViaInvite(RegisterViaInviteRequest request) {
         // Validate token
-        Invitation invitation = invitationService.validateToken(request.token());
+        Invitation invitation = invitationRepository
+                .findWithAgencyByToken(request.token())
+                .orElseThrow(() -> new ResourceNotFoundException("convite não encontrado: " + request.token()));
+        InvitationTokenPolicy.ensureUsable(invitation);
 
         // Validate password length
         if (request.password().length() < 8) {
