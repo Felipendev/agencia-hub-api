@@ -16,8 +16,8 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 
 | Pacote (raiz) | Papel hoje |
 |----------------|------------|
-| `com.agenciahub.api.controller.<feature>` | `@RestController` (implementa `*API`). |
-| `com.agenciahub.api.application.controllers.docs` | Interfaces `*API` + OpenAPI (`StandardErrorApiResponses`, etc.). |
+| `com.agenciahub.api.application.controller` | `@RestController` (implementa `*API`). |
+| `com.agenciahub.api.application.controller.doc` | Interfaces `*API` + OpenAPI (`StandardErrorApiResponses`, etc.). |
 | `com.agenciahub.api.application.usecases.<feature>.<action>` | Interfaces `*UseCase`, implementações `@Service`, comandos/consultas; mappers partilhados no pacote da feature. |
 | `com.agenciahub.api.application.integrations.*` | Portas outbound (e-mail, códigos de verificação, …). |
 | `com.agenciahub.api.application.scheduling` | Jobs `@Scheduled` (ex.: expiração de trial). |
@@ -52,8 +52,8 @@ Este documento **define** o modelo alvo de pacotes e o papel de cada tipo de cla
 
 | Tipo | Pacote sugerido (ver secção 5) | Responsabilidade |
 |------|--------------------------------|------------------|
-| **`*API`** | `application.controllers.docs` | Contrato REST + OpenAPI; sem lógica de negócio. |
-| **`*Controller`** | `controller.<feature>` | Implementa `*API`; delega a `*UseCase`; liga `@AuthenticationPrincipal`, headers, `@Valid`. |
+| **`*API`** | `application.controller.doc` | Contrato REST + OpenAPI; sem lógica de negócio. |
+| **`*Controller`** | `application.controller` | Implementa `*API`; delega a `*UseCase`; liga `@AuthenticationPrincipal`, headers, `@Valid`. |
 | **`*UseCase` (interface)** | `application…` | Contrato da operação (`execute(Input)` ou `void`). |
 | **Implementação do use case** (`@Service`, nome = verbo/ação) | `application…` | **Todo** o fluxo da operação que hoje estaria “escondido” num `*Service` monolítico **desta** operação. |
 | **Comando / consulta (record ou tipo dedicado)** | Junto do use case ou subpacote `…commands` / `…queries` | Entrada imutável da operação (evitar “god parameter list”). |

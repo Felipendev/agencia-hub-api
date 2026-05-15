@@ -43,7 +43,7 @@ HTTP Request
 └────────────────────────────────────────────────────────┘
 ```
 
-**Nota de mapeamento conceptual → este repositório:** a camada *Presentation* inclui o contrato OpenAPI; em Java, as interfaces `*API` vivem em `com.agenciahub.api.application.controllers.docs` e os `@RestController` em `com.agenciahub.api.controller.<feature>` (ver **ADR 0004**).
+**Nota de mapeamento conceptual → este repositório:** a camada *Presentation* inclui o contrato OpenAPI; em Java, as interfaces `*API` vivem em `com.agenciahub.api.application.controller.doc` e os `@RestController` em `com.agenciahub.api.controller.<feature>` (ver **ADR 0004**).
 
 ---
 

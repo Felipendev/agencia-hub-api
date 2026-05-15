@@ -1,6 +1,7 @@
 package com.agenciahub.api.application.usecases.user.createuser;
 
 import com.agenciahub.api.application.usecases.user.UserResponseMapper;
+import com.agenciahub.api.domain.UserRole;
 import com.agenciahub.api.dto.user.CreateUserRequest;
 import com.agenciahub.api.dto.user.UserResponse;
 import com.agenciahub.api.entity.User;
@@ -23,6 +24,10 @@ public class CreateUser implements CreateUserUseCase {
     @Override
     @Transactional
     public UserResponse execute(CreateUserRequest request) {
+        if (request.role() == UserRole.SELLER) {
+            throw new IllegalArgumentException(
+                    "agente de venda deve ser criado via convite; use POST /invitations e o registo com token");
+        }
         if (userRepository.existsByEmail(request.email().trim().toLowerCase())) {
             throw new IllegalArgumentException("este e-mail já está cadastrado");
         }
