@@ -30,18 +30,15 @@ sequenceDiagram
     participant F1 as Fase 1 Orquestração no use case
     participant F2 as Fase 2 Pacotes e mappers 06
     participant F3 as Fase 3 Integrações
-    participant F4 as Fase 4 Clock
-    participant F5 as Fase 5 ADR decisões
+    participant F4 as Fase 4 ADR decisões
 
     Note over F0: não reexecutar
     F0->>F1: absorver lógica do *Service
     F1->>F2: opcional por feature
     F2->>F3: quando surgir integração clara
-    F1->>F4: quando teste exigir tempo fixo
-    F2->>F5: quando padrão global mudar
-    F3->>F5: quando padrão global mudar
-    F4->>F5: quando padrão global mudar
-    F5->>F1: prioridades revisadas
+    F2->>F4: quando padrão global mudar
+    F3->>F4: quando padrão global mudar
+    F4->>F1: prioridades revisadas
 ```
 
 ---
@@ -95,30 +92,13 @@ sequenceDiagram
 
 **Pronto quando:** O use case não chama diretamente detalhes de framework de integração espalhados; contrato da porta está claro.
 
-**Depois:** Fase 1 noutros fluxos que reutilizem a integração **ou** Fase 5 se a política de erros/retry for transversal.
+**Depois:** Fase 1 noutros fluxos que reutilizem a integração **ou** Fase 4 se a política de erros/retry for transversal.
 
 ---
 
-## Fase 4 — Tempo (`Clock`) só onde a regra e os testes exigirem
+## Fase 4 — Decisões transversais (ADR + docs)
 
-**Objetivo:** Instantes determinísticos em testes (expiração, trial, convites, etc.).
-
-**Inclui (checklist):**
-
-- [ ] Introduzir `Clock` (ou bean de tempo) **só** no fluxo que vai ganhar teste com instante fixo.
-- [ ] Substituir `Instant.now()` / `System.currentTimeMillis()` **na parte orquestrada** pelo relógio injetado.
-
-**Pronto quando:** Testes do fluxo não dependem do relógio real.
-
-**Depois:** Repetir apenas noutros fluxos com a mesma necessidade; **ADR** se `Clock` global virar regra.
-
-**Evitar:** Injetar `Clock` em toda a base “por precaução”.
-
----
-
-## Fase 5 — Decisões transversais (ADR + docs)
-
-**Objetivo:** Quando algo vira **regra do projeto** (novo pacote raiz, política obrigatória de tempo, split domínio/JPA em larga escala), ficar explícito.
+**Objetivo:** Quando algo vira **regra do projeto** (novo pacote raiz, split domínio/JPA em larga escala, política transversal de erros/retry), ficar explícito.
 
 **Inclui (checklist):**
 
@@ -138,9 +118,8 @@ sequenceDiagram
 | 0 | **Não aplicável** — baseline já feito neste repo. |
 | 1 (um PR) | Continuar **Fase 1** noutra operação **ou** **Fase 2** se a feature estiver madura para reorganizar pacotes. |
 | 2 | **Fase 1** nas operações da feature reorganizada **ou** **Fase 3** se integrações forem o foco. |
-| 3 | **Fase 1** em consumidores **ou** **Fase 5** se houver decisão global. |
-| 4 | **Fase 1** ou **5** conforme contexto. |
-| 5 | **Fase 1** (prioridade revisada). |
+| 3 | **Fase 1** em consumidores **ou** **Fase 4** se houver decisão global. |
+| 4 | **Fase 1** (prioridade revisada). |
 
 ---
 

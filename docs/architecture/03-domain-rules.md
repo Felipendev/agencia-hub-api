@@ -170,10 +170,8 @@ Prefer an abstraction when time is part of the rule.
 
 Possible approaches:
 
-- TimeProvider
-- Clock
-- injected date/time service
-- fixed Clock in tests
+- TimeProvider or injected date/time service
+- fixed instant in tests
 
 Use this especially when:
 

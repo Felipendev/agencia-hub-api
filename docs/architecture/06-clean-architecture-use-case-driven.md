@@ -180,5 +180,5 @@ com.agenciahub.api/
 | `02-backend-architecture.md` | Camadas, contratos `UseCase` / `VoidUseCase`, HTTP, OpenAPI. |
 | `05-package-refactoring-and-class-responsibilities.md` | Pacotes evolutivos, `@Transactional`, anti-padrões, checklist de PR. |
 | **Este `06-…`** | Referência **detalhada** Clean Architecture / use case driven e pirâmide de testes. |
-| `04-incremental-refactoring-roadmap.md` | **Fases 1–5** operacionais; Fase 0 = baseline já feito neste repo (não repetir). |
+| `04-incremental-refactoring-roadmap.md` | **Fases 1–4** operacionais; Fase 0 = baseline já feito neste repo (não repetir). |
 | ADR 0004 | Por que `controller` e `application` são irmãos no pacote Java. |

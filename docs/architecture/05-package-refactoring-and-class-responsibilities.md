@@ -151,7 +151,7 @@ com.agenciahub.api.application.usecases.<feature>.<verbo>/
 | Documento | Função |
 |-----------|--------|
 | `02-backend-architecture.md` | Camadas gerais, contratos `UseCase` / `VoidUseCase`, layout HTTP. |
-| `04-incremental-refactoring-roadmap.md` | **Fases 1–5** (pós-baseline); Fase 0 tratada como concluída neste repositório. |
+| `04-incremental-refactoring-roadmap.md` | **Fases 1–4** (pós-baseline); Fase 0 tratada como concluída neste repositório. |
 | `06-clean-architecture-use-case-driven.md` | Referência detalhada: camadas, pacotes alvo, mappers, repositório domínio/persistência, pirâmide de testes. |
 | ADR 0004 | Por que `controller` e `application` são irmãos no pacote Java. |
 | Este `05-…` | **Definições** de pacotes evolutivos e **papel** de cada classe no refator. |

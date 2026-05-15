@@ -101,13 +101,6 @@ When rules conflict, follow this order:
 - Request validation may use Bean Validation or the framework validation tool.
 - Business validation belongs in the domain or domain services when appropriate.
 
-## Time
-
-- Do not use real current time directly in business logic when time affects behavior or test stability.
-- Prefer TimeProvider, Clock or an equivalent abstraction when needed.
-- Tests must use fixed time when validating date/time behavior.
-- Do not compare expected dates using the real current processing time.
-
 ## Clean Code
 
 - Avoid nested if statements.
