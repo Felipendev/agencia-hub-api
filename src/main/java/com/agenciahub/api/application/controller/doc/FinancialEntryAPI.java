@@ -3,9 +3,9 @@ package com.agenciahub.api.application.controller.doc;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
 import com.agenciahub.api.domain.FinancialEntryType;
-import com.agenciahub.api.dto.financial.CreateFinancialEntryRequest;
-import com.agenciahub.api.dto.financial.FinancialEntryResponse;
-import com.agenciahub.api.dto.financial.UpdateFinancialEntryRequest;
+import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryRequestDTO;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
+import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,7 +44,7 @@ public interface FinancialEntryAPI {
                     Filtros combináveis: intervalo de datas (`from`/`to`), tipo, categoria, status, cliente e conta bancária.
 
                     Ordenação: data do lançamento (`entryDate`) decrescente.""")
-    List<FinancialEntryResponse> list(
+    List<FinancialEntrySummaryResponseDTO> list(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(required = false) FinancialEntryType type,
@@ -59,18 +59,18 @@ public interface FinancialEntryAPI {
             @ApiResponse(responseCode = "200", description = "lançamento encontrado"),
             @ApiResponse(responseCode = "404", description = "lançamento inexistente")
     })
-    FinancialEntryResponse get(@Parameter(description = "id do lançamento") @PathVariable UUID id);
+    FinancialEntrySummaryResponseDTO get(@Parameter(description = "id do lançamento") @PathVariable UUID id);
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(
             summary = "Cria lançamento",
             description = "Cliente é opcional; quando informado, deve existir na base.")
-    FinancialEntryResponse create(@Valid @RequestBody CreateFinancialEntryRequest request);
+    FinancialEntrySummaryResponseDTO create(@Valid @RequestBody CreateFinancialEntryRequestDTO request);
 
     @PatchMapping("/{id}")
     @Operation(summary = "Atualiza parcialmente o lançamento")
-    FinancialEntryResponse patch(
+    FinancialEntrySummaryResponseDTO patch(
             @Parameter(description = "id do lançamento") @PathVariable UUID id,
-            @RequestBody UpdateFinancialEntryRequest request);
+            @RequestBody UpdateFinancialEntryRequestDTO request);
 }

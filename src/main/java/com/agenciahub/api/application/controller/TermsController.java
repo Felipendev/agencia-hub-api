@@ -1,10 +1,10 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.terms.acceptterms.AcceptTermsCommand;
-import com.agenciahub.api.application.usecases.terms.acceptterms.AcceptTermsUseCase;
-import com.agenciahub.api.application.usecases.terms.getlatesttermspublic.GetLatestTermsPublicUseCase;
+import com.agenciahub.api.application.usecases.terms.accept.AcceptTermsCommand;
+import com.agenciahub.api.application.usecases.terms.accept.AcceptTermsUseCase;
+import com.agenciahub.api.application.usecases.terms.retrieve.latest.GetLatestTermsPublicUseCase;
 import com.agenciahub.api.application.controller.doc.TermsAPI;
-import com.agenciahub.api.dto.terms.AcceptTermsRequest;
+import com.agenciahub.api.application.usecases.terms.accept.AcceptTermsRequestDTO;
 import com.agenciahub.api.security.SecurityContextUsers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +25,7 @@ public class TermsController implements TermsAPI {
     }
 
     @Override
-    public Map<String, String> accept(AcceptTermsRequest request) {
+    public Map<String, String> accept(AcceptTermsRequestDTO request) {
         UUID userId = SecurityContextUsers.requireUserId();
         return acceptTermsUseCase.execute(new AcceptTermsCommand(userId, request.termsVersion()));
     }

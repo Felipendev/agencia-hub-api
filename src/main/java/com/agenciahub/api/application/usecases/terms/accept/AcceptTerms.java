@@ -1,6 +1,6 @@
-package com.agenciahub.api.application.usecases.terms.acceptterms;
+package com.agenciahub.api.application.usecases.terms.accept;
 
-import com.agenciahub.api.application.usecases.terms.TermsConstants;
+import com.agenciahub.api.application.usecases.terms.shared.TermsConstants;
 import com.agenciahub.api.entity.User;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.repository.UserRepository;

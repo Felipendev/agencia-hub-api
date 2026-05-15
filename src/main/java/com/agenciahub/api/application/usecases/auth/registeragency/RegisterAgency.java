@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.usecases.auth.registeragency;
 
 import com.agenciahub.api.application.usecases.auth.AuthBetaWhitelist;
-import com.agenciahub.api.application.usecases.terms.TermsConstants;
+import com.agenciahub.api.application.usecases.terms.shared.TermsConstants;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.UserRole;

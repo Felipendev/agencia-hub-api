@@ -1,8 +1,8 @@
-package com.agenciahub.api.application.usecases.financial.createfinancialentry;
+package com.agenciahub.api.application.usecases.financial.create;
 
-import com.agenciahub.api.application.usecases.financial.FinancialEntryResponseMapper;
-import com.agenciahub.api.dto.financial.CreateFinancialEntryRequest;
-import com.agenciahub.api.dto.financial.FinancialEntryResponse;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntryResponseMapper;
+import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryRequestDTO;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
 import com.agenciahub.api.entity.Customer;
 import com.agenciahub.api.entity.FinancialEntry;
 import com.agenciahub.api.exception.ResourceNotFoundException;
@@ -22,7 +22,7 @@ public class CreateFinancialEntry implements CreateFinancialEntryUseCase {
     private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Override
-    public FinancialEntryResponse execute(CreateFinancialEntryRequest request) {
+    public FinancialEntrySummaryResponseDTO execute(CreateFinancialEntryRequestDTO request) {
         Customer customer = resolveCustomer(request.customerId());
         FinancialEntry entity = FinancialEntry.builder()
                 .description(request.description().strip())

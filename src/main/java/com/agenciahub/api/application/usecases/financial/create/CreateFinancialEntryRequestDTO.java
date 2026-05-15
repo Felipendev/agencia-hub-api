@@ -1,4 +1,4 @@
-package com.agenciahub.api.dto.financial;
+package com.agenciahub.api.application.usecases.financial.create;
 
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record CreateFinancialEntryRequest(
+public record CreateFinancialEntryRequestDTO(
         @NotBlank String description,
         @NotNull FinancialEntryType type,
         @NotNull FinancialEntryCategory category,

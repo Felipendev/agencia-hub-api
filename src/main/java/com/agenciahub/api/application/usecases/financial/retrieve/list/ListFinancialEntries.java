@@ -1,7 +1,7 @@
-package com.agenciahub.api.application.usecases.financial.listfinancialentries;
+package com.agenciahub.api.application.usecases.financial.retrieve.list;
 
-import com.agenciahub.api.application.usecases.financial.FinancialEntryResponseMapper;
-import com.agenciahub.api.dto.financial.FinancialEntryResponse;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntryResponseMapper;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
 import com.agenciahub.api.entity.FinancialEntry;
 import com.agenciahub.api.repository.FinancialEntryRepository;
 import com.agenciahub.api.repository.spec.FinancialEntrySpecifications;
@@ -20,7 +20,7 @@ public class ListFinancialEntries implements ListFinancialEntriesUseCase {
     private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Override
-    public List<FinancialEntryResponse> execute(ListFinancialEntriesQuery query) {
+    public List<FinancialEntrySummaryResponseDTO> execute(ListFinancialEntriesQuery query) {
         Specification<FinancialEntry> spec = FinancialEntrySpecifications.withFilters(
                 query.from(),
                 query.to(),

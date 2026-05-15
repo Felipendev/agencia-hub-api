@@ -1,16 +1,16 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.financial.createfinancialentry.CreateFinancialEntryUseCase;
-import com.agenciahub.api.application.usecases.financial.getfinancialentrybyid.GetFinancialEntryByIdUseCase;
-import com.agenciahub.api.application.usecases.financial.listfinancialentries.ListFinancialEntriesQuery;
-import com.agenciahub.api.application.usecases.financial.listfinancialentries.ListFinancialEntriesUseCase;
-import com.agenciahub.api.application.usecases.financial.updatefinancialentry.UpdateFinancialEntryUseCase;
+import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryUseCase;
+import com.agenciahub.api.application.usecases.financial.retrieve.byid.GetFinancialEntryByIdUseCase;
+import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesQuery;
+import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesUseCase;
+import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
 import com.agenciahub.api.domain.FinancialEntryType;
-import com.agenciahub.api.dto.financial.CreateFinancialEntryRequest;
-import com.agenciahub.api.dto.financial.FinancialEntryResponse;
+import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryRequestDTO;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
@@ -73,7 +73,7 @@ class FinancialEntryControllerWebMvcTest {
     void list_returnsEntries() throws Exception {
         UUID id = UUID.randomUUID();
         when(listFinancialEntriesUseCase.execute(any(ListFinancialEntriesQuery.class)))
-                .thenReturn(List.of(new FinancialEntryResponse(
+                .thenReturn(List.of(new FinancialEntrySummaryResponseDTO(
                         id,
                         "Pagamento fornecedor",
                         FinancialEntryType.EXPENSE,

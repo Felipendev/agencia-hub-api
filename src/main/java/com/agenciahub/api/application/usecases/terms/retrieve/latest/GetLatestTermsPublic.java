@@ -1,6 +1,6 @@
-package com.agenciahub.api.application.usecases.terms.getlatesttermspublic;
+package com.agenciahub.api.application.usecases.terms.retrieve.latest;
 
-import com.agenciahub.api.application.usecases.terms.TermsConstants;
+import com.agenciahub.api.application.usecases.terms.shared.TermsConstants;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

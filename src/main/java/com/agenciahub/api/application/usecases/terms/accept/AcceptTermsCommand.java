@@ -1,4 +1,4 @@
-package com.agenciahub.api.application.usecases.terms.acceptterms;
+package com.agenciahub.api.application.usecases.terms.accept;
 
 import java.util.UUID;
 

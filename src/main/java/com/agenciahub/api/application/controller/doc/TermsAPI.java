@@ -1,6 +1,6 @@
 package com.agenciahub.api.application.controller.doc;
 
-import com.agenciahub.api.dto.terms.AcceptTermsRequest;
+import com.agenciahub.api.application.usecases.terms.accept.AcceptTermsRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,5 +23,5 @@ public interface TermsAPI {
     @PostMapping("/terms/accept")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Registra aceite", description = "Define `termsAccepted` no usuário autenticado após validar a versão.")
-    Map<String, String> accept(@Valid @RequestBody AcceptTermsRequest request);
+    Map<String, String> accept(@Valid @RequestBody AcceptTermsRequestDTO request);
 }

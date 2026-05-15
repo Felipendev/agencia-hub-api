@@ -1,4 +1,4 @@
-package com.agenciahub.api.application.usecases.terms.getlatesttermspublic;
+package com.agenciahub.api.application.usecases.terms.retrieve.latest;
 
 import com.agenciahub.api.application.UseCase;
 

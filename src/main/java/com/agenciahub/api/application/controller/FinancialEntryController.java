@@ -1,18 +1,18 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.financial.createfinancialentry.CreateFinancialEntryUseCase;
-import com.agenciahub.api.application.usecases.financial.getfinancialentrybyid.GetFinancialEntryByIdUseCase;
-import com.agenciahub.api.application.usecases.financial.listfinancialentries.ListFinancialEntriesQuery;
-import com.agenciahub.api.application.usecases.financial.listfinancialentries.ListFinancialEntriesUseCase;
-import com.agenciahub.api.application.usecases.financial.updatefinancialentry.UpdateFinancialEntryCommand;
-import com.agenciahub.api.application.usecases.financial.updatefinancialentry.UpdateFinancialEntryUseCase;
+import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryUseCase;
+import com.agenciahub.api.application.usecases.financial.retrieve.byid.GetFinancialEntryByIdUseCase;
+import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesQuery;
+import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesUseCase;
+import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryCommand;
+import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryUseCase;
 import com.agenciahub.api.application.controller.doc.FinancialEntryAPI;
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
 import com.agenciahub.api.domain.FinancialEntryType;
-import com.agenciahub.api.dto.financial.CreateFinancialEntryRequest;
-import com.agenciahub.api.dto.financial.FinancialEntryResponse;
-import com.agenciahub.api.dto.financial.UpdateFinancialEntryRequest;
+import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryRequestDTO;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
+import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +33,7 @@ public class FinancialEntryController implements FinancialEntryAPI {
     private final UpdateFinancialEntryUseCase updateFinancialEntryUseCase;
 
     @Override
-    public List<FinancialEntryResponse> list(
+    public List<FinancialEntrySummaryResponseDTO> list(
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             FinancialEntryType type,
@@ -46,17 +46,17 @@ public class FinancialEntryController implements FinancialEntryAPI {
     }
 
     @Override
-    public FinancialEntryResponse get(UUID id) {
+    public FinancialEntrySummaryResponseDTO get(UUID id) {
         return getFinancialEntryByIdUseCase.execute(id);
     }
 
     @Override
-    public FinancialEntryResponse create(CreateFinancialEntryRequest request) {
+    public FinancialEntrySummaryResponseDTO create(CreateFinancialEntryRequestDTO request) {
         return createFinancialEntryUseCase.execute(request);
     }
 
     @Override
-    public FinancialEntryResponse patch(UUID id, UpdateFinancialEntryRequest request) {
+    public FinancialEntrySummaryResponseDTO patch(UUID id, UpdateFinancialEntryRequestDTO request) {
         return updateFinancialEntryUseCase.execute(new UpdateFinancialEntryCommand(id, request));
     }
 }

@@ -1,8 +1,8 @@
-package com.agenciahub.api.application.usecases.financial.updatefinancialentry;
+package com.agenciahub.api.application.usecases.financial.update;
 
-import com.agenciahub.api.application.usecases.financial.FinancialEntryResponseMapper;
-import com.agenciahub.api.dto.financial.FinancialEntryResponse;
-import com.agenciahub.api.dto.financial.UpdateFinancialEntryRequest;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntryResponseMapper;
+import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySummaryResponseDTO;
+import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryRequestDTO;
 import com.agenciahub.api.entity.Customer;
 import com.agenciahub.api.entity.FinancialEntry;
 import com.agenciahub.api.exception.ResourceNotFoundException;
@@ -22,9 +22,9 @@ public class UpdateFinancialEntry implements UpdateFinancialEntryUseCase {
     private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Override
-    public FinancialEntryResponse execute(UpdateFinancialEntryCommand command) {
+    public FinancialEntrySummaryResponseDTO execute(UpdateFinancialEntryCommand command) {
         UUID id = command.id();
-        UpdateFinancialEntryRequest request = command.request();
+        UpdateFinancialEntryRequestDTO request = command.request();
         FinancialEntry entity = financialEntryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
         if (request.description() != null) {

@@ -1,4 +1,4 @@
-package com.agenciahub.api.application.usecases.financial.listfinancialentries;
+package com.agenciahub.api.application.usecases.financial.retrieve.list;
 
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;

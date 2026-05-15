@@ -1,4 +1,4 @@
-package com.agenciahub.api.dto.financial;
+package com.agenciahub.api.application.usecases.financial.update;
 
 import com.agenciahub.api.domain.FinancialEntryCategory;
 import com.agenciahub.api.domain.FinancialEntryStatus;
@@ -8,8 +8,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record FinancialEntryResponse(
-        UUID id,
+/**
+ * Partial update: {@code null} fields are ignored.
+ */
+public record UpdateFinancialEntryRequestDTO(
         String description,
         FinancialEntryType type,
         FinancialEntryCategory category,
@@ -17,7 +19,6 @@ public record FinancialEntryResponse(
         LocalDate entryDate,
         FinancialEntryStatus status,
         UUID customerId,
-        String customerName,
         String bankAccount
 ) {
 }

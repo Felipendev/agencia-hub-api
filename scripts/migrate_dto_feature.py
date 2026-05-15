@@ -20,6 +20,30 @@ FEATURES = {
         },
         "root_components": ["AgencyResponseMapper"],
     },
+    "terms": {
+        "folders": {
+            "acceptterms": "accept",
+            "getlatesttermspublic": "retrieve/latest",
+        },
+        "dto": {
+            "AcceptTermsRequest": ("accept", "AcceptTermsRequestDTO"),
+        },
+        "root_components": ["TermsConstants"],
+    },
+    "financial": {
+        "folders": {
+            "createfinancialentry": "create",
+            "getfinancialentrybyid": "retrieve/byid",
+            "listfinancialentries": "retrieve/list",
+            "updatefinancialentry": "update",
+        },
+        "dto": {
+            "FinancialEntryResponse": ("shared", "FinancialEntrySummaryResponseDTO"),
+            "CreateFinancialEntryRequest": ("create", "CreateFinancialEntryRequestDTO"),
+            "UpdateFinancialEntryRequest": ("update", "UpdateFinancialEntryRequestDTO"),
+        },
+        "root_components": ["FinancialEntryResponseMapper"],
+    },
     "invitation": {
         "folders": {
             "createinvitation": "create",
@@ -171,6 +195,18 @@ def migrate_feature(feature: str) -> None:
         (
             f"com.agenciahub.api.application.usecases.{feature}.AgencyResponseMapper",
             f"{pkg(feature, 'shared')}.AgencyResponseMapper",
+        )
+    )
+    replacements.append(
+        (
+            f"com.agenciahub.api.application.usecases.{feature}.FinancialEntryResponseMapper",
+            f"{pkg(feature, 'shared')}.FinancialEntryResponseMapper",
+        )
+    )
+    replacements.append(
+        (
+            f"com.agenciahub.api.application.usecases.{feature}.TermsConstants",
+            f"{pkg(feature, 'shared')}.TermsConstants",
         )
     )
 

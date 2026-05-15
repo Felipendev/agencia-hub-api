@@ -1,7 +1,7 @@
 package com.agenciahub.api.application.controller;
 
-import com.agenciahub.api.application.usecases.terms.acceptterms.AcceptTermsUseCase;
-import com.agenciahub.api.application.usecases.terms.getlatesttermspublic.GetLatestTermsPublicUseCase;
+import com.agenciahub.api.application.usecases.terms.accept.AcceptTermsUseCase;
+import com.agenciahub.api.application.usecases.terms.retrieve.latest.GetLatestTermsPublicUseCase;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
