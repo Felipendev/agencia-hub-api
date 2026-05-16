@@ -5,6 +5,7 @@ import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
 import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
 import com.agenciahub.api.application.persistence.entity.Agency;
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.exception.EmailNotVerifiedException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.security.JwtService;
@@ -33,7 +34,7 @@ public class Login implements LoginUseCase {
         }
 
         if (!Boolean.TRUE.equals(user.getEmailVerified())) {
-            throw new IllegalStateException("verifique seu e-mail para acessar o sistema");
+            throw new EmailNotVerifiedException(user.getEmail());
         }
 
         Agency agency = user.getAgency();
