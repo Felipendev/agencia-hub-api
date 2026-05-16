@@ -1,5 +1,7 @@
 package com.agenciahub.api.security;
 
+import com.agenciahub.api.exception.MissingAgencyContextException;
+
 import java.util.UUID;
 
 /**
@@ -16,6 +18,17 @@ public class TenantContext {
 
     public static UUID get() {
         return currentTenant.get();
+    }
+
+    /**
+     * Agency id for the current request (JWT + {@code TenantInterceptor}); throws if missing.
+     */
+    public static UUID requireAgencyId() {
+        UUID id = currentTenant.get();
+        if (id == null) {
+            throw new MissingAgencyContextException("agência não definida no contexto da requisição");
+        }
+        return id;
     }
 
     public static void clear() {

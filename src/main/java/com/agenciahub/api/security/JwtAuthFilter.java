@@ -1,7 +1,7 @@
 package com.agenciahub.api.security;
 
-import com.agenciahub.api.entity.User;
-import com.agenciahub.api.repository.UserRepository;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,7 @@ import java.util.UUID;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final PlatformAccountRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -44,7 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         UUID userId = jwtService.extractUserId(token);
-        User user = userRepository.findByIdWithAgency(userId).orElse(null);
+        PlatformAccount user = userRepository.findByIdWithAgency(userId).orElse(null);
         if (user == null || !Boolean.TRUE.equals(user.getActive())) {
             chain.doFilter(request, response);
             return;
@@ -73,7 +73,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         var auth = new UsernamePasswordAuthenticationToken(
                 user,
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getAccountKind().name()))
         );
         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(auth);

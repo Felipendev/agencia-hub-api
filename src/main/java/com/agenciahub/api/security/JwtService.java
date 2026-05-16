@@ -30,24 +30,24 @@ public class JwtService {
      * @deprecated Use {@link #generate(UUID, String, UUID, Instant)} instead.
      */
     @Deprecated
-    public String generate(UUID userId, String role) {
-        return generate(userId, role, null, null);
+    public String generate(UUID userId, String accountKind) {
+        return generate(userId, accountKind, null, null);
     }
 
     /**
      * Generates a JWT token with agency_id and password_changed_at claims.
      *
-     * @param userId           the user's UUID
-     * @param role             the user's role (OWNER, SELLER)
-     * @param agencyId         the user's agency UUID
+     * @param userId            the user's UUID
+     * @param accountKind       AGENCY_OWNER or SALES_AGENT
+     * @param agencyId          the user's agency UUID
      * @param passwordChangedAt the timestamp of the last password change (nullable)
      * @return signed JWT token string
      */
-    public String generate(UUID userId, String role, UUID agencyId, Instant passwordChangedAt) {
+    public String generate(UUID userId, String accountKind, UUID agencyId, Instant passwordChangedAt) {
         long now = System.currentTimeMillis();
         var builder = Jwts.builder()
                 .subject(userId.toString())
-                .claim("role", role)
+                .claim("accountKind", accountKind)
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + expirationMs));
 
@@ -83,8 +83,24 @@ public class JwtService {
         return UUID.fromString(parse(token).getSubject());
     }
 
+    /**
+     * Lê {@code accountKind} do token; aceita claim legado {@code role} até expirarem tokens antigos.
+     */
+    public String extractAccountKind(String token) {
+        Claims claims = parse(token);
+        String accountKind = claims.get("accountKind", String.class);
+        if (accountKind != null) {
+            return accountKind;
+        }
+        return claims.get("role", String.class);
+    }
+
+    /**
+     * @deprecated Use {@link #extractAccountKind(String)}.
+     */
+    @Deprecated
     public String extractRole(String token) {
-        return parse(token).get("role", String.class);
+        return extractAccountKind(token);
     }
 
     public UUID extractAgencyId(String token) {

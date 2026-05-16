@@ -7,6 +7,6 @@ package com.agenciahub.api.exception;
 public class DuplicateCustomerException extends RuntimeException {
 
     public DuplicateCustomerException(String field, String value) {
-        super("Já existe um cliente cadastrado com " + field + " \"" + value + "\".");
+        super("já existe um cliente cadastrado com " + field + " \"" + value + "\"");
     }
 }
