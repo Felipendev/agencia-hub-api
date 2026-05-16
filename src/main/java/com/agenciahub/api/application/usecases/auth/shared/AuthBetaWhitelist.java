@@ -7,6 +7,8 @@ public final class AuthBetaWhitelist {
 
     public static final Set<String> ALLOWED_OWNER_EMAILS = Set.of(
             "contato@agenciashub.com.br",
+            "felipehenrique.pds@gmail.com",
+            "fhps.dev@gmail.com",
             "consultoria.andressaviagens@gmail.com");
 
     private AuthBetaWhitelist() {}
