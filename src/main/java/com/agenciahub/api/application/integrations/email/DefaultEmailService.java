@@ -1,5 +1,6 @@
 package com.agenciahub.api.application.integrations.email;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +12,19 @@ import org.springframework.stereotype.Service;
 public class DefaultEmailService implements EmailService {
 
     private final TransactionalMailChannel channel;
+    private final String appBaseUrl;
 
-    public DefaultEmailService(TransactionalMailChannel channel) {
+    public DefaultEmailService(
+            TransactionalMailChannel channel,
+            @Value("${app.base-url:http://localhost:3000}") String appBaseUrl) {
         this.channel = channel;
+        this.appBaseUrl = appBaseUrl;
     }
 
     @Async
     @Override
     public void sendVerificationCode(String to, String code, String userName) {
-        channel.send(to, TransactionalMailBody.verificationCode(userName, code));
+        channel.send(to, TransactionalMailBody.verificationCode(userName, code, to, appBaseUrl));
     }
 
     @Async

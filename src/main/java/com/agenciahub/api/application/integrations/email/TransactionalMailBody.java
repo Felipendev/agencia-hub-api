@@ -5,19 +5,25 @@ public final class TransactionalMailBody {
 
     private TransactionalMailBody() {}
 
-    public static TransactionalMail verificationCode(String userName, String code) {
+    public static TransactionalMail verificationCode(String userName, String code, String email, String baseUrl) {
+        String magicLink = baseUrl + "/cadastro/verificar?email=" +
+                java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8) +
+                "&code=" + code;
         String body =
                 """
                 Olá %s,
 
                 Seu código de verificação é: %s
 
+                Ou clique no link abaixo para ativar sua conta automaticamente:
+                %s
+
                 Este código expira em 15 minutos.
 
                 Se você não solicitou este código, ignore este e-mail.
 
                 Equipe AgênciasHub"""
-                        .formatted(userName, code);
+                        .formatted(userName, code, magicLink);
         return new TransactionalMail("AgênciasHub — Código de Verificação", body);
     }
 
