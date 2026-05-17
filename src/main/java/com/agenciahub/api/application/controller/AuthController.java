@@ -10,6 +10,8 @@ import com.agenciahub.api.application.usecases.auth.resendcode.ResendCodeUseCase
 import com.agenciahub.api.application.usecases.auth.resetpassword.ResetPasswordUseCase;
 import com.agenciahub.api.application.usecases.auth.validatetoken.ValidateInviteTokenUseCase;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailUseCase;
+import com.agenciahub.api.application.usecases.auth.verifyemailbylink.VerifyEmailByLink;
+import com.agenciahub.api.application.usecases.auth.verifyemailbylink.VerifyEmailByLinkRequestDTO;
 import com.agenciahub.api.application.controller.doc.AuthAPI;
 import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswordRequestDTO;
 import com.agenciahub.api.application.usecases.auth.forgotpassword.ForgotPasswordRequestDTO;
@@ -41,6 +43,7 @@ public class AuthController implements AuthAPI {
     private final ForgotPasswordUseCase forgotPasswordUseCase;
     private final ResetPasswordUseCase resetPasswordUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
+    private final VerifyEmailByLink verifyEmailByLink;
     private final ValidateInviteTokenUseCase validateInviteTokenUseCase;
     private final RegisterViaInviteUseCase registerViaInviteUseCase;
 
@@ -57,6 +60,11 @@ public class AuthController implements AuthAPI {
     @Override
     public VerifyEmailResponseDTO verifyEmail(VerifyEmailRequestDTO request) {
         return verifyEmailUseCase.execute(request);
+    }
+
+    @Override
+    public VerifyEmailResponseDTO verifyEmailByLink(VerifyEmailByLinkRequestDTO request) {
+        return verifyEmailByLink.execute(request);
     }
 
     @Override
