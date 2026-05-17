@@ -1,15 +1,21 @@
 package com.agenciahub.api.application.controller;
 
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.application.usecases.solicitacao.submission.delete.DeleteSolicitacaoSubmissionForAgencyUseCase;
 import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.list.ListSolicitacaoSubmissionsForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.list.ListSubmissionsQuery;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.web.GlobalExceptionHandler;
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
 import com.agenciahub.api.security.JwtAuthFilter;
 import com.agenciahub.api.security.RateLimitFilter;
+import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
@@ -24,7 +30,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -73,7 +78,16 @@ class SolicitacaoSubmissionAgencyControllerWebMvcTest {
     void list_returnsSubmissions() throws Exception {
         UUID id = UUID.randomUUID();
         Instant created = Instant.parse("2026-01-01T12:00:00Z");
-        when(listSolicitacaoSubmissionsForAgencyUseCase.execute(eq(agencyId)))
+
+        PlatformAccount owner = PlatformAccount.builder()
+                .id(UUID.randomUUID())
+                .accountKind(AccountKind.AGENCY_OWNER)
+                .name("Owner")
+                .email("owner@test.com")
+                .passwordHash("x")
+                .build();
+
+        when(listSolicitacaoSubmissionsForAgencyUseCase.execute(any(ListSubmissionsQuery.class)))
                 .thenReturn(List.of(new SolicitacaoSubmissionSummaryResponseDTO(
                         id,
                         "demo",
@@ -86,9 +100,13 @@ class SolicitacaoSubmissionAgencyControllerWebMvcTest {
                         null,
                         "")));
 
-        mockMvc.perform(get("/agency/solicitacao-submissions"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nome").value("João"));
+        try (MockedStatic<SecurityContextUsers> mocked = Mockito.mockStatic(SecurityContextUsers.class)) {
+            mocked.when(SecurityContextUsers::requireUser).thenReturn(owner);
+
+            mockMvc.perform(get("/agency/solicitacao-submissions"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].nome").value("João"));
+        }
     }
 
     @Test
