@@ -10,6 +10,7 @@ import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class ListQuotations implements ListQuotationsUseCase {
     private final QuotationResponseMapper quotationResponseMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<QuotationSummaryResponseDTO> execute(ListQuotationsQuery query) {
         UUID agencyId = TenantContext.requireAgencyId();
         UUID callerId = query.caller() != null ? query.caller().getId() : null;
