@@ -4,6 +4,7 @@ import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAc
 import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,10 @@ public class ListActiveSalesAgents implements ListActiveSalesAgentsUseCase {
 
     @Override
     public List<PlatformAccountSummaryResponseDTO> execute(Void unused) {
-        return userRepository.findByAccountKindAndActiveTrue(AccountKind.SALES_AGENT).stream()
+        var agencyId = TenantContext.requireAgencyId();
+        return userRepository
+                .findByAgency_IdAndAccountKindAndActiveTrue(agencyId, AccountKind.SALES_AGENT)
+                .stream()
                 .map(userResponseMapper::toResponse)
                 .toList();
     }

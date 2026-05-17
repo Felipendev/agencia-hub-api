@@ -30,12 +30,15 @@ public final class QuotationSupport {
     }
 
     public static Specification<Quotation> quotationSearchSpec(
-            UUID customerId, QuotationStatus status, String rawSearch, UUID sellerId) {
+            UUID agencyId, UUID customerId, QuotationStatus status, String rawSearch, UUID sellerId) {
         final String trimmed = rawSearch != null ? rawSearch.strip() : "";
         final boolean hasSearch = !trimmed.isEmpty();
 
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            // Always scope to the caller's agency
+            predicates.add(cb.equal(root.get("agency").get("id"), agencyId));
 
             if (customerId != null) {
                 predicates.add(cb.equal(root.join("customer").get("id"), customerId));
@@ -55,9 +58,6 @@ public final class QuotationSupport {
                 predicates.add(cb.or(titlePred, destPred, namePred));
             }
 
-            if (predicates.isEmpty()) {
-                return cb.conjunction();
-            }
             return cb.and(predicates.toArray(Predicate[]::new));
         };
     }

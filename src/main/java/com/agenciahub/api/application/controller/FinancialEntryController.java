@@ -5,6 +5,7 @@ import com.agenciahub.api.application.usecases.financial.retrieve.byid.GetFinanc
 import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesQuery;
 import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesUseCase;
 import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryCommand;
+import com.agenciahub.api.application.usecases.financial.delete.DeleteFinancialEntryUseCase;
 import com.agenciahub.api.application.usecases.financial.update.UpdateFinancialEntryUseCase;
 import com.agenciahub.api.application.controller.doc.FinancialEntryAPI;
 import com.agenciahub.api.domain.FinancialEntryCategory;
@@ -31,6 +32,7 @@ public class FinancialEntryController implements FinancialEntryAPI {
     private final GetFinancialEntryByIdUseCase getFinancialEntryByIdUseCase;
     private final CreateFinancialEntryUseCase createFinancialEntryUseCase;
     private final UpdateFinancialEntryUseCase updateFinancialEntryUseCase;
+    private final DeleteFinancialEntryUseCase deleteFinancialEntryUseCase;
 
     @Override
     public List<FinancialEntrySummaryResponseDTO> list(
@@ -58,5 +60,10 @@ public class FinancialEntryController implements FinancialEntryAPI {
     @Override
     public FinancialEntrySummaryResponseDTO patch(UUID id, UpdateFinancialEntryRequestDTO request) {
         return updateFinancialEntryUseCase.execute(new UpdateFinancialEntryCommand(id, request));
+    }
+
+    @Override
+    public void delete(UUID id) {
+        deleteFinancialEntryUseCase.execute(id);
     }
 }
