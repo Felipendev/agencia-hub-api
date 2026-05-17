@@ -219,6 +219,54 @@ public final class TransactionalMailBody {
                 </html>""".formatted(bodyContent, footerDisclaimer, recipientLine);
     }
 
+    public static TransactionalMail newSubmissionAlert(
+            String agencyName, String clienteNome, String telefone,
+            String rota, String datas, String dashboardUrl, String recipientEmail) {
+
+        String text = """
+                Nova solicitação de orçamento recebida em %s.
+
+                Cliente: %s
+                Telefone: %s
+                Rota: %s
+                Datas: %s
+
+                Acesse o painel para visualizar e importar: %s
+
+                Equipe AgênciasHub""".formatted(agencyName, clienteNome, telefone, rota, datas, dashboardUrl);
+
+        String row = "<tr><td style=\"padding:6px 0;font-size:14px;color:#475569;\"><strong style=\"color:#1E293B;\">%s</strong> %s</td></tr>";
+
+        String body = """
+                <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;line-height:1.25;">Nova solicitação recebida</h1>
+                <p style="margin:0 0 24px;font-size:15px;color:#475569;text-align:center;line-height:1.6;">
+                  Um cliente preencheu o formulário público de <strong style="color:#1E293B;">%s</strong>.
+                </p>
+                <table cellpadding="0" cellspacing="0" role="presentation"
+                       style="width:100%%;border-top:1px solid #E2E8F0;margin-bottom:28px;">
+                  %s
+                  %s
+                  %s
+                  %s
+                </table>
+                %s
+                """.formatted(
+                agencyName,
+                row.formatted("Cliente:", clienteNome),
+                row.formatted("Telefone:", telefone),
+                row.formatted("Rota:", rota),
+                row.formatted("Datas:", datas),
+                ctaButton(dashboardUrl, "Ver no painel"));
+
+        return new TransactionalMail(
+                "Nova solicitação de orçamento — " + agencyName,
+                text,
+                layout(body,
+                        "Você recebe este e-mail porque é gestor(a) da agência " + agencyName + " no AgênciasHub.",
+                        recipientEmail));
+    }
+
     /** Centered CTA button following the brand amber color. */
     private static String ctaButton(String href, String label) {
         return """

@@ -43,4 +43,12 @@ public class DefaultEmailService implements EmailService {
     public void sendPasswordResetCode(String to, String code, String userName) {
         channel.send(to, TransactionalMailBody.passwordReset(userName, code));
     }
+
+    @Async
+    @Override
+    public void sendNewSubmissionAlert(String to, String agencyName, String clienteNome,
+                                       String telefone, String rota, String datas, String dashboardUrl) {
+        channel.send(to, TransactionalMailBody.newSubmissionAlert(
+                agencyName, clienteNome, telefone, rota, datas, dashboardUrl, to));
+    }
 }
