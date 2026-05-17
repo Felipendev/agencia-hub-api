@@ -10,9 +10,11 @@ import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRepository;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.validation.PhoneValidator;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -24,6 +26,10 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
     private final SolicitacaoSubmissionRepository submissionRepository;
     private final SolicitacaoConfigRepository configRepository;
     private final PlatformAccountRepository userRepository;
+    private final EmailService emailService;
+
+    @Value("${app.base-url:http://localhost:3000}")
+    private String appBaseUrl;
 
     @Override
     public PublicSolicitacaoSubmitResponseDTO execute(PublicSolicitacaoSubmitRequestDTO request) {
@@ -50,10 +56,77 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
                 .telefone(telefoneDigits)
                 .observacoes(request.observacoes() != null ? request.observacoes().trim() : "")
                 .detalhes(detalhes)
+                .consentimentoLgpd(Boolean.TRUE.equals(request.consentimentoLgpd()))
                 .build();
 
         submission = submissionRepository.save(submission);
+        dispatchAlertEmail(agency, submission);
         return new PublicSolicitacaoSubmitResponseDTO(true, submission.getId());
+    }
+
+    private void dispatchAlertEmail(Agency agency, SolicitacaoSubmission submission) {
+        if (agency == null) return;
+
+        JsonNode det = submission.getDetalhes();
+        String rota = buildRota(det);
+        String datas = buildDatas(det);
+        String dashboardUrl = appBaseUrl + "/cotacoes";
+
+        // Notifica o dono da agência
+        userRepository
+                .findByAgency_IdAndAccountKindAndActiveTrue(agency.getId(), AccountKind.AGENCY_OWNER)
+                .stream()
+                .findFirst()
+                .filter(owner -> Boolean.TRUE.equals(owner.getNotifEmailSubmissao()))
+                .ifPresent(owner -> {
+                    String email = agency.getCommercialEmail() != null && !agency.getCommercialEmail().isBlank()
+                            ? agency.getCommercialEmail()
+                            : owner.getEmail();
+                    emailService.sendNewSubmissionAlert(email, agency.getName(),
+                            submission.getNome(), submission.getTelefone(), rota, datas, dashboardUrl);
+                });
+
+        // Notifica o vendedor indicador (se houver e for diferente do dono)
+        PlatformAccount seller = submission.getReferralSeller();
+        if (seller != null && seller.getAccountKind() == AccountKind.SALES_AGENT
+                && Boolean.TRUE.equals(seller.getNotifEmailSubmissao())) {
+            emailService.sendNewSubmissionAlert(seller.getEmail(), agency.getName(),
+                    submission.getNome(), submission.getTelefone(), rota, datas, dashboardUrl);
+        }
+    }
+
+    private static String buildRota(JsonNode det) {
+        if (det == null) return "—";
+        String origem = text(det, "origem");
+        String destino = text(det, "destinoForm");
+        if (destino == null || destino.isBlank()) {
+            JsonNode arr = det.get("destinosTrechos");
+            if (arr != null && arr.isArray()) {
+                StringBuilder sb = new StringBuilder();
+                for (JsonNode n : arr) {
+                    if (n != null && n.isTextual() && !n.asText().isBlank()) {
+                        if (!sb.isEmpty()) sb.append(" · ");
+                        sb.append(n.asText().trim());
+                    }
+                }
+                if (!sb.isEmpty()) destino = sb.toString();
+            }
+        }
+        if (origem != null && !origem.isBlank() && destino != null && !destino.isBlank())
+            return origem + " → " + destino;
+        if (origem != null && !origem.isBlank()) return origem;
+        if (destino != null && !destino.isBlank()) return destino;
+        return "—";
+    }
+
+    private static String buildDatas(JsonNode det) {
+        if (det == null) return "—";
+        String ida = text(det, "dataIda");
+        String volta = text(det, "dataVolta");
+        if (ida != null && !ida.isBlank() && volta != null && !volta.isBlank())
+            return ida + " → " + volta;
+        if (ida != null && !ida.isBlank()) return "Ida: " + ida;
+        return "—";
     }
 
     private PlatformAccount resolveReferral(PublicSolicitacaoSubmitRequestDTO request, Agency agency) {

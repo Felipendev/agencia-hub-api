@@ -12,6 +12,9 @@ import java.util.UUID;
  *
  * <p>Indicação de vendedor: use {@code sellerPublicCode} (query {@code ?vendedor=}) quando possível;
  * {@code referralSellerId} permanece para compatibilidade. Se ambos vierem preenchidos, prevalece o código.
+ *
+ * <p>{@code consentimentoLgpd} deve ser {@code true} — o formulário público exige que o cliente marque
+ * a checkbox de autorização LGPD antes de enviar.
  */
 public record PublicSolicitacaoSubmitRequestDTO(
         @NotBlank @Size(max = 128) String slug,
@@ -21,6 +24,7 @@ public record PublicSolicitacaoSubmitRequestDTO(
         @NotNull JsonNode detalhes,
         @Size(max = 20000) String observacoes,
         UUID referralSellerId,
-        @Size(max = 16, message = "deve ter no máximo 16 caracteres") String sellerPublicCode
+        @Size(max = 16, message = "deve ter no máximo 16 caracteres") String sellerPublicCode,
+        Boolean consentimentoLgpd
 ) {
 }

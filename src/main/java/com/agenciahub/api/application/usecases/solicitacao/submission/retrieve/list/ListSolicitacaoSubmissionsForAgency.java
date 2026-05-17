@@ -3,13 +3,13 @@ package com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionResponseMapper;
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
+import com.agenciahub.api.domain.enums.AccountKind;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,11 +19,16 @@ public class ListSolicitacaoSubmissionsForAgency implements ListSolicitacaoSubmi
     private final SolicitacaoSubmissionResponseMapper solicitacaoSubmissionResponseMapper;
 
     @Override
-    public List<SolicitacaoSubmissionSummaryResponseDTO> execute(UUID agencyId) {
-        if (agencyId == null) {
+    public List<SolicitacaoSubmissionSummaryResponseDTO> execute(ListSubmissionsQuery query) {
+        if (query.agencyId() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
         }
-        return submissionRepository.findByAgency_IdOrderByCreatedAtDesc(agencyId).stream()
+        var rows = query.accountKind() == AccountKind.SALES_AGENT
+                ? submissionRepository.findByAgency_IdAndReferralSeller_IdOrderByCreatedAtDesc(
+                        query.agencyId(), query.currentUserId())
+                : submissionRepository.findByAgency_IdOrderByCreatedAtDesc(query.agencyId());
+
+        return rows.stream()
                 .map(solicitacaoSubmissionResponseMapper::toResponse)
                 .toList();
     }

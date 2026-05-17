@@ -65,6 +65,10 @@ public class SolicitacaoSubmission {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    /** Consentimento LGPD — true quando o cliente autorizou o uso dos dados no formulário público. */
+    @Column(name = "consentimento_lgpd", nullable = false)
+    private boolean consentimentoLgpd;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) {

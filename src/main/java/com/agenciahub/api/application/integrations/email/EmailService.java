@@ -11,4 +11,7 @@ public interface EmailService {
     void sendInvitation(String to, String inviteUrl, String agencyName, String inviterName);
 
     void sendPasswordResetCode(String to, String code, String userName);
+
+    void sendNewSubmissionAlert(String to, String agencyName, String clienteNome,
+                                String telefone, String rota, String datas, String dashboardUrl);
 }
