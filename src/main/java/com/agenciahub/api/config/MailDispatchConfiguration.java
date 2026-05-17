@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -75,13 +76,17 @@ public class MailDispatchConfiguration {
         @Override
         public void send(String to, TransactionalMail mail) {
             try {
+                var body = new java.util.LinkedHashMap<String, Object>();
+                body.put("from", from);
+                body.put("to", List.of(to));
+                body.put("subject", mail.subject());
+                body.put("text", mail.textBody());
+                if (mail.htmlBody() != null) {
+                    body.put("html", mail.htmlBody());
+                }
                 client.post()
                         .uri("/emails")
-                        .body(Map.of(
-                                "from", from,
-                                "to", List.of(to),
-                                "subject", mail.subject(),
-                                "text", mail.textBody()))
+                        .body(body)
                         .retrieve()
                         .toBodilessEntity();
                 log.debug("Resend: sent to {} subject '{}'", to, mail.subject());
@@ -106,12 +111,22 @@ public class MailDispatchConfiguration {
         @Override
         public void send(String to, TransactionalMail mail) {
             try {
-                SimpleMailMessage m = new SimpleMailMessage();
-                m.setFrom(from);
-                m.setTo(to);
-                m.setSubject(mail.subject());
-                m.setText(mail.textBody());
-                mailSender.send(m);
+                if (mail.htmlBody() != null) {
+                    var mime = mailSender.createMimeMessage();
+                    var helper = new MimeMessageHelper(mime, true, "UTF-8");
+                    helper.setFrom(from);
+                    helper.setTo(to);
+                    helper.setSubject(mail.subject());
+                    helper.setText(mail.textBody(), mail.htmlBody());
+                    mailSender.send(mime);
+                } else {
+                    SimpleMailMessage m = new SimpleMailMessage();
+                    m.setFrom(from);
+                    m.setTo(to);
+                    m.setSubject(mail.subject());
+                    m.setText(mail.textBody());
+                    mailSender.send(m);
+                }
                 log.debug("SMTP: sent to {} subject '{}'", to, mail.subject());
             } catch (Exception e) {
                 log.warn("SMTP: failed to {}: {}", to, e.getMessage(), e);
@@ -129,9 +144,9 @@ public class MailDispatchConfiguration {
             Matcher matcher = SIX_DIGIT_CODE.matcher(mail.textBody());
             if (matcher.find()) {
                 log.info("[EMAIL-NOOP] to={} subject={} code={}", to, mail.subject(), matcher.group());
-                return;
+            } else {
+                log.info("[EMAIL-NOOP] to={} subject={} body={}", to, mail.subject(), mail.textBody());
             }
-            log.info("[EMAIL-NOOP] to={} subject={} body={}", to, mail.subject(), mail.textBody());
         }
     }
 }

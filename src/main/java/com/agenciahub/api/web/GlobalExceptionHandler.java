@@ -2,6 +2,7 @@ package com.agenciahub.api.web;
 
 import com.agenciahub.api.exception.ApiError;
 import com.agenciahub.api.exception.DuplicateCustomerException;
+import com.agenciahub.api.exception.EmailNotVerifiedException;
 import com.agenciahub.api.exception.MissingAgencyContextException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.exception.UnauthenticatedException;
@@ -75,6 +76,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiError(ex.getMessage(), "UNAUTHENTICATED"));
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ApiError> handleEmailNotVerified(EmailNotVerifiedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ApiError(ex.getMessage(), "EMAIL_NOT_VERIFIED", ex.getEmail()));
     }
 
     @ExceptionHandler(IllegalStateException.class)

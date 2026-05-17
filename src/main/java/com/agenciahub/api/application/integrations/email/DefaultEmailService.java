@@ -1,5 +1,7 @@
 package com.agenciahub.api.application.integrations.email;
 
+import com.agenciahub.api.security.VerificationLinkTokenService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +13,23 @@ import org.springframework.stereotype.Service;
 public class DefaultEmailService implements EmailService {
 
     private final TransactionalMailChannel channel;
+    private final VerificationLinkTokenService linkTokenService;
+    private final String appBaseUrl;
 
-    public DefaultEmailService(TransactionalMailChannel channel) {
+    public DefaultEmailService(
+            TransactionalMailChannel channel,
+            VerificationLinkTokenService linkTokenService,
+            @Value("${app.base-url:http://localhost:3000}") String appBaseUrl) {
         this.channel = channel;
+        this.linkTokenService = linkTokenService;
+        this.appBaseUrl = appBaseUrl;
     }
 
     @Async
     @Override
     public void sendVerificationCode(String to, String code, String userName) {
-        channel.send(to, TransactionalMailBody.verificationCode(userName, code));
+        String linkToken = linkTokenService.generate(to, code);
+        channel.send(to, TransactionalMailBody.verificationCode(userName, code, to, appBaseUrl, linkToken));
     }
 
     @Async
