@@ -50,6 +50,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
                 .telefone(telefoneDigits)
                 .observacoes(request.observacoes() != null ? request.observacoes().trim() : "")
                 .detalhes(detalhes)
+                .consentimentoLgpd(Boolean.TRUE.equals(request.consentimentoLgpd()))
                 .build();
 
         submission = submissionRepository.save(submission);
