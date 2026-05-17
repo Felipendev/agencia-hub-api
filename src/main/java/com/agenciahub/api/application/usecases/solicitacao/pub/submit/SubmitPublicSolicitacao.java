@@ -66,34 +66,33 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
 
     private void dispatchAlertEmail(Agency agency, SolicitacaoSubmission submission) {
         if (agency == null) return;
-        String recipientEmail = resolveAlertRecipient(agency);
-        if (recipientEmail == null || recipientEmail.isBlank()) return;
 
         JsonNode det = submission.getDetalhes();
         String rota = buildRota(det);
         String datas = buildDatas(det);
         String dashboardUrl = appBaseUrl + "/cotacoes";
 
-        emailService.sendNewSubmissionAlert(
-                recipientEmail,
-                agency.getName(),
-                submission.getNome(),
-                submission.getTelefone(),
-                rota,
-                datas,
-                dashboardUrl);
-    }
-
-    private String resolveAlertRecipient(Agency agency) {
-        if (agency.getCommercialEmail() != null && !agency.getCommercialEmail().isBlank()) {
-            return agency.getCommercialEmail();
-        }
-        return userRepository
+        // Notifica o dono da agência
+        userRepository
                 .findByAgency_IdAndAccountKindAndActiveTrue(agency.getId(), AccountKind.AGENCY_OWNER)
                 .stream()
                 .findFirst()
-                .map(PlatformAccount::getEmail)
-                .orElse(null);
+                .filter(owner -> Boolean.TRUE.equals(owner.getNotifEmailSubmissao()))
+                .ifPresent(owner -> {
+                    String email = agency.getCommercialEmail() != null && !agency.getCommercialEmail().isBlank()
+                            ? agency.getCommercialEmail()
+                            : owner.getEmail();
+                    emailService.sendNewSubmissionAlert(email, agency.getName(),
+                            submission.getNome(), submission.getTelefone(), rota, datas, dashboardUrl);
+                });
+
+        // Notifica o vendedor indicador (se houver e for diferente do dono)
+        PlatformAccount seller = submission.getReferralSeller();
+        if (seller != null && seller.getAccountKind() == AccountKind.SALES_AGENT
+                && Boolean.TRUE.equals(seller.getNotifEmailSubmissao())) {
+            emailService.sendNewSubmissionAlert(seller.getEmail(), agency.getName(),
+                    submission.getNome(), submission.getTelefone(), rota, datas, dashboardUrl);
+        }
     }
 
     private static String buildRota(JsonNode det) {

@@ -89,6 +89,11 @@ public class PlatformAccount implements AgencyMemberProfile {
     @Builder.Default
     private Boolean termsAccepted = Boolean.FALSE;
 
+    /** Receber e-mail quando uma nova solicitação chega (via formulário público). */
+    @Column(name = "notif_email_submissao", nullable = false)
+    @Builder.Default
+    private Boolean notifEmailSubmissao = Boolean.TRUE;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

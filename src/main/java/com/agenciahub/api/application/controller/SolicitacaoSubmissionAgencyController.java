@@ -3,8 +3,10 @@ package com.agenciahub.api.application.controller;
 import com.agenciahub.api.application.usecases.solicitacao.submission.delete.DeleteSolicitacaoSubmissionCommand;
 import com.agenciahub.api.application.usecases.solicitacao.submission.delete.DeleteSolicitacaoSubmissionForAgencyUseCase;
 import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.list.ListSolicitacaoSubmissionsForAgencyUseCase;
+import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.list.ListSubmissionsQuery;
 import com.agenciahub.api.application.controller.doc.SolicitacaoSubmissionAgencyAPI;
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
+import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('AGENCY_OWNER')")
+@PreAuthorize("hasAnyRole('AGENCY_OWNER','SALES_AGENT')")
 public class SolicitacaoSubmissionAgencyController implements SolicitacaoSubmissionAgencyAPI {
 
     private final ListSolicitacaoSubmissionsForAgencyUseCase listSolicitacaoSubmissionsForAgencyUseCase;
@@ -24,7 +26,9 @@ public class SolicitacaoSubmissionAgencyController implements SolicitacaoSubmiss
     @Override
     public List<SolicitacaoSubmissionSummaryResponseDTO> list() {
         UUID agencyId = TenantContext.requireAgencyId();
-        return listSolicitacaoSubmissionsForAgencyUseCase.execute(agencyId);
+        var currentUser = SecurityContextUsers.requireUser();
+        var query = new ListSubmissionsQuery(agencyId, currentUser.getId(), currentUser.getAccountKind());
+        return listSolicitacaoSubmissionsForAgencyUseCase.execute(query);
     }
 
     @Override

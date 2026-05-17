@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS notif_email_submissao BOOLEAN NOT NULL DEFAULT TRUE;
