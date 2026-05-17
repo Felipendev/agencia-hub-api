@@ -25,4 +25,6 @@ public interface FinancialEntryRepository extends JpaRepository<FinancialEntry, 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE FinancialEntry f SET f.customer = null WHERE f.customer.id = :customerId")
     int unlinkCustomer(@Param("customerId") UUID customerId);
+
+    java.util.List<FinancialEntry> findByAgency_Id(UUID agencyId);
 }

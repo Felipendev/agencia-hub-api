@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,4 +74,8 @@ public interface AuthAPI {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Cadastro via convite", description = "Registra vendedor a partir de token de convite.")
     RegisterAgencyResultDTO registerViaInvite(@Valid @RequestBody RegisterViaInviteRequestDTO request);
+
+    @DeleteMapping("/account")
+    @Operation(summary = "Solicitar exclusão de conta", description = "Agenda a exclusão da agência em 7 dias (grace period).")
+    Map<String, String> requestAccountDeletion();
 }

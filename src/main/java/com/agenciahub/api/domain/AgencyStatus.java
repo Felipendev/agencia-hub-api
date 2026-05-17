@@ -5,5 +5,6 @@ public enum AgencyStatus {
     TRIAL,
     ACTIVE,
     SUSPENDED,
-    CANCELED
+    CANCELED,
+    DELETION_PENDING
 }

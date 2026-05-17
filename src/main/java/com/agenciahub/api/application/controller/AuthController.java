@@ -10,6 +10,8 @@ import com.agenciahub.api.application.usecases.auth.resendcode.ResendCodeUseCase
 import com.agenciahub.api.application.usecases.auth.resetpassword.ResetPasswordUseCase;
 import com.agenciahub.api.application.usecases.auth.validatetoken.ValidateInviteTokenUseCase;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailUseCase;
+import com.agenciahub.api.application.usecases.agency.delete.RequestAccountDeletion;
+import com.agenciahub.api.application.usecases.agency.delete.RequestAccountDeletionRequestDTO;
 import com.agenciahub.api.application.usecases.auth.verifyemailbylink.VerifyEmailByLink;
 import com.agenciahub.api.application.usecases.auth.verifyemailbylink.VerifyEmailByLinkRequestDTO;
 import com.agenciahub.api.application.controller.doc.AuthAPI;
@@ -46,6 +48,7 @@ public class AuthController implements AuthAPI {
     private final VerifyEmailByLink verifyEmailByLink;
     private final ValidateInviteTokenUseCase validateInviteTokenUseCase;
     private final RegisterViaInviteUseCase registerViaInviteUseCase;
+    private final RequestAccountDeletion requestAccountDeletion;
 
     @Override
     public LoginResponseDTO login(LoginRequestDTO request) {
@@ -96,5 +99,12 @@ public class AuthController implements AuthAPI {
     @Override
     public RegisterAgencyResultDTO registerViaInvite(RegisterViaInviteRequestDTO request) {
         return registerViaInviteUseCase.execute(request);
+    }
+
+    @Override
+    public java.util.Map<String, String> requestAccountDeletion() {
+        UUID currentUserId = SecurityContextUsers.requireUserId();
+        requestAccountDeletion.execute(new RequestAccountDeletionRequestDTO(currentUserId));
+        return java.util.Map.of("message", "exclusão agendada. sua conta será deletada em 7 dias.");
     }
 }

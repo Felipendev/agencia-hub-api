@@ -18,4 +18,8 @@ public interface QuotationRepository
 
     @EntityGraph(attributePaths = {"customer"})
     List<Quotation> findByCustomer_IdOrderByCreatedAtDesc(UUID customerId);
+
+    List<Quotation> findByAgency_Id(UUID agencyId);
+
+    long countByAgency_Id(UUID agencyId);
 }
