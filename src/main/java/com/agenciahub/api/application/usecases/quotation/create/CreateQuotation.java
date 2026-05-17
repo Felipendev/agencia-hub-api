@@ -16,6 +16,7 @@ import com.agenciahub.api.application.persistence.repository.CrmCustomerReposito
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -62,11 +63,15 @@ public class CreateQuotation implements CreateQuotationUseCase {
 
         final CreateQuotationRequestDTO effective = request;
 
+        UUID agencyId = TenantContext.requireAgencyId();
+
         CrmCustomer customer = customerRepository
                 .findById(effective.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + effective.customerId()));
 
-        UUID agencyId = customer.getAgency().getId();
+        if (!customer.getAgency().getId().equals(agencyId)) {
+            throw new ResourceNotFoundException("cliente não encontrado: " + effective.customerId());
+        }
         PlatformAccount seller = QuotationSupport.resolveSellerInAgency(userRepository, effective.sellerId(), agencyId);
 
         SolicitacaoSubmission publicSub = null;

@@ -27,6 +27,8 @@ public interface PlatformAccountRepository extends JpaRepository<PlatformAccount
     Optional<PlatformAccount> findByPublicLinkCode(String publicLinkCode);
 
     List<PlatformAccount> findByAccountKindAndActiveTrue(AccountKind accountKind);
+
+    List<PlatformAccount> findByAgency_IdAndAccountKindAndActiveTrue(UUID agencyId, AccountKind accountKind);
     List<PlatformAccount> findAllByOrderByNameAsc();
 
     List<PlatformAccount> findByAgency_Id(UUID agencyId);

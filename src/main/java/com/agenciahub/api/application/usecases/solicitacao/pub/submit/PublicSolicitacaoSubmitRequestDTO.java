@@ -21,6 +21,6 @@ public record PublicSolicitacaoSubmitRequestDTO(
         @NotNull JsonNode detalhes,
         @Size(max = 20000) String observacoes,
         UUID referralSellerId,
-        @Size(max = 16) String sellerPublicCode
+        @Size(max = 16, message = "deve ter no máximo 16 caracteres") String sellerPublicCode
 ) {
 }
