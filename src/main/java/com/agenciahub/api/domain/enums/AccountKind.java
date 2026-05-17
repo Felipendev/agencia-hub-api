@@ -8,5 +8,7 @@ public enum AccountKind {
     /** Dono da agência — acesso administrativo completo na agência. */
     AGENCY_OWNER,
     /** Agente de venda — convidado pela agência; cotações e painel restritos. */
-    SALES_AGENT
+    SALES_AGENT,
+    /** Administrador da plataforma — sem agência associada. */
+    PLATFORM_ADMIN
 }

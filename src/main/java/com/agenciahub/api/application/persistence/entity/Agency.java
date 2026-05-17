@@ -70,6 +70,12 @@ public class Agency {
     @Column(name = "trial_ends_at")
     private Instant trialEndsAt;
 
+    @Column(name = "deletion_scheduled_at")
+    private Instant deletionScheduledAt;
+
+    @Column(name = "status_before_deletion", length = 32)
+    private String statusBeforeDeletion;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

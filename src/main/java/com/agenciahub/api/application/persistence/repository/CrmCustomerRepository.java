@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.UUID;
 
 public interface CrmCustomerRepository extends JpaRepository<CrmCustomer, UUID> {
 
@@ -34,4 +35,8 @@ public interface CrmCustomerRepository extends JpaRepository<CrmCustomer, UUID> 
 
     @Query("SELECT c FROM CrmCustomer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone")
     Optional<CrmCustomer> findFirstByNormalizedPhone(@Param("phone") String phone);
+
+    List<CrmCustomer> findByAgency_Id(UUID agencyId);
+
+    long countByAgency_Id(UUID agencyId);
 }

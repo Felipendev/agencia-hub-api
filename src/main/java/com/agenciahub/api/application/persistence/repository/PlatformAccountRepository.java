@@ -28,4 +28,8 @@ public interface PlatformAccountRepository extends JpaRepository<PlatformAccount
 
     List<PlatformAccount> findByAccountKindAndActiveTrue(AccountKind accountKind);
     List<PlatformAccount> findAllByOrderByNameAsc();
+
+    List<PlatformAccount> findByAgency_Id(UUID agencyId);
+
+    long countByAgency_IdAndAccountKind(UUID agencyId, AccountKind accountKind);
 }

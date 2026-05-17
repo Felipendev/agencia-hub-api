@@ -38,7 +38,7 @@ public class PlatformAccount implements AgencyMemberProfile {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "agency_id", nullable = false)
+    @JoinColumn(name = "agency_id", nullable = true)
     private Agency agency;
 
     @Column(nullable = false)
