@@ -44,6 +44,10 @@ public interface AuthAPI {
     @Operation(summary = "Confirmar e-mail", description = "Valida código de 6 dígitos enviado por e-mail.")
     VerifyEmailResponseDTO verifyEmail(@Valid @RequestBody VerifyEmailRequestDTO request);
 
+    @PostMapping("/verify-email-link")
+    @Operation(summary = "Confirmar e-mail via link", description = "Valida token opaco do link enviado por e-mail (auto-login).")
+    VerifyEmailResponseDTO verifyEmailByLink(@Valid @RequestBody com.agenciahub.api.application.usecases.auth.verifyemailbylink.VerifyEmailByLinkRequestDTO request);
+
     @PostMapping("/resend-code")
     @Operation(summary = "Reenviar código", description = "Solicita novo código de verificação de e-mail.")
     Map<String, String> resendCode(@Valid @RequestBody ResendCodeRequestDTO request);
