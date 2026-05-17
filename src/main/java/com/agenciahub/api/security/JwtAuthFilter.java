@@ -2,6 +2,7 @@ package com.agenciahub.api.security;
 
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.domain.enums.AccountKind;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,13 +62,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
 
-        // Extract agency_id from token and set TenantContext
-        UUID agencyId = jwtService.extractAgencyId(token);
-        if (agencyId != null) {
-            TenantContext.set(agencyId);
-        } else if (user.getAgency() != null) {
-            // Fallback: use agency from user entity (for legacy tokens without agency_id claim)
-            TenantContext.set(user.getAgency().getId());
+        // Only set TenantContext for agency-scoped users
+        if (user.getAccountKind() != AccountKind.PLATFORM_ADMIN) {
+            UUID agencyId = jwtService.extractAgencyId(token);
+            if (agencyId != null) {
+                TenantContext.set(agencyId);
+            } else if (user.getAgency() != null) {
+                // Fallback: use agency from user entity (for legacy tokens without agency_id claim)
+                TenantContext.set(user.getAgency().getId());
+            }
         }
 
         var auth = new UsernamePasswordAuthenticationToken(

@@ -1,5 +1,6 @@
 package com.agenciahub.api.web;
 
+import com.agenciahub.api.exception.AccountDeletionPendingException;
 import com.agenciahub.api.exception.ApiError;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.EmailNotVerifiedException;
@@ -19,6 +20,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AccountDeletionPendingException.class)
+    public ResponseEntity<ApiError> handleAccountDeletionPending(AccountDeletionPendingException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiError(ex.getMessage(), "ACCOUNT_DELETION_PENDING"));
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException ex) {

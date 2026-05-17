@@ -59,8 +59,15 @@ public class SecurityConfig {
                 ).permitAll()
                 // Public form endpoints
                 .requestMatchers("/public/**").permitAll()
-                // Owner-only: user management
+                // Email verify via link
+                .requestMatchers(HttpMethod.POST, "/auth/verify-email-link").permitAll()
+                // Internal: protected by API key in the handler itself
+                .requestMatchers("/internal/**").permitAll()
+                // Admin: platform admin only
+                .requestMatchers("/admin/**").hasRole("PLATFORM_ADMIN")
+                // Owner-only: user management and account deletion
                 .requestMatchers("/users/**").hasRole("AGENCY_OWNER")
+                .requestMatchers(HttpMethod.DELETE, "/auth/account").hasRole("AGENCY_OWNER")
                 // Everything else requires authentication
                 .anyRequest().authenticated()
             )

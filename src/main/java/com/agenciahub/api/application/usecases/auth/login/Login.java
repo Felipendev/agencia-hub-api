@@ -5,6 +5,7 @@ import com.agenciahub.api.application.usecases.auth.login.LoginRequestDTO;
 import com.agenciahub.api.application.usecases.auth.login.LoginResponseDTO;
 import com.agenciahub.api.application.persistence.entity.Agency;
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.exception.AccountDeletionPendingException;
 import com.agenciahub.api.exception.EmailNotVerifiedException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
@@ -40,6 +41,9 @@ public class Login implements LoginUseCase {
         Agency agency = user.getAgency();
         if (agency != null) {
             AgencyStatus agencyStatus = agency.getStatus();
+            if (agencyStatus == AgencyStatus.DELETION_PENDING) {
+                throw new AccountDeletionPendingException();
+            }
             if (agencyStatus == AgencyStatus.PENDING_VERIFICATION || agencyStatus == AgencyStatus.CANCELED) {
                 throw new IllegalStateException("sua agência não está ativa. entre em contato com o suporte.");
             }
