@@ -7,6 +7,7 @@ import com.agenciahub.api.domain.enums.AccountKind;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class ListSolicitacaoSubmissionsForAgency implements ListSolicitacaoSubmi
     private final SolicitacaoSubmissionResponseMapper solicitacaoSubmissionResponseMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<SolicitacaoSubmissionSummaryResponseDTO> execute(ListSubmissionsQuery query) {
         if (query.agencyId() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
