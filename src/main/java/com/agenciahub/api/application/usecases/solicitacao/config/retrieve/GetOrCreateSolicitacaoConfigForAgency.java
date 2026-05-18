@@ -10,6 +10,7 @@ import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRe
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -22,6 +23,7 @@ public class GetOrCreateSolicitacaoConfigForAgency implements GetOrCreateSolicit
     private final ObjectMapper objectMapper;
 
     @Override
+    @Transactional
     public SolicitacaoConfigSummaryResponseDTO execute(UUID agencyId) {
         if (agencyId == null) {
             throw new IllegalStateException("nenhuma agência no contexto do tenant");

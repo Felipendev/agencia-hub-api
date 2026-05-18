@@ -28,9 +28,6 @@ public class CreateCustomer implements CreateCustomerUseCase {
         if (!email.isEmpty() && customerRepository.existsByEmailIgnoreCase(email)) {
             throw new DuplicateCustomerException("e-mail", email);
         }
-        if (!phone.isEmpty() && customerRepository.existsByNormalizedPhone(phone)) {
-            throw new DuplicateCustomerException("telefone", request.phone().strip());
-        }
 
         Agency agency = agencyRepository.getReferenceById(TenantContext.requireAgencyId());
         CrmCustomer entity = InputMapper.toNewEntity(request);
