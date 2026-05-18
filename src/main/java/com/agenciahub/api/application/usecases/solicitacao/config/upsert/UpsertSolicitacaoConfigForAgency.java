@@ -11,6 +11,7 @@ import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRe
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -23,6 +24,7 @@ public class UpsertSolicitacaoConfigForAgency implements UpsertSolicitacaoConfig
     private final ObjectMapper objectMapper;
 
     @Override
+    @Transactional
     public SolicitacaoConfigSummaryResponseDTO execute(UpsertSolicitacaoConfigCommand command) {
         UUID agencyId = command.agencyId();
         if (agencyId == null) {
