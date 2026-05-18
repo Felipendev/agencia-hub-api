@@ -5,6 +5,7 @@ import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissi
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -14,6 +15,7 @@ public class DeleteSolicitacaoSubmissionForAgency implements DeleteSolicitacaoSu
     private final SolicitacaoSubmissionRepository submissionRepository;
 
     @Override
+    @Transactional
     public void execute(DeleteSolicitacaoSubmissionCommand command) {
         if (command.agencyId() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
