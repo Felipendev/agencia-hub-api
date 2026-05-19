@@ -153,14 +153,10 @@ public final class TransactionalMailBody {
                       <table cellpadding="0" cellspacing="0" role="presentation"
                              style="margin-bottom:28px;">
                         <tr>
-                          <td style="width:44px;height:44px;vertical-align:middle;">
-                            <img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOSIgZmlsbD0iIzBCMUIyQiIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjE1IiBzdHJva2U9IiNGNUYxRUEiIHN0cm9rZS13aWR0aD0iMS4yIi8+PHBhdGggZD0iTTIwIDggTDIyLjUgMjAgTDIwIDMyIEwxNy41IDIwIFoiIGZpbGw9IiNGNUYxRUEiLz48cGF0aCBkPSJNOCAyMCBMMjAgMTcuNSBMMzIgMjAgTDIwIDIyLjUgWiIgZmlsbD0iI0UwQTQ1OCIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9IiMwQjFCMkIiIHN0cm9rZT0iI0Y1RjFFQSIgc3Ryb2tlLXdpZHRoPSIwLjgiLz48L3N2Zz4="
-                                 width="44" height="44" alt="AgênciasHub" style="display:block;">
-                          </td>
-                          <td style="padding-left:12px;vertical-align:middle;">
-                            <span style="font-size:20px;font-weight:700;letter-spacing:-0.4px;">
-                              <span style="color:#0B1B2B;">Agências</span><span style="color:#E0A458;">Hub</span>
-                            </span>
+                          <td style="text-align:center;">
+                            <img src="https://agenciashub.com.br/logo_mais_nome.png"
+                                 width="180" height="44" alt="AgênciasHub"
+                                 style="display:block;border:0;outline:none;text-decoration:none;">
                           </td>
                         </tr>
                       </table>
@@ -196,11 +192,9 @@ public final class TransactionalMailBody {
                              style="margin-top:28px;">
                         <tr>
                           <td style="text-align:center;">
-                            <img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgNDAgNDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOSIgZmlsbD0iIzBCMUIyQiIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjE1IiBzdHJva2U9IiNGNUYxRUEiIHN0cm9rZS13aWR0aD0iMS4yIi8+PHBhdGggZD0iTTIwIDggTDIyLjUgMjAgTDIwIDMyIEwxNy41IDIwIFoiIGZpbGw9IiNGNUYxRUEiLz48cGF0aCBkPSJNOCAyMCBMMjAgMTcuNSBMMzIgMjAgTDIwIDIyLjUgWiIgZmlsbD0iI0UwQTQ1OCIvPjxjaXJjbGUgY3g9IjIwIiBjeT0iMjAiIHI9IjIiIGZpbGw9IiMwQjFCMkIiIHN0cm9rZT0iI0Y1RjFFQSIgc3Ryb2tlLXdpZHRoPSIwLjgiLz48L3N2Zz4="
-                                 width="28" height="28" alt="" style="display:inline-block;vertical-align:middle;margin-right:8px;">
-                            <span style="font-size:14px;font-weight:600;vertical-align:middle;">
-                              <span style="color:#64748B;">Agências</span><span style="color:#E0A458;">Hub</span>
-                            </span>
+                            <img src="https://agenciashub.com.br/logo_mais_nome.png"
+                                 width="120" height="30" alt="AgênciasHub"
+                                 style="display:inline-block;border:0;outline:none;text-decoration:none;">
                           </td>
                         </tr>
                         <tr>
