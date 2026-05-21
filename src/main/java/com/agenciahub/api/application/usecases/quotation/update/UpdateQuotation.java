@@ -10,6 +10,7 @@ import com.agenciahub.api.application.persistence.repository.QuotationRepository
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 
@@ -22,6 +23,7 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
     private final QuotationResponseMapper quotationResponseMapper;
 
     @Override
+    @Transactional
     public QuotationSummaryResponseDTO execute(UpdateQuotationCommand command) {
         Quotation entity = quotationRepository
                 .findById(command.id())
