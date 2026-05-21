@@ -2,6 +2,7 @@ package com.agenciahub.api.application.controller;
 
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationCommand;
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationUseCase;
+import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationCommand;
 import com.agenciahub.api.application.usecases.quotation.retrieve.byid.GetQuotationByIdUseCase;
 import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsQuery;
 import com.agenciahub.api.application.usecases.quotation.retrieve.list.ListQuotationsUseCase;
@@ -37,8 +38,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -168,5 +173,99 @@ class QuotationControllerWebMvcTest {
                         .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void create_negativeTotalAmount_returns400() throws Exception {
+        UUID cid = UUID.randomUUID();
+        mockMvc.perform(post("/quotations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "customerId": "%s",
+                                  "title": "Orçamento",
+                                  "destination": "Lisboa",
+                                  "totalAmount": -1.00,
+                                  "validUntil": "2026-12-31"
+                                }
+                                """.formatted(cid)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void get_happyPath_returns200() throws Exception {
+        UUID qid = UUID.randomUUID();
+        UUID cid = UUID.randomUUID();
+        when(getQuotationByIdUseCase.execute(eq(qid))).thenReturn(sampleDto(qid, cid));
+
+        mockMvc.perform(get("/quotations/" + qid))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(qid.toString()))
+                .andExpect(jsonPath("$.totalAmount").value(10));
+    }
+
+    @Test
+    void update_happyPath_returns200() throws Exception {
+        UUID qid = UUID.randomUUID();
+        UUID cid = UUID.randomUUID();
+        when(updateQuotationUseCase.execute(any(UpdateQuotationCommand.class)))
+                .thenReturn(sampleDto(qid, cid));
+
+        mockMvc.perform(patch("/quotations/" + qid)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Novo Título\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(qid.toString()));
+    }
+
+    @Test
+    void update_whenMissing_returns404() throws Exception {
+        UUID qid = UUID.randomUUID();
+        when(updateQuotationUseCase.execute(any(UpdateQuotationCommand.class)))
+                .thenThrow(new ResourceNotFoundException("cotação não encontrada"));
+
+        mockMvc.perform(patch("/quotations/" + qid)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"X\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+    }
+
+    @Test
+    void delete_happyPath_returns204() throws Exception {
+        UUID qid = UUID.randomUUID();
+        doNothing().when(deleteQuotationUseCase).execute(eq(qid));
+
+        mockMvc.perform(delete("/quotations/" + qid))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void delete_whenMissing_returns404() throws Exception {
+        UUID qid = UUID.randomUUID();
+        doThrow(new ResourceNotFoundException("cotação não encontrada"))
+                .when(deleteQuotationUseCase).execute(eq(qid));
+
+        mockMvc.perform(delete("/quotations/" + qid))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+    }
+
+    private QuotationSummaryResponseDTO sampleDto(UUID qid, UUID cid) {
+        return new QuotationSummaryResponseDTO(
+                qid, cid, "Cliente", null, null,
+                "Título", "Destino", null,
+                BigDecimal.TEN, "BRL",
+                QuotationStatus.DRAFT,
+                LocalDate.parse("2026-12-31"),
+                null, null,
+                objectMapper.createObjectNode(),
+                Collections.emptyList(),
+                false, null, null,
+                Instant.parse("2026-01-01T00:00:00Z"),
+                Instant.parse("2026-01-01T00:00:00Z"),
+                QuotationCreationSource.INTERNAL,
+                null, null, null);
     }
 }
