@@ -70,4 +70,22 @@ public class DefaultEmailService implements EmailService {
     public void sendDataDeletionProcessed(String to, boolean accepted, String justificativa) {
         channel.send(to, TransactionalMailBody.dataDeletionProcessed(accepted, justificativa));
     }
+
+    @Async
+    @Override
+    public void sendQuotationAccepted(String to, String quotationTitle, String clienteNome) {
+        channel.send(to, TransactionalMailBody.quotationAccepted(quotationTitle, clienteNome, to));
+    }
+
+    @Async
+    @Override
+    public void sendQuotationExpiringSoon(String to, String quotationTitle, String validUntil) {
+        channel.send(to, TransactionalMailBody.quotationExpiringSoon(quotationTitle, validUntil, to));
+    }
+
+    @Async
+    @Override
+    public void sendDeletionScheduled(String to, String scheduledAt) {
+        channel.send(to, TransactionalMailBody.deletionScheduled(scheduledAt, to));
+    }
 }

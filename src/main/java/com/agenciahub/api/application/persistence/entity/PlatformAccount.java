@@ -94,6 +94,22 @@ public class PlatformAccount implements AgencyMemberProfile {
     @Builder.Default
     private Boolean notifEmailSubmissao = Boolean.TRUE;
 
+    @Column(name = "notif_email_cotacao_aprovada", nullable = false)
+    @Builder.Default
+    private Boolean notifEmailCotacaoAprovada = Boolean.TRUE;
+
+    @Column(name = "notif_email_cotacao_vencendo", nullable = false)
+    @Builder.Default
+    private Boolean notifEmailCotacaoVencendo = Boolean.TRUE;
+
+    @Column(name = "notif_email_cotacao_vencida", nullable = false)
+    @Builder.Default
+    private Boolean notifEmailCotacaoVencida = Boolean.TRUE;
+
+    @Column(name = "notif_email_exclusao_agendada", nullable = false)
+    @Builder.Default
+    private Boolean notifEmailExclusaoAgendada = Boolean.TRUE;
+
     @Column(name = "last_logout_at")
     private Instant lastLogoutAt;
 

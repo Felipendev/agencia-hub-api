@@ -1,8 +1,15 @@
 package com.agenciahub.api.integration.http;
 
+import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
+import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.support.AbstractIntegrationTest;
 import com.agenciahub.api.support.IntegrationHttpSupport;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 import static com.agenciahub.api.support.IntegrationHttpSupport.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -19,6 +26,25 @@ class JwtRevocationIntegrationTest extends AbstractIntegrationTest {
     private static final String LOGOUT_URL = IntegrationHttpSupport.API_PREFIX + "/auth/logout";
     private static final String DELETE_ACCOUNT_URL = IntegrationHttpSupport.API_PREFIX + "/auth/account";
 
+    @Autowired
+    private AgencyRepository agencyRepository;
+
+    @AfterEach
+    void restoreDeletionPendingAgencies() {
+        List<Agency> pending = agencyRepository.findAll().stream()
+                .filter(a -> a.getStatus() == AgencyStatus.DELETION_PENDING)
+                .toList();
+        for (Agency a : pending) {
+            AgencyStatus prev = a.getStatusBeforeDeletion() != null
+                    ? AgencyStatus.valueOf(a.getStatusBeforeDeletion())
+                    : AgencyStatus.TRIAL;
+            a.setStatus(prev);
+            a.setDeletionScheduledAt(null);
+            a.setStatusBeforeDeletion(null);
+            agencyRepository.save(a);
+        }
+    }
+
     @Test
     void logout_withoutAuth_returns401or403() throws Exception {
         mockMvc.perform(post(LOGOUT_URL))
@@ -32,7 +58,6 @@ class JwtRevocationIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get(AGENCY_URL).header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        // Ensure iat (second precision) < lastLogoutAt
         Thread.sleep(1001);
 
         mockMvc.perform(post(LOGOUT_URL).header("Authorization", "Bearer " + token))

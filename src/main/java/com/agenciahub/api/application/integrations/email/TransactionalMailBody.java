@@ -357,4 +357,84 @@ public final class TransactionalMailBody {
                 text,
                 layout(body, null, null));
     }
+
+    public static TransactionalMail quotationAccepted(
+            String quotationTitle, String clienteNome, String recipientEmail) {
+
+        String text = """
+                Boa notícia!
+
+                A cotação "%s" para %s foi aceita pelo cliente.
+
+                Acesse o painel para acompanhar os próximos passos.
+
+                Equipe AgênciasHub""".formatted(quotationTitle, clienteNome);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Cotação aceita!</h1>
+                <p style="margin:16px 0 8px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  A cotação <strong style="color:#1E293B;">%s</strong><br>
+                  foi aceita por <strong style="color:#1E293B;">%s</strong>.
+                </p>
+                <p style="margin:0 0 28px;font-size:14px;color:#64748B;text-align:center;">
+                  Acesse o painel para prosseguir com o atendimento.
+                </p>""".formatted(quotationTitle, clienteNome);
+
+        return new TransactionalMail(
+                "AgênciasHub — Cotação aceita: " + quotationTitle,
+                text,
+                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.", recipientEmail));
+    }
+
+    public static TransactionalMail quotationExpiringSoon(
+            String quotationTitle, String validUntil, String recipientEmail) {
+
+        String text = """
+                Atenção: a cotação "%s" vence em %s.
+
+                Acesse o painel para acompanhar ou renovar.
+
+                Equipe AgênciasHub""".formatted(quotationTitle, validUntil);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Cotação vencendo em breve</h1>
+                <p style="margin:16px 0 28px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  A cotação <strong style="color:#1E293B;">%s</strong>
+                  vence em <strong style="color:#D97706;">%s</strong>.<br>
+                  Acesse o painel para acompanhar ou renovar.
+                </p>""".formatted(quotationTitle, validUntil);
+
+        return new TransactionalMail(
+                "AgênciasHub — Cotação vencendo: " + quotationTitle,
+                text,
+                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.", recipientEmail));
+    }
+
+    public static TransactionalMail deletionScheduled(String scheduledAt, String recipientEmail) {
+
+        String text = """
+                Sua solicitação de exclusão de conta foi registrada.
+
+                Sua agência e todos os dados associados serão permanentemente excluídos em %s.
+
+                Se mudar de ideia, acesse o painel e cancele a exclusão antes dessa data.
+
+                Equipe AgênciasHub""".formatted(scheduledAt);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Exclusão de conta agendada</h1>
+                <p style="margin:16px 0 28px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  Sua agência e dados serão excluídos em
+                  <strong style="color:#DC2626;">%s</strong>.<br>
+                  Para cancelar, acesse o painel antes dessa data.
+                </p>""".formatted(scheduledAt);
+
+        return new TransactionalMail(
+                "AgênciasHub — Exclusão de conta agendada",
+                text,
+                layout(body, "Você recebe este e-mail por ter solicitado a exclusão da sua conta.", recipientEmail));
+    }
 }

@@ -20,4 +20,10 @@ public interface EmailService {
     void sendDataDeletionOwnerNotification(String to, String requestId);
 
     void sendDataDeletionProcessed(String to, boolean accepted, String justificativa);
+
+    void sendQuotationAccepted(String to, String quotationTitle, String clienteNome);
+
+    void sendQuotationExpiringSoon(String to, String quotationTitle, String validUntil);
+
+    void sendDeletionScheduled(String to, String scheduledAt);
 }
