@@ -2,6 +2,7 @@ package com.agenciahub.api.web;
 
 import com.agenciahub.api.exception.AccountDeletionPendingException;
 import com.agenciahub.api.exception.ApiError;
+import com.agenciahub.api.exception.DetalhesValidationException;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.EmailNotVerifiedException;
 import com.agenciahub.api.exception.MissingAgencyContextException;
@@ -62,6 +63,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(new ApiError("violação de integridade de dados.", "DATA_INTEGRITY"));
+    }
+
+    @ExceptionHandler(DetalhesValidationException.class)
+    public ResponseEntity<ApiError> handleDetalhesValidation(DetalhesValidationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ApiError(ex.getMessage(), "DETALHES_VALIDATION_ERROR"));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

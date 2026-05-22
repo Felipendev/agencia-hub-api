@@ -27,6 +27,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
     private final SolicitacaoConfigRepository configRepository;
     private final PlatformAccountRepository userRepository;
     private final EmailService emailService;
+    private final SolicitacaoDetalhesValidator detalhesValidator;
 
     @Value("${app.base-url:http://localhost:3000}")
     private String appBaseUrl;
@@ -38,7 +39,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
             throw new IllegalArgumentException("informe um celular válido com DDD (10 ou 11 dígitos).");
         }
 
-        JsonNode detalhes = request.detalhes();
+        JsonNode detalhes = detalhesValidator.validate(request.detalhes());
         if (!hasRouteInfo(detalhes)) {
             throw new IllegalArgumentException("informe origem e/ou destino.");
         }
