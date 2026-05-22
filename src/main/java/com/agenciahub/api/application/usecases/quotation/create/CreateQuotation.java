@@ -1,5 +1,6 @@
 package com.agenciahub.api.application.usecases.quotation.create;
 
+import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSupport;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationResponseMapper;
 import com.agenciahub.api.domain.QuotationCreationSource;
@@ -8,9 +9,9 @@ import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.quotation.create.CreateQuotationRequestDTO;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.application.persistence.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.application.persistence.entity.Quotation;
 import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
-import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
@@ -18,8 +19,11 @@ import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissi
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -33,8 +37,13 @@ public class CreateQuotation implements CreateQuotationUseCase {
     private final PlatformAccountRepository userRepository;
     private final SolicitacaoSubmissionRepository solicitacaoSubmissionRepository;
     private final QuotationResponseMapper quotationResponseMapper;
+    private final EmailService emailService;
+
+    @Value("${app.base-url:http://localhost:3000}")
+    private String appBaseUrl;
 
     @Override
+    @Transactional
     public QuotationSummaryResponseDTO execute(CreateQuotationCommand command) {
         CreateQuotationRequestDTO request = command.request();
         PlatformAccount caller = command.caller();
@@ -121,6 +130,35 @@ public class CreateQuotation implements CreateQuotationUseCase {
                 .publicSubmission(publicSub)
                 .build();
 
-        return quotationResponseMapper.toResponse(quotationRepository.save(entity));
+        QuotationSummaryResponseDTO response = quotationResponseMapper.toResponse(quotationRepository.save(entity));
+
+        if (publicSub != null) {
+            notifyReferralSeller(publicSub, entity);
+        }
+
+        return response;
+    }
+
+    private void notifyReferralSeller(SolicitacaoSubmission submission, Quotation quotation) {
+        PlatformAccount referralSeller = submission.getReferralSeller();
+        if (referralSeller == null || !Boolean.TRUE.equals(referralSeller.getNotifEmailSubmissao())) {
+            return;
+        }
+        String agencyName = quotation.getAgency().getName();
+        String dashboardUrl = appBaseUrl + "/minhas-comissoes";
+        String datas = formatDates(quotation.getTravelStartDate(), quotation.getTravelEndDate());
+        emailService.sendNewSubmissionAlert(
+                referralSeller.getEmail(),
+                agencyName,
+                submission.getNome(),
+                submission.getTelefone(),
+                quotation.getDestination(),
+                datas,
+                dashboardUrl);
+    }
+
+    private String formatDates(LocalDate start, LocalDate end) {
+        if (start == null) return "";
+        return end != null ? start + " – " + end : start.toString();
     }
 }
