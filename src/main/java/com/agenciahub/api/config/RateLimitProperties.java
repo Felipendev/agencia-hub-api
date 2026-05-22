@@ -58,4 +58,7 @@ public class RateLimitProperties {
 
     /** POST {@code /public/solicitacao/consent/revoke} — LGPD revogação; máx 3/hora por IP (SEC-03) */
     private int publicConsentRevokePerHour = 3;
+
+    /** POST {@code /public/data-deletion-request} — LGPD exclusão; máx 3/hora por IP (LGPD-02) */
+    private int publicDataDeletionPerHour = 3;
 }

@@ -51,4 +51,23 @@ public class DefaultEmailService implements EmailService {
         channel.send(to, TransactionalMailBody.newSubmissionAlert(
                 agencyName, clienteNome, telefone, rota, datas, dashboardUrl, to));
     }
+
+    @Async
+    @Override
+    public void sendDataDeletionRequestConfirmation(String to) {
+        channel.send(to, TransactionalMailBody.dataDeletionConfirmation(to));
+    }
+
+    @Async
+    @Override
+    public void sendDataDeletionOwnerNotification(String to, String requestId) {
+        String processUrl = appBaseUrl + "/solicitacoes-exclusao/" + requestId;
+        channel.send(to, TransactionalMailBody.dataDeletionOwnerNotification(processUrl));
+    }
+
+    @Async
+    @Override
+    public void sendDataDeletionProcessed(String to, boolean accepted, String justificativa) {
+        channel.send(to, TransactionalMailBody.dataDeletionProcessed(accepted, justificativa));
+    }
 }

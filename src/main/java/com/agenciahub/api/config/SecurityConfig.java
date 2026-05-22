@@ -76,7 +76,7 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/docs"
                 ).permitAll()
-                // Public form endpoints
+                // Public form endpoints (includes /public/data-deletion-request)
                 .requestMatchers("/public/**").permitAll()
                 // Email verify via link
                 .requestMatchers(HttpMethod.POST, "/auth/verify-email-link").permitAll()

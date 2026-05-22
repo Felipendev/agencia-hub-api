@@ -65,6 +65,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 perHour(properties.getPublicConsentRevokePerHour()),
                 "public-consent-revoke"));
         rules.add(new Rule(
+                "POST",
+                "/public/data-deletion-request",
+                perHour(properties.getPublicDataDeletionPerHour()),
+                "public-data-deletion"));
+        rules.add(new Rule(
                 "GET",
                 "/public/solicitacao-config/**",
                 perMinute(properties.getPublicConfigGetPerMinute()),

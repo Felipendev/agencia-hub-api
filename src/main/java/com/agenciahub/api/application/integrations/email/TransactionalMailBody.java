@@ -279,4 +279,82 @@ public final class TransactionalMailBody {
                   </tr>
                 </table>""".formatted(href, label);
     }
+
+    public static TransactionalMail dataDeletionConfirmation(String toEmail) {
+        String text = """
+                Olá,
+
+                Recebemos sua solicitação de exclusão de dados pessoais no AgênciasHub.
+
+                Analisaremos sua solicitação em até 15 dias úteis e enviaremos uma resposta para este endereço de e-mail.
+
+                Caso não tenha feito esta solicitação, entre em contato conosco.
+
+                Equipe AgênciasHub""";
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Solicitação de exclusão recebida</h1>
+                <p style="margin:16px 0;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  Recebemos sua solicitação de exclusão de dados pessoais.<br>
+                  Analisaremos em até <strong>15 dias úteis</strong> e retornaremos neste e-mail.
+                </p>""";
+
+        return new TransactionalMail(
+                "AgênciasHub — Solicitação de exclusão de dados recebida",
+                text,
+                layout(body, "Caso não tenha feito esta solicitação, ignore este e-mail.", toEmail));
+    }
+
+    public static TransactionalMail dataDeletionOwnerNotification(String processUrl) {
+        String text = """
+                Olá,
+
+                Uma nova solicitação de exclusão de dados foi recebida. Acesse o painel para analisá-la:
+                %s
+
+                Equipe AgênciasHub""".formatted(processUrl);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Nova solicitação de exclusão</h1>
+                <p style="margin:16px 0 32px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  Uma nova solicitação de exclusão de dados foi recebida.<br>
+                  Acesse o painel para analisar e processar.
+                </p>
+                %s""".formatted(ctaButton(processUrl, "Ver solicitação"));
+
+        return new TransactionalMail(
+                "AgênciasHub — Nova solicitação de exclusão de dados",
+                text,
+                layout(body, null, null));
+    }
+
+    public static TransactionalMail dataDeletionProcessed(boolean accepted, String justificativa) {
+        String titulo = accepted ? "Seus dados foram excluídos" : "Solicitação de exclusão processada";
+        String mensagem = accepted
+                ? "Seus dados pessoais foram excluídos da nossa plataforma conforme solicitado."
+                : "Sua solicitação de exclusão foi analisada. " +
+                  (justificativa != null && !justificativa.isBlank()
+                          ? "Motivo: " + justificativa
+                          : "Não foi possível processar a exclusão neste momento.");
+
+        String text = """
+                Olá,
+
+                %s
+
+                Equipe AgênciasHub""".formatted(mensagem);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">%s</h1>
+                <p style="margin:16px 0;font-size:15px;color:#475569;text-align:center;line-height:1.7;">%s</p>
+                """.formatted(titulo, mensagem);
+
+        return new TransactionalMail(
+                "AgênciasHub — " + titulo,
+                text,
+                layout(body, null, null));
+    }
 }
