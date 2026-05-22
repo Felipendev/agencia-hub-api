@@ -1,6 +1,7 @@
 package com.agenciahub.api.security;
 
 import com.agenciahub.api.config.RateLimitProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -20,19 +21,24 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.UrlPathHelper;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Rate limiting por IP em rotas públicas e de autenticação.
- * Executa antes do JWT; não exige autenticação.
+ * Rate limiting por IP em rotas públicas/auth e por token JWT em rotas autenticadas.
+ * Executa antes do JWT; não requer autenticação prévia.
  */
 @Component
 @RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
+
+    private static final Set<String> MUTATION_METHODS = Set.of("POST", "PUT", "PATCH", "DELETE");
 
     private final RateLimitProperties properties;
     private final ObjectMapper objectMapper;
@@ -51,7 +57,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     /** Recalcula limites a partir das propriedades (testes podem chamar após ajustar limites). */
-    void initRules() {
+    public void initRules() {
         buckets.clear();
         List<Rule> rules = new ArrayList<>();
         rules.add(new Rule(
@@ -180,6 +186,27 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
 
         if (matched == null) {
+            // No IP-based rule matched — check token-based limit for authenticated endpoints
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                if (!isPlatformAdmin(token)) {
+                    boolean isMutation = MUTATION_METHODS.contains(method.toUpperCase());
+                    Bandwidth bandwidth = isMutation
+                            ? perMinute(properties.getAuthenticatedMutationPerMinute())
+                            : perMinute(properties.getAuthenticatedGetPerMinute());
+                    String prefix = isMutation ? "auth-token-mut" : "auth-token-get";
+                    String tokenKey = prefix + ":" + tokenHash(token);
+                    Bucket tokenBucket = buckets.computeIfAbsent(
+                            tokenKey,
+                            k -> Bucket.builder().addLimit(bandwidth).build());
+                    ConsumptionProbe tokenProbe = tokenBucket.tryConsumeAndReturnRemaining(1);
+                    if (!tokenProbe.isConsumed()) {
+                        rejectTooManyRequests(response, tokenProbe);
+                        return;
+                    }
+                }
+            }
             filterChain.doFilter(request, response);
             return;
         }
@@ -195,17 +222,42 @@ public class RateLimitFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        rejectTooManyRequests(response, probe);
+    }
 
+    private void rejectTooManyRequests(HttpServletResponse response, ConsumptionProbe probe) throws IOException {
         long retryAfterSeconds = Math.max(
                 1L,
                 java.util.concurrent.TimeUnit.NANOSECONDS.toSeconds(probe.getNanosToWaitForRefill()) + 1);
-
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(objectMapper.writeValueAsString(Map.of(
                 "message", "Muitas requisições. Aguarde e tente novamente.",
                 "code", "TOO_MANY_REQUESTS")));
+    }
+
+    private boolean isPlatformAdmin(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) return false;
+            String payloadJson = new String(
+                    Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
+            JsonNode payload = objectMapper.readTree(payloadJson);
+            JsonNode roles = payload.get("roles");
+            if (roles == null || !roles.isArray()) return false;
+            for (JsonNode r : roles) {
+                if ("ROLE_PLATFORM_ADMIN".equals(r.asText())) return true;
+            }
+        } catch (Exception ignored) {
+            // malformed token — JWT filter will reject it
+        }
+        return false;
+    }
+
+    private static String tokenHash(String token) {
+        int h = token.hashCode();
+        return Integer.toHexString(h);
     }
 
     private String clientIp(HttpServletRequest request) {

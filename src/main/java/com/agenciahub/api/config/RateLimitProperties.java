@@ -61,4 +61,12 @@ public class RateLimitProperties {
 
     /** POST {@code /public/data-deletion-request} — LGPD exclusão; máx 3/hora por IP (LGPD-02) */
     private int publicDataDeletionPerHour = 3;
+
+    // ── Rate limit por token JWT (SEC-06) ─────────────────────────────────────
+
+    /** GET autenticados: máx requisições por minuto por token JWT */
+    private int authenticatedGetPerMinute = 300;
+
+    /** POST/PUT/PATCH/DELETE autenticados: máx requisições por minuto por token JWT */
+    private int authenticatedMutationPerMinute = 60;
 }
