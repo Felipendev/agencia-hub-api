@@ -2,6 +2,7 @@ package com.agenciahub.api.web;
 
 import com.agenciahub.api.exception.AccountDeletionPendingException;
 import com.agenciahub.api.exception.ApiError;
+import com.agenciahub.api.exception.ConsentRevocationException;
 import com.agenciahub.api.exception.DetalhesValidationException;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.EmailNotVerifiedException;
@@ -70,6 +71,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new ApiError(ex.getMessage(), "DETALHES_VALIDATION_ERROR"));
+    }
+
+    @ExceptionHandler(ConsentRevocationException.class)
+    public ResponseEntity<ApiError> handleConsentRevocation(ConsentRevocationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ApiError(ex.getMessage(), "CONSENT_REVOCATION_ERROR"));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

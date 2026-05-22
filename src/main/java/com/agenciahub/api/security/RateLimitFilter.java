@@ -60,6 +60,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 perMinute(properties.getPublicSubmitPerMinute()),
                 "public-submit"));
         rules.add(new Rule(
+                "POST",
+                "/public/solicitacao/consent/revoke",
+                perHour(properties.getPublicConsentRevokePerHour()),
+                "public-consent-revoke"));
+        rules.add(new Rule(
                 "GET",
                 "/public/solicitacao-config/**",
                 perMinute(properties.getPublicConfigGetPerMinute()),

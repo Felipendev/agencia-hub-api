@@ -55,4 +55,7 @@ public class RateLimitProperties {
 
     /** GET documentação Swagger / OpenAPI (evita abuso leve de leitura). */
     private int docsGetPerMinute = 120;
+
+    /** POST {@code /public/solicitacao/consent/revoke} — LGPD revogação; máx 3/hora por IP (SEC-03) */
+    private int publicConsentRevokePerHour = 3;
 }
