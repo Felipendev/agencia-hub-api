@@ -111,4 +111,8 @@ public class JwtService {
     public Long extractPasswordChangedAt(String token) {
         return parse(token).get("password_changed_at", Long.class);
     }
+
+    public Instant extractIssuedAt(String token) {
+        return parse(token).getIssuedAt().toInstant();
+    }
 }

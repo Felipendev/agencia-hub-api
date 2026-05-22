@@ -4,9 +4,12 @@ import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,4 +37,9 @@ public interface PlatformAccountRepository extends JpaRepository<PlatformAccount
     List<PlatformAccount> findByAgency_Id(UUID agencyId);
 
     long countByAgency_IdAndAccountKind(UUID agencyId, AccountKind accountKind);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE PlatformAccount u SET u.lastLogoutAt = :now WHERE u.agency.id = :agencyId")
+    void updateLastLogoutAtByAgencyId(@Param("agencyId") UUID agencyId, @Param("now") Instant now);
 }

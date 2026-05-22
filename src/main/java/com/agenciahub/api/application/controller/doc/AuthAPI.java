@@ -75,6 +75,10 @@ public interface AuthAPI {
     @Operation(summary = "Cadastro via convite", description = "Registra vendedor a partir de token de convite.")
     RegisterAgencyResultDTO registerViaInvite(@Valid @RequestBody RegisterViaInviteRequestDTO request);
 
+    @PostMapping("/logout")
+    @Operation(summary = "Logout", description = "Invalida o token JWT atual via last_logout_at.")
+    Map<String, String> logout();
+
     @DeleteMapping("/account")
     @Operation(summary = "Solicitar exclusão de conta", description = "Agenda a exclusão da agência em 7 dias (grace period).")
     Map<String, String> requestAccountDeletion();

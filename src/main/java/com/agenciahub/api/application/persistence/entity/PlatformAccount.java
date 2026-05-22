@@ -94,6 +94,9 @@ public class PlatformAccount implements AgencyMemberProfile {
     @Builder.Default
     private Boolean notifEmailSubmissao = Boolean.TRUE;
 
+    @Column(name = "last_logout_at")
+    private Instant lastLogoutAt;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

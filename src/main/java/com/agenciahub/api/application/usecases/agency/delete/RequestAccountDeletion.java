@@ -44,5 +44,6 @@ public class RequestAccountDeletion {
         agency.setDeletionScheduledAt(Instant.now().plus(7, ChronoUnit.DAYS));
 
         agencyRepository.save(agency);
+        platformAccountRepository.updateLastLogoutAtByAgencyId(agency.getId(), Instant.now());
     }
 }
