@@ -23,7 +23,9 @@ class SalesAgentDashboardHttpIntegrationTest extends AbstractIntegrationTest {
     void myDashboard_withAuth_returns200() throws Exception {
         mockMvc.perform(http.authorized(mockMvc, get(IntegrationHttpSupport.API_PREFIX + "/sales-agent/dashboard/me")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.salesAgent").exists());
+                .andExpect(jsonPath("$.salesAgent").exists())
+                .andExpect(jsonPath("$.recentSubmissions").isArray())
+                .andExpect(jsonPath("$.monthlyCommissions").isArray());
     }
 
     @Test

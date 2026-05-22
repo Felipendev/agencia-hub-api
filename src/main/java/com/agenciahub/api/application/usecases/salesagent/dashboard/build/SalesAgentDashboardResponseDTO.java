@@ -13,6 +13,8 @@ public record SalesAgentDashboardResponseDTO(
         long approvedQuotations,
         BigDecimal totalCommissionEarned,
         BigDecimal pendingCommission,
-        List<QuotationSummaryResponseDTO> recentQuotations
+        List<QuotationSummaryResponseDTO> recentQuotations,
+        List<SubmissionSummaryDTO> recentSubmissions,
+        List<MonthlyCommissionDTO> monthlyCommissions
 ) {
 }
