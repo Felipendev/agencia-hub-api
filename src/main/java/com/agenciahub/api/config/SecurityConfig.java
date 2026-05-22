@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
@@ -38,6 +39,24 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .headers(headers -> headers
+                .frameOptions(fo -> fo.deny())
+                .contentTypeOptions(cto -> {})
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .maxAgeInSeconds(63072000)
+                    .includeSubDomains(true)
+                    .preload(true))
+                .referrerPolicy(rp -> rp
+                    .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives(
+                        "default-src 'none'; " +
+                        "script-src 'self'; " +
+                        "style-src 'self' 'unsafe-inline'; " +
+                        "img-src 'self' data:; " +
+                        "font-src 'self'; " +
+                        "connect-src 'self'"))
+            )
             .authorizeHttpRequests(auth -> auth
                 // Preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
