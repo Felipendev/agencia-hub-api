@@ -126,13 +126,22 @@ public final class TransactionalMailBody {
 
     // ── Private helpers ────────────────────────────────────────────────────────
 
-    /** Renders the full HTML wrapper around arbitrary body content. */
     private static String layout(String bodyContent, String footerDisclaimer, String recipientEmail) {
+        return layout(bodyContent, footerDisclaimer, recipientEmail, null);
+    }
+
+    /** Renders the full HTML wrapper around arbitrary body content. */
+    private static String layout(String bodyContent, String footerDisclaimer,
+                                  String recipientEmail, String unsubscribeUrl) {
         String recipientLine = recipientEmail != null && !recipientEmail.isBlank()
                 ? "<p style=\"margin:8px 0 0;font-size:12px;color:#94A3B8;\">" +
                   "Este e-mail foi enviado para " +
                   "<a href=\"mailto:" + recipientEmail + "\" " +
                   "style=\"color:#0EA5E9;text-decoration:none;\">" + recipientEmail + "</a>.</p>"
+                : "";
+        String unsubscribeLine = unsubscribeUrl != null
+                ? "<p style=\"margin:8px 0 0;font-size:11px;color:#94A3B8;\">" +
+                  "<a href=\"" + unsubscribeUrl + "\" style=\"color:#94A3B8;\">Cancelar inscrição</a></p>"
                 : "";
 
         return """
@@ -182,6 +191,7 @@ public final class TransactionalMailBody {
                               %s
                             </p>
                             %s
+                            %s
                           </td>
                         </tr>
 
@@ -210,12 +220,12 @@ public final class TransactionalMailBody {
                   </table>
 
                 </body>
-                </html>""".formatted(bodyContent, footerDisclaimer, recipientLine);
+                </html>""".formatted(bodyContent, footerDisclaimer, recipientLine, unsubscribeLine);
     }
 
     public static TransactionalMail newSubmissionAlert(
             String agencyName, String clienteNome, String telefone,
-            String rota, String datas, String dashboardUrl, String recipientEmail) {
+            String rota, String datas, String dashboardUrl, String recipientEmail, String unsubscribeUrl) {
 
         String text = """
                 Nova solicitação de orçamento recebida em %s.
@@ -258,7 +268,7 @@ public final class TransactionalMailBody {
                 text,
                 layout(body,
                         "Você recebe este e-mail porque é gestor(a) da agência " + agencyName + " no AgênciasHub.",
-                        recipientEmail));
+                        recipientEmail, unsubscribeUrl));
     }
 
     /** Centered CTA button following the brand amber color. */
@@ -359,7 +369,7 @@ public final class TransactionalMailBody {
     }
 
     public static TransactionalMail quotationAccepted(
-            String quotationTitle, String clienteNome, String recipientEmail) {
+            String quotationTitle, String clienteNome, String recipientEmail, String unsubscribeUrl) {
 
         String text = """
                 Boa notícia!
@@ -384,11 +394,12 @@ public final class TransactionalMailBody {
         return new TransactionalMail(
                 "AgênciasHub — Cotação aceita: " + quotationTitle,
                 text,
-                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.", recipientEmail));
+                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.",
+                        recipientEmail, unsubscribeUrl));
     }
 
     public static TransactionalMail quotationExpiringSoon(
-            String quotationTitle, String validUntil, String recipientEmail) {
+            String quotationTitle, String validUntil, String recipientEmail, String unsubscribeUrl) {
 
         String text = """
                 Atenção: a cotação "%s" vence em %s.
@@ -409,10 +420,11 @@ public final class TransactionalMailBody {
         return new TransactionalMail(
                 "AgênciasHub — Cotação vencendo: " + quotationTitle,
                 text,
-                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.", recipientEmail));
+                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.",
+                        recipientEmail, unsubscribeUrl));
     }
 
-    public static TransactionalMail deletionScheduled(String scheduledAt, String recipientEmail) {
+    public static TransactionalMail deletionScheduled(String scheduledAt, String recipientEmail, String unsubscribeUrl) {
 
         String text = """
                 Sua solicitação de exclusão de conta foi registrada.
@@ -435,6 +447,7 @@ public final class TransactionalMailBody {
         return new TransactionalMail(
                 "AgênciasHub — Exclusão de conta agendada",
                 text,
-                layout(body, "Você recebe este e-mail por ter solicitado a exclusão da sua conta.", recipientEmail));
+                layout(body, "Você recebe este e-mail por ter solicitado a exclusão da sua conta.",
+                        recipientEmail, unsubscribeUrl));
     }
 }

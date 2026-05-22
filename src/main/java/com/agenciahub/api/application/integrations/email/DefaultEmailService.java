@@ -1,5 +1,6 @@
 package com.agenciahub.api.application.integrations.email;
 
+import com.agenciahub.api.security.UnsubscribeTokenService;
 import com.agenciahub.api.security.VerificationLinkTokenService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -14,14 +15,17 @@ public class DefaultEmailService implements EmailService {
 
     private final TransactionalMailChannel channel;
     private final VerificationLinkTokenService linkTokenService;
+    private final UnsubscribeTokenService unsubscribeTokenService;
     private final String appBaseUrl;
 
     public DefaultEmailService(
             TransactionalMailChannel channel,
             VerificationLinkTokenService linkTokenService,
+            UnsubscribeTokenService unsubscribeTokenService,
             @Value("${app.base-url:http://localhost:3000}") String appBaseUrl) {
         this.channel = channel;
         this.linkTokenService = linkTokenService;
+        this.unsubscribeTokenService = unsubscribeTokenService;
         this.appBaseUrl = appBaseUrl;
     }
 
@@ -48,8 +52,9 @@ public class DefaultEmailService implements EmailService {
     @Override
     public void sendNewSubmissionAlert(String to, String agencyName, String clienteNome,
                                        String telefone, String rota, String datas, String dashboardUrl) {
+        String unsubscribeUrl = buildUnsubscribeUrl(to, "submissao");
         channel.send(to, TransactionalMailBody.newSubmissionAlert(
-                agencyName, clienteNome, telefone, rota, datas, dashboardUrl, to));
+                agencyName, clienteNome, telefone, rota, datas, dashboardUrl, to, unsubscribeUrl));
     }
 
     @Async
@@ -74,18 +79,26 @@ public class DefaultEmailService implements EmailService {
     @Async
     @Override
     public void sendQuotationAccepted(String to, String quotationTitle, String clienteNome) {
-        channel.send(to, TransactionalMailBody.quotationAccepted(quotationTitle, clienteNome, to));
+        String unsubscribeUrl = buildUnsubscribeUrl(to, "cotacao_aprovada");
+        channel.send(to, TransactionalMailBody.quotationAccepted(quotationTitle, clienteNome, to, unsubscribeUrl));
     }
 
     @Async
     @Override
     public void sendQuotationExpiringSoon(String to, String quotationTitle, String validUntil) {
-        channel.send(to, TransactionalMailBody.quotationExpiringSoon(quotationTitle, validUntil, to));
+        String unsubscribeUrl = buildUnsubscribeUrl(to, "cotacao_vencendo");
+        channel.send(to, TransactionalMailBody.quotationExpiringSoon(quotationTitle, validUntil, to, unsubscribeUrl));
     }
 
     @Async
     @Override
     public void sendDeletionScheduled(String to, String scheduledAt) {
-        channel.send(to, TransactionalMailBody.deletionScheduled(scheduledAt, to));
+        String unsubscribeUrl = buildUnsubscribeUrl(to, "exclusao_agendada");
+        channel.send(to, TransactionalMailBody.deletionScheduled(scheduledAt, to, unsubscribeUrl));
+    }
+
+    private String buildUnsubscribeUrl(String email, String notifType) {
+        String token = unsubscribeTokenService.generate(email, notifType);
+        return appBaseUrl + "/api/v1/public/unsubscribe?t=" + token + "&type=" + notifType;
     }
 }
