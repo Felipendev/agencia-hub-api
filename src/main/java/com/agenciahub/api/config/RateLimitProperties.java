@@ -41,11 +41,11 @@ public class RateLimitProperties {
     /** POST {@code /auth/resend-code} */
     private int authResendCodePerHour = 10;
 
-    /** POST {@code /auth/verify-email} */
-    private int authVerifyEmailPerMinute = 40;
+    /** POST {@code /auth/verify-email} — OTP; máx 5 tentativas por IP por minuto (SEC-02) */
+    private int authVerifyEmailPerMinute = 5;
 
-    /** POST {@code /auth/reset-password} */
-    private int authResetPasswordPerMinute = 20;
+    /** POST {@code /auth/reset-password} — OTP; máx 5 tentativas por IP por minuto (SEC-02) */
+    private int authResetPasswordPerMinute = 5;
 
     /** POST {@code /auth/register-invite} */
     private int authRegisterInvitePerHour = 15;
