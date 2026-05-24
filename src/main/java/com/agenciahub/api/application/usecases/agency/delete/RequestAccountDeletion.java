@@ -1,5 +1,6 @@
 package com.agenciahub.api.application.usecases.agency.delete;
 
+import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.application.persistence.entity.Agency;
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.application.persistence.repository.AgencyRepository;
@@ -12,14 +13,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
 public class RequestAccountDeletion {
 
+    private static final DateTimeFormatter DATE_FMT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy").withZone(ZoneId.of("America/Sao_Paulo"));
+
     private final PlatformAccountRepository platformAccountRepository;
     private final AgencyRepository agencyRepository;
+    private final EmailService emailService;
 
     @Transactional
     public void execute(RequestAccountDeletionRequestDTO request) {
@@ -44,5 +51,11 @@ public class RequestAccountDeletion {
         agency.setDeletionScheduledAt(Instant.now().plus(7, ChronoUnit.DAYS));
 
         agencyRepository.save(agency);
+        platformAccountRepository.updateLastLogoutAtByAgencyId(agency.getId(), Instant.now());
+
+        if (Boolean.TRUE.equals(owner.getNotifEmailExclusaoAgendada())) {
+            emailService.sendDeletionScheduled(
+                    owner.getEmail(), DATE_FMT.format(agency.getDeletionScheduledAt()));
+        }
     }
 }

@@ -69,6 +69,15 @@ public class SolicitacaoSubmission {
     @Column(name = "consentimento_lgpd", nullable = false)
     private boolean consentimentoLgpd;
 
+    @Column(name = "consentimento_at")
+    private Instant consentimentoAt;
+
+    @Column(name = "consentimento_ip", length = 45)
+    private String consentimentoIp;
+
+    @Column(name = "consentimento_versao_termos", length = 32)
+    private String consentimentoVersaoTermos;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) {

@@ -3,12 +3,15 @@ package com.agenciahub.api.application.controller;
 import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswordUseCase;
 import com.agenciahub.api.application.usecases.auth.forgotpassword.ForgotPasswordUseCase;
 import com.agenciahub.api.application.usecases.auth.login.LoginUseCase;
+import com.agenciahub.api.application.usecases.auth.logout.Logout;
+import com.agenciahub.api.application.usecases.agency.delete.RequestAccountDeletion;
 import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyUseCase;
 import com.agenciahub.api.application.usecases.auth.registerviainvite.RegisterViaInviteUseCase;
 import com.agenciahub.api.application.usecases.auth.resendcode.ResendCodeUseCase;
 import com.agenciahub.api.application.usecases.auth.resetpassword.ResetPasswordUseCase;
 import com.agenciahub.api.application.usecases.auth.validatetoken.ValidateInviteTokenUseCase;
 import com.agenciahub.api.application.usecases.auth.verifyemail.VerifyEmailUseCase;
+import com.agenciahub.api.application.usecases.auth.verifyemailbylink.VerifyEmailByLink;
 import com.agenciahub.api.domain.AgencyStatus;
 import com.agenciahub.api.domain.SubscriptionStatus;
 import com.agenciahub.api.domain.enums.AccountKind;
@@ -83,6 +86,15 @@ class AuthControllerWebMvcTest {
 
     @MockitoBean
     private RegisterViaInviteUseCase registerViaInviteUseCase;
+
+    @MockitoBean
+    private VerifyEmailByLink verifyEmailByLink;
+
+    @MockitoBean
+    private RequestAccountDeletion requestAccountDeletion;
+
+    @MockitoBean
+    private Logout logoutUseCase;
 
     @Test
     void login_happyPath_returnsToken() throws Exception {

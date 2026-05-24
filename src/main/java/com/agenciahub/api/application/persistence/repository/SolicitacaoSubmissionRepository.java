@@ -4,6 +4,7 @@ import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,5 +17,11 @@ public interface SolicitacaoSubmissionRepository extends JpaRepository<Solicitac
     @EntityGraph(attributePaths = {"referralSeller"})
     List<SolicitacaoSubmission> findByAgency_IdAndReferralSeller_IdOrderByCreatedAtDesc(UUID agencyId, UUID referralSellerId);
 
+    List<SolicitacaoSubmission> findByReferralSeller_IdAndCreatedAtAfterOrderByCreatedAtDesc(UUID referralSellerId, Instant after);
+
     Optional<SolicitacaoSubmission> findByIdAndAgency_Id(UUID id, UUID agencyId);
+
+    List<SolicitacaoSubmission> findByEmailAndTelefone(String email, String telefone);
+
+    List<SolicitacaoSubmission> findByEmailIgnoreCase(String email);
 }

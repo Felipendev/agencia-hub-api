@@ -4,6 +4,7 @@ import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswor
 import com.agenciahub.api.application.usecases.auth.changepassword.ChangePasswordUseCase;
 import com.agenciahub.api.application.usecases.auth.forgotpassword.ForgotPasswordUseCase;
 import com.agenciahub.api.application.usecases.auth.login.LoginUseCase;
+import com.agenciahub.api.application.usecases.auth.logout.Logout;
 import com.agenciahub.api.application.usecases.auth.registeragency.RegisterAgencyUseCase;
 import com.agenciahub.api.application.usecases.auth.registerviainvite.RegisterViaInviteUseCase;
 import com.agenciahub.api.application.usecases.auth.resendcode.ResendCodeUseCase;
@@ -49,6 +50,7 @@ public class AuthController implements AuthAPI {
     private final ValidateInviteTokenUseCase validateInviteTokenUseCase;
     private final RegisterViaInviteUseCase registerViaInviteUseCase;
     private final RequestAccountDeletion requestAccountDeletion;
+    private final Logout logoutUseCase;
 
     @Override
     public LoginResponseDTO login(LoginRequestDTO request) {
@@ -99,6 +101,13 @@ public class AuthController implements AuthAPI {
     @Override
     public RegisterAgencyResultDTO registerViaInvite(RegisterViaInviteRequestDTO request) {
         return registerViaInviteUseCase.execute(request);
+    }
+
+    @Override
+    public Map<String, String> logout() {
+        UUID currentUserId = SecurityContextUsers.requireUserId();
+        logoutUseCase.execute(currentUserId);
+        return Map.of("message", "logout realizado com sucesso.");
     }
 
     @Override

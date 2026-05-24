@@ -126,13 +126,22 @@ public final class TransactionalMailBody {
 
     // ── Private helpers ────────────────────────────────────────────────────────
 
-    /** Renders the full HTML wrapper around arbitrary body content. */
     private static String layout(String bodyContent, String footerDisclaimer, String recipientEmail) {
+        return layout(bodyContent, footerDisclaimer, recipientEmail, null);
+    }
+
+    /** Renders the full HTML wrapper around arbitrary body content. */
+    private static String layout(String bodyContent, String footerDisclaimer,
+                                  String recipientEmail, String unsubscribeUrl) {
         String recipientLine = recipientEmail != null && !recipientEmail.isBlank()
                 ? "<p style=\"margin:8px 0 0;font-size:12px;color:#94A3B8;\">" +
                   "Este e-mail foi enviado para " +
                   "<a href=\"mailto:" + recipientEmail + "\" " +
                   "style=\"color:#0EA5E9;text-decoration:none;\">" + recipientEmail + "</a>.</p>"
+                : "";
+        String unsubscribeLine = unsubscribeUrl != null
+                ? "<p style=\"margin:8px 0 0;font-size:11px;color:#94A3B8;\">" +
+                  "<a href=\"" + unsubscribeUrl + "\" style=\"color:#94A3B8;\">Cancelar inscrição</a></p>"
                 : "";
 
         return """
@@ -182,6 +191,7 @@ public final class TransactionalMailBody {
                               %s
                             </p>
                             %s
+                            %s
                           </td>
                         </tr>
 
@@ -210,12 +220,12 @@ public final class TransactionalMailBody {
                   </table>
 
                 </body>
-                </html>""".formatted(bodyContent, footerDisclaimer, recipientLine);
+                </html>""".formatted(bodyContent, footerDisclaimer, recipientLine, unsubscribeLine);
     }
 
     public static TransactionalMail newSubmissionAlert(
             String agencyName, String clienteNome, String telefone,
-            String rota, String datas, String dashboardUrl, String recipientEmail) {
+            String rota, String datas, String dashboardUrl, String recipientEmail, String unsubscribeUrl) {
 
         String text = """
                 Nova solicitação de orçamento recebida em %s.
@@ -258,7 +268,7 @@ public final class TransactionalMailBody {
                 text,
                 layout(body,
                         "Você recebe este e-mail porque é gestor(a) da agência " + agencyName + " no AgênciasHub.",
-                        recipientEmail));
+                        recipientEmail, unsubscribeUrl));
     }
 
     /** Centered CTA button following the brand amber color. */
@@ -278,5 +288,166 @@ public final class TransactionalMailBody {
                     </td>
                   </tr>
                 </table>""".formatted(href, label);
+    }
+
+    public static TransactionalMail dataDeletionConfirmation(String toEmail) {
+        String text = """
+                Olá,
+
+                Recebemos sua solicitação de exclusão de dados pessoais no AgênciasHub.
+
+                Analisaremos sua solicitação em até 15 dias úteis e enviaremos uma resposta para este endereço de e-mail.
+
+                Caso não tenha feito esta solicitação, entre em contato conosco.
+
+                Equipe AgênciasHub""";
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Solicitação de exclusão recebida</h1>
+                <p style="margin:16px 0;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  Recebemos sua solicitação de exclusão de dados pessoais.<br>
+                  Analisaremos em até <strong>15 dias úteis</strong> e retornaremos neste e-mail.
+                </p>""";
+
+        return new TransactionalMail(
+                "AgênciasHub — Solicitação de exclusão de dados recebida",
+                text,
+                layout(body, "Caso não tenha feito esta solicitação, ignore este e-mail.", toEmail));
+    }
+
+    public static TransactionalMail dataDeletionOwnerNotification(String processUrl) {
+        String text = """
+                Olá,
+
+                Uma nova solicitação de exclusão de dados foi recebida. Acesse o painel para analisá-la:
+                %s
+
+                Equipe AgênciasHub""".formatted(processUrl);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Nova solicitação de exclusão</h1>
+                <p style="margin:16px 0 32px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  Uma nova solicitação de exclusão de dados foi recebida.<br>
+                  Acesse o painel para analisar e processar.
+                </p>
+                %s""".formatted(ctaButton(processUrl, "Ver solicitação"));
+
+        return new TransactionalMail(
+                "AgênciasHub — Nova solicitação de exclusão de dados",
+                text,
+                layout(body, null, null));
+    }
+
+    public static TransactionalMail dataDeletionProcessed(boolean accepted, String justificativa) {
+        String titulo = accepted ? "Seus dados foram excluídos" : "Solicitação de exclusão processada";
+        String mensagem = accepted
+                ? "Seus dados pessoais foram excluídos da nossa plataforma conforme solicitado."
+                : "Sua solicitação de exclusão foi analisada. " +
+                  (justificativa != null && !justificativa.isBlank()
+                          ? "Motivo: " + justificativa
+                          : "Não foi possível processar a exclusão neste momento.");
+
+        String text = """
+                Olá,
+
+                %s
+
+                Equipe AgênciasHub""".formatted(mensagem);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">%s</h1>
+                <p style="margin:16px 0;font-size:15px;color:#475569;text-align:center;line-height:1.7;">%s</p>
+                """.formatted(titulo, mensagem);
+
+        return new TransactionalMail(
+                "AgênciasHub — " + titulo,
+                text,
+                layout(body, null, null));
+    }
+
+    public static TransactionalMail quotationAccepted(
+            String quotationTitle, String clienteNome, String recipientEmail, String unsubscribeUrl) {
+
+        String text = """
+                Boa notícia!
+
+                A cotação "%s" para %s foi aceita pelo cliente.
+
+                Acesse o painel para acompanhar os próximos passos.
+
+                Equipe AgênciasHub""".formatted(quotationTitle, clienteNome);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Cotação aceita!</h1>
+                <p style="margin:16px 0 8px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  A cotação <strong style="color:#1E293B;">%s</strong><br>
+                  foi aceita por <strong style="color:#1E293B;">%s</strong>.
+                </p>
+                <p style="margin:0 0 28px;font-size:14px;color:#64748B;text-align:center;">
+                  Acesse o painel para prosseguir com o atendimento.
+                </p>""".formatted(quotationTitle, clienteNome);
+
+        return new TransactionalMail(
+                "AgênciasHub — Cotação aceita: " + quotationTitle,
+                text,
+                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.",
+                        recipientEmail, unsubscribeUrl));
+    }
+
+    public static TransactionalMail quotationExpiringSoon(
+            String quotationTitle, String validUntil, String recipientEmail, String unsubscribeUrl) {
+
+        String text = """
+                Atenção: a cotação "%s" vence em %s.
+
+                Acesse o painel para acompanhar ou renovar.
+
+                Equipe AgênciasHub""".formatted(quotationTitle, validUntil);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Cotação vencendo em breve</h1>
+                <p style="margin:16px 0 28px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  A cotação <strong style="color:#1E293B;">%s</strong>
+                  vence em <strong style="color:#D97706;">%s</strong>.<br>
+                  Acesse o painel para acompanhar ou renovar.
+                </p>""".formatted(quotationTitle, validUntil);
+
+        return new TransactionalMail(
+                "AgênciasHub — Cotação vencendo: " + quotationTitle,
+                text,
+                layout(body, "Você recebe este e-mail por ser responsável por esta cotação.",
+                        recipientEmail, unsubscribeUrl));
+    }
+
+    public static TransactionalMail deletionScheduled(String scheduledAt, String recipientEmail, String unsubscribeUrl) {
+
+        String text = """
+                Sua solicitação de exclusão de conta foi registrada.
+
+                Sua agência e todos os dados associados serão permanentemente excluídos em %s.
+
+                Se mudar de ideia, acesse o painel e cancele a exclusão antes dessa data.
+
+                Equipe AgênciasHub""".formatted(scheduledAt);
+
+        String body = """
+                <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#0B1B2B;
+                           text-align:center;">Exclusão de conta agendada</h1>
+                <p style="margin:16px 0 28px;font-size:15px;color:#475569;text-align:center;line-height:1.7;">
+                  Sua agência e dados serão excluídos em
+                  <strong style="color:#DC2626;">%s</strong>.<br>
+                  Para cancelar, acesse o painel antes dessa data.
+                </p>""".formatted(scheduledAt);
+
+        return new TransactionalMail(
+                "AgênciasHub — Exclusão de conta agendada",
+                text,
+                layout(body, "Você recebe este e-mail por ter solicitado a exclusão da sua conta.",
+                        recipientEmail, unsubscribeUrl));
     }
 }

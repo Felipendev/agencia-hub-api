@@ -14,4 +14,16 @@ public interface EmailService {
 
     void sendNewSubmissionAlert(String to, String agencyName, String clienteNome,
                                 String telefone, String rota, String datas, String dashboardUrl);
+
+    void sendDataDeletionRequestConfirmation(String to);
+
+    void sendDataDeletionOwnerNotification(String to, String requestId);
+
+    void sendDataDeletionProcessed(String to, boolean accepted, String justificativa);
+
+    void sendQuotationAccepted(String to, String quotationTitle, String clienteNome);
+
+    void sendQuotationExpiringSoon(String to, String quotationTitle, String validUntil);
+
+    void sendDeletionScheduled(String to, String scheduledAt);
 }

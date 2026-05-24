@@ -4,19 +4,25 @@ import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitRequestDTO;
 import com.agenciahub.api.application.usecases.solicitacao.pub.submit.PublicSolicitacaoSubmitResponseDTO;
 import com.agenciahub.api.application.persistence.entity.Agency;
+import com.agenciahub.api.application.persistence.entity.ConsentimentoLog;
 import com.agenciahub.api.application.persistence.entity.SolicitacaoConfig;
 import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.repository.ConsentimentoLogRepository;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRepository;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.validation.PhoneValidator;
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -27,9 +33,14 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
     private final SolicitacaoConfigRepository configRepository;
     private final PlatformAccountRepository userRepository;
     private final EmailService emailService;
+    private final SolicitacaoDetalhesValidator detalhesValidator;
+    private final ConsentimentoLogRepository consentimentoLogRepository;
 
     @Value("${app.base-url:http://localhost:3000}")
     private String appBaseUrl;
+
+    @Value("${terms.current-version:1.0}")
+    private String termsCurrentVersion;
 
     @Override
     public PublicSolicitacaoSubmitResponseDTO execute(PublicSolicitacaoSubmitRequestDTO request) {
@@ -38,7 +49,7 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
             throw new IllegalArgumentException("informe um celular válido com DDD (10 ou 11 dígitos).");
         }
 
-        JsonNode detalhes = request.detalhes();
+        JsonNode detalhes = detalhesValidator.validate(request.detalhes());
         if (!hasRouteInfo(detalhes)) {
             throw new IllegalArgumentException("informe origem e/ou destino.");
         }
@@ -46,6 +57,9 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
         var configOpt = configRepository.findFirstBySlug(request.slug().trim());
         Agency agency = configOpt.map(SolicitacaoConfig::getAgency).orElse(null);
         PlatformAccount referral = resolveReferral(request, agency);
+
+        boolean consented = Boolean.TRUE.equals(request.consentimentoLgpd());
+        String clientIp = extractClientIp();
 
         var submission = SolicitacaoSubmission.builder()
                 .agency(agency)
@@ -56,10 +70,23 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
                 .telefone(telefoneDigits)
                 .observacoes(request.observacoes() != null ? request.observacoes().trim() : "")
                 .detalhes(detalhes)
-                .consentimentoLgpd(Boolean.TRUE.equals(request.consentimentoLgpd()))
+                .consentimentoLgpd(consented)
+                .consentimentoAt(consented ? Instant.now() : null)
+                .consentimentoIp(consented ? clientIp : null)
+                .consentimentoVersaoTermos(consented ? termsCurrentVersion : null)
                 .build();
 
         submission = submissionRepository.save(submission);
+
+        if (consented) {
+            consentimentoLogRepository.save(ConsentimentoLog.builder()
+                    .submission(submission)
+                    .tipo("CONSENTIMENTO")
+                    .ip(clientIp)
+                    .versaoTermos(termsCurrentVersion)
+                    .build());
+        }
+
         dispatchAlertEmail(agency, submission);
         return new PublicSolicitacaoSubmitResponseDTO(true, submission.getId());
     }
@@ -172,6 +199,21 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
             throw new IllegalArgumentException("apenas vendedor ou gestor podem ser indicados no link.");
         }
         return u;
+    }
+
+    private String extractClientIp() {
+        try {
+            ServletRequestAttributes attrs =
+                    (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            HttpServletRequest req = attrs.getRequest();
+            String xff = req.getHeader("X-Forwarded-For");
+            if (xff != null && !xff.isBlank()) {
+                return xff.split(",")[0].trim();
+            }
+            return req.getRemoteAddr();
+        } catch (Exception e) {
+            return "unknown";
+        }
     }
 
     private static boolean hasRouteInfo(JsonNode det) {

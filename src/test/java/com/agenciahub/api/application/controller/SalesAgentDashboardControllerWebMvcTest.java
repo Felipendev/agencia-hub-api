@@ -104,6 +104,8 @@ class SalesAgentDashboardControllerWebMvcTest {
                         0L,
                         BigDecimal.ZERO,
                         BigDecimal.ZERO,
+                        List.of(),
+                        List.of(),
                         List.of()));
 
         mockMvc.perform(get("/sales-agent/dashboard/me"))
@@ -164,6 +166,8 @@ class SalesAgentDashboardControllerWebMvcTest {
                         0L,
                         BigDecimal.ZERO,
                         BigDecimal.ZERO,
+                        List.of(),
+                        List.of(),
                         List.of()));
 
         mockMvc.perform(get("/sales-agent/dashboard/" + agentId))

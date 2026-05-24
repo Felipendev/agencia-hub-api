@@ -1,6 +1,7 @@
 package com.agenciahub.api.application.controller;
 
 import com.agenciahub.api.application.usecases.financial.create.CreateFinancialEntryUseCase;
+import com.agenciahub.api.application.usecases.financial.delete.DeleteFinancialEntryUseCase;
 import com.agenciahub.api.application.usecases.financial.retrieve.byid.GetFinancialEntryByIdUseCase;
 import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesQuery;
 import com.agenciahub.api.application.usecases.financial.retrieve.list.ListFinancialEntriesUseCase;
@@ -68,6 +69,9 @@ class FinancialEntryControllerWebMvcTest {
 
     @MockitoBean
     private UpdateFinancialEntryUseCase updateFinancialEntryUseCase;
+
+    @MockitoBean
+    private DeleteFinancialEntryUseCase deleteFinancialEntryUseCase;
 
     @Test
     void list_returnsEntries() throws Exception {

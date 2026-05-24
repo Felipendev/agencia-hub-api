@@ -4,6 +4,7 @@ import com.agenciahub.api.application.usecases.customer.shared.OutputMapper;
 import com.agenciahub.api.application.usecases.customer.shared.CustomerSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,9 @@ public class GetCustomerById implements GetCustomerByIdUseCase {
 
     @Override
     public CustomerSummaryResponseDTO execute(UUID id) {
+        UUID agencyId = TenantContext.requireAgencyId();
         return customerRepository
-                .findById(id)
+                .findByIdAndAgency_Id(id, agencyId)
                 .map(OutputMapper::toSummary)
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
     }

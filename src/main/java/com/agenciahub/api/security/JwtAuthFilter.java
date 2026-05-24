@@ -56,7 +56,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (user.getPasswordChangedAt() != null) {
             long userPasswordChangedEpoch = user.getPasswordChangedAt().getEpochSecond();
             if (tokenPasswordChangedAt == null || tokenPasswordChangedAt < userPasswordChangedEpoch) {
-                // Token was issued before the password was changed — reject it
+                chain.doFilter(request, response);
+                return;
+            }
+        }
+
+        // Validate last_logout_at: reject tokens issued at or before the last logout
+        if (user.getLastLogoutAt() != null) {
+            long iatEpochSeconds = jwtService.extractIssuedAt(token).getEpochSecond();
+            if (iatEpochSeconds < user.getLastLogoutAt().getEpochSecond()) {
                 chain.doFilter(request, response);
                 return;
             }

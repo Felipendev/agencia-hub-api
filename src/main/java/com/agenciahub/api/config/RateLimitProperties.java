@@ -41,11 +41,11 @@ public class RateLimitProperties {
     /** POST {@code /auth/resend-code} */
     private int authResendCodePerHour = 10;
 
-    /** POST {@code /auth/verify-email} */
-    private int authVerifyEmailPerMinute = 40;
+    /** POST {@code /auth/verify-email} — OTP; máx 5 tentativas por IP por minuto (SEC-02) */
+    private int authVerifyEmailPerMinute = 5;
 
-    /** POST {@code /auth/reset-password} */
-    private int authResetPasswordPerMinute = 20;
+    /** POST {@code /auth/reset-password} — OTP; máx 5 tentativas por IP por minuto (SEC-02) */
+    private int authResetPasswordPerMinute = 5;
 
     /** POST {@code /auth/register-invite} */
     private int authRegisterInvitePerHour = 15;
@@ -55,4 +55,18 @@ public class RateLimitProperties {
 
     /** GET documentação Swagger / OpenAPI (evita abuso leve de leitura). */
     private int docsGetPerMinute = 120;
+
+    /** POST {@code /public/solicitacao/consent/revoke} — LGPD revogação; máx 3/hora por IP (SEC-03) */
+    private int publicConsentRevokePerHour = 3;
+
+    /** POST {@code /public/data-deletion-request} — LGPD exclusão; máx 3/hora por IP (LGPD-02) */
+    private int publicDataDeletionPerHour = 3;
+
+    // ── Rate limit por token JWT (SEC-06) ─────────────────────────────────────
+
+    /** GET autenticados: máx requisições por minuto por token JWT */
+    private int authenticatedGetPerMinute = 300;
+
+    /** POST/PUT/PATCH/DELETE autenticados: máx requisições por minuto por token JWT */
+    private int authenticatedMutationPerMinute = 60;
 }

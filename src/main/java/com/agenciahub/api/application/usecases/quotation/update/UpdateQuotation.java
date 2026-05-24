@@ -1,10 +1,14 @@
 package com.agenciahub.api.application.usecases.quotation.update;
 
+import com.agenciahub.api.application.integrations.email.EmailService;
+import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSupport;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationResponseMapper;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.application.usecases.quotation.update.UpdateQuotationRequestDTO;
 import com.agenciahub.api.application.persistence.entity.Quotation;
+import com.agenciahub.api.domain.QuotationStatus;
+import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
@@ -13,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +27,7 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
     private final QuotationRepository quotationRepository;
     private final PlatformAccountRepository userRepository;
     private final QuotationResponseMapper quotationResponseMapper;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -29,6 +36,7 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
                 .findById(command.id())
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + command.id()));
         UpdateQuotationRequestDTO request = command.request();
+        QuotationStatus previousStatus = entity.getStatus();
 
         if (Boolean.TRUE.equals(request.unsetSeller())) {
             entity.setSeller(null);
@@ -79,6 +87,31 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
             entity.setInternalNotes(request.internalNotes().strip());
         }
 
-        return quotationResponseMapper.toResponse(quotationRepository.save(entity));
+        QuotationSummaryResponseDTO result = quotationResponseMapper.toResponse(quotationRepository.save(entity));
+
+        if (request.status() == QuotationStatus.ACCEPTED && previousStatus != QuotationStatus.ACCEPTED) {
+            notifyQuotationAccepted(entity);
+        }
+
+        return result;
+    }
+
+    private void notifyQuotationAccepted(Quotation quotation) {
+        String title = quotation.getTitle();
+        String clienteNome = quotation.getCustomer() != null ? quotation.getCustomer().getName() : "";
+        UUID agencyId = quotation.getAgency().getId();
+
+        List<PlatformAccount> owners = userRepository
+                .findByAgency_IdAndAccountKindAndActiveTrue(agencyId, AccountKind.AGENCY_OWNER);
+        for (PlatformAccount owner : owners) {
+            if (Boolean.TRUE.equals(owner.getNotifEmailCotacaoAprovada())) {
+                emailService.sendQuotationAccepted(owner.getEmail(), title, clienteNome);
+            }
+        }
+
+        PlatformAccount seller = quotation.getSeller();
+        if (seller != null && Boolean.TRUE.equals(seller.getNotifEmailCotacaoAprovada())) {
+            emailService.sendQuotationAccepted(seller.getEmail(), title, clienteNome);
+        }
     }
 }

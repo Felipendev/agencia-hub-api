@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.UUID;
 
 public interface CrmCustomerRepository extends JpaRepository<CrmCustomer, UUID> {
 
@@ -39,4 +38,23 @@ public interface CrmCustomerRepository extends JpaRepository<CrmCustomer, UUID> 
     List<CrmCustomer> findByAgency_Id(UUID agencyId);
 
     long countByAgency_Id(UUID agencyId);
+
+    // ── Leitura com isolamento de agência (SEC-01) ──────────────────────────
+
+    List<CrmCustomer> findAllByAgency_IdOrderByCreatedAtDesc(UUID agencyId);
+
+    List<CrmCustomer> findByAgency_IdAndNameContainingIgnoreCaseOrderByCreatedAtDesc(UUID agencyId, String name);
+
+    List<CrmCustomer> findByAgency_IdAndStatusOrderByCreatedAtDesc(UUID agencyId, CustomerStatus status);
+
+    List<CrmCustomer> findByAgency_IdAndNameContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(
+            UUID agencyId, String name, CustomerStatus status);
+
+    Optional<CrmCustomer> findByIdAndAgency_Id(UUID id, UUID agencyId);
+
+    Optional<CrmCustomer> findFirstByEmailIgnoreCaseAndAgency_Id(String email, UUID agencyId);
+
+    @Query("SELECT c FROM CrmCustomer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone AND c.agency.id = :agencyId")
+    Optional<CrmCustomer> findFirstByNormalizedPhoneAndAgency_Id(
+            @Param("phone") String phone, @Param("agencyId") UUID agencyId);
 }

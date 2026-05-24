@@ -3,7 +3,10 @@ package com.agenciahub.api.application.persistence.repository;
 import com.agenciahub.api.application.persistence.entity.SolicitacaoConfig;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,4 +21,7 @@ public interface SolicitacaoConfigRepository extends JpaRepository<SolicitacaoCo
     /** Busca config pelo slug público; @EntityGraph carrega agency imediatamente. */
     @EntityGraph(attributePaths = {"agency"})
     Optional<SolicitacaoConfig> findFirstBySlug(String slug);
+
+    @Query("SELECT c FROM SolicitacaoConfig c WHERE c.agency.id = :agencyId")
+    List<SolicitacaoConfig> findAllByAgencyId(@Param("agencyId") UUID agencyId);
 }

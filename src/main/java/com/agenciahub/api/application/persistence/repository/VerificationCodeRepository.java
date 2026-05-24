@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,4 +22,8 @@ public interface VerificationCodeRepository extends JpaRepository<VerificationCo
     @Modifying
     @Query("UPDATE VerificationCode v SET v.used = true WHERE v.email = :email AND v.type = :type AND v.used = false")
     void invalidateAllByEmailAndType(@Param("email") String email, @Param("type") VerificationCodeType type);
+
+    @Modifying
+    @Query("DELETE FROM VerificationCode v WHERE v.user.id IN :userIds")
+    void deleteByUserIdIn(@Param("userIds") List<UUID> userIds);
 }
