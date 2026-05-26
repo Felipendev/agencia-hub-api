@@ -81,6 +81,9 @@ email:
 # Application base URL (used for invite links, etc.)
 app:
   base-url: ${APP_BASE_URL:https://agenciashub.com.br}
+  # Backend-specific base URL used for unsubscribe links in emails.
+  # If unset, falls back to app.base-url (may cause 404 when frontend and backend have different domains).
+  api-base-url: ${APP_API_BASE_URL:}
 
 # Rate limit por IP (Bucket4j em memória; por instância). Atrás de proxy confiável, ative TRUST_X_FORWARDED_FOR=true.
 agenciahub:
