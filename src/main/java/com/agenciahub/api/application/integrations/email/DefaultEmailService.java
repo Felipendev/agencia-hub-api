@@ -17,16 +17,19 @@ public class DefaultEmailService implements EmailService {
     private final VerificationLinkTokenService linkTokenService;
     private final UnsubscribeTokenService unsubscribeTokenService;
     private final String appBaseUrl;
+    private final String apiBaseUrl;
 
     public DefaultEmailService(
             TransactionalMailChannel channel,
             VerificationLinkTokenService linkTokenService,
             UnsubscribeTokenService unsubscribeTokenService,
-            @Value("${app.base-url:http://localhost:3000}") String appBaseUrl) {
+            @Value("${app.base-url:http://localhost:3000}") String appBaseUrl,
+            @Value("${app.api-base-url:}") String apiBaseUrl) {
         this.channel = channel;
         this.linkTokenService = linkTokenService;
         this.unsubscribeTokenService = unsubscribeTokenService;
         this.appBaseUrl = appBaseUrl;
+        this.apiBaseUrl = apiBaseUrl.isBlank() ? appBaseUrl : apiBaseUrl;
     }
 
     @Async
@@ -99,6 +102,6 @@ public class DefaultEmailService implements EmailService {
 
     private String buildUnsubscribeUrl(String email, String notifType) {
         String token = unsubscribeTokenService.generate(email, notifType);
-        return appBaseUrl + "/api/v1/public/unsubscribe?t=" + token + "&type=" + notifType;
+        return apiBaseUrl + "/api/v1/public/unsubscribe?t=" + token + "&type=" + notifType;
     }
 }
