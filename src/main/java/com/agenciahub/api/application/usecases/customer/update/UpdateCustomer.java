@@ -8,6 +8,7 @@ import com.agenciahub.api.application.persistence.entity.CrmCustomer;
 import com.agenciahub.api.exception.DuplicateCustomerException;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,29 +23,30 @@ public class UpdateCustomer implements UpdateCustomerUseCase {
     @Override
     public CustomerSummaryResponseDTO execute(UpdateCustomerCommand command) {
         UUID id = command.id();
+        UUID agencyId = TenantContext.requireAgencyId();
         UpdateCustomerRequestDTO request = command.request();
         CrmCustomer entity = customerRepository
-                .findById(id)
+                .findByIdAndAgency_Id(id, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
 
         if (request.email() != null) {
             String email = request.email().strip();
             if (!email.isEmpty()
                     && !email.equalsIgnoreCase(entity.getEmail())
-                    && customerRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+                    && customerRepository.existsByEmailIgnoreCaseAndAgency_IdAndIdNot(email, agencyId, id)) {
                 throw new DuplicateCustomerException("e-mail", email);
             }
-            entity.setEmail(email);
+            entity.setEmail(email.isEmpty() ? null : email);
         }
         if (request.phone() != null) {
             String phone = CustomerPhoneNormalizer.normalize(request.phone());
             String currentNorm = CustomerPhoneNormalizer.normalize(entity.getPhone());
             if (!phone.isEmpty()
                     && !phone.equals(currentNorm)
-                    && customerRepository.existsByNormalizedPhoneAndIdNot(phone, id)) {
+                    && customerRepository.existsByNormalizedPhoneAndAgency_IdAndIdNot(phone, agencyId, id)) {
                 throw new DuplicateCustomerException("telefone", request.phone().strip());
             }
-            entity.setPhone(request.phone().strip());
+            entity.setPhone(phone.isEmpty() ? null : request.phone().strip());
         }
         if (request.name() != null) {
             entity.setName(request.name().strip());

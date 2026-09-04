@@ -5,6 +5,7 @@ import com.agenciahub.api.application.usecases.financial.shared.FinancialEntrySu
 import com.agenciahub.api.application.persistence.entity.FinancialEntry;
 import com.agenciahub.api.application.persistence.repository.FinancialEntryRepository;
 import com.agenciahub.api.application.persistence.repository.spec.FinancialEntrySpecifications;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,7 +22,9 @@ public class ListFinancialEntries implements ListFinancialEntriesUseCase {
 
     @Override
     public List<FinancialEntrySummaryResponseDTO> execute(ListFinancialEntriesQuery query) {
+        java.util.UUID agencyId = TenantContext.requireAgencyId();
         Specification<FinancialEntry> spec = FinancialEntrySpecifications.withFilters(
+                agencyId,
                 query.from(),
                 query.to(),
                 query.type(),

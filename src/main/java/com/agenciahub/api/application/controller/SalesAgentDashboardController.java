@@ -5,6 +5,8 @@ import com.agenciahub.api.application.usecases.salesagent.dashboard.build.BuildS
 import com.agenciahub.api.application.usecases.salesagent.dashboard.build.SalesAgentDashboardResponseDTO;
 import com.agenciahub.api.application.usecases.platformaccount.retrieve.entity.GetPlatformAccountEntityByIdUseCase;
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,6 +32,10 @@ public class SalesAgentDashboardController implements SalesAgentDashboardAPI {
             UUID agentId,
             @AuthenticationPrincipal PlatformAccount caller) {
         PlatformAccount agent = getUserEntityByIdUseCase.execute(agentId);
+        UUID agencyId = TenantContext.requireAgencyId();
+        if (agent.getAgency() == null || !agencyId.equals(agent.getAgency().getId())) {
+            throw new ResourceNotFoundException("agente não encontrado: " + agentId);
+        }
         return buildSalesAgentDashboardUseCase.execute(agent);
     }
 }

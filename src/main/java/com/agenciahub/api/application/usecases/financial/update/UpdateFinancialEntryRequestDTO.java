@@ -19,6 +19,12 @@ public record UpdateFinancialEntryRequestDTO(
         LocalDate entryDate,
         FinancialEntryStatus status,
         UUID customerId,
-        String bankAccount
+        UUID supplierId,
+        String bankAccount,
+        String recurrenceFrequency,
+        String notes,
+        BigDecimal saleAmount,
+        BigDecimal supplierCost,
+        BigDecimal commissionAmount
 ) {
 }

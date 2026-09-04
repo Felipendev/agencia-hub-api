@@ -17,11 +17,8 @@ public class DeleteFinancialEntry implements DeleteFinancialEntryUseCase {
     @Override
     public void execute(UUID id) {
         UUID agencyId = TenantContext.requireAgencyId();
-        var entry = financialEntryRepository.findById(id)
+        var entry = financialEntryRepository.findByIdAndAgency_Id(id, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
-        if (!entry.getAgency().getId().equals(agencyId)) {
-            throw new ResourceNotFoundException("lançamento financeiro não encontrado: " + id);
-        }
-        financialEntryRepository.deleteById(id);
+        financialEntryRepository.delete(entry);
     }
 }

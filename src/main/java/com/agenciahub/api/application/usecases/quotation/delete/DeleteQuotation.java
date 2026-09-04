@@ -3,6 +3,7 @@ package com.agenciahub.api.application.usecases.quotation.delete;
 import com.agenciahub.api.application.persistence.entity.Quotation;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,9 @@ public class DeleteQuotation implements DeleteQuotationUseCase {
 
     @Override
     public void execute(UUID id) {
+        UUID agencyId = TenantContext.requireAgencyId();
         Quotation entity = quotationRepository
-                .findById(id)
+                .findByIdAndAgency_Id(id, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));
         quotationRepository.delete(entity);
     }

@@ -87,6 +87,14 @@ class FinancialEntryControllerWebMvcTest {
                         FinancialEntryStatus.CONFIRMED,
                         null,
                         null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
                         null)));
 
         mockMvc.perform(get("/financial-entries"))

@@ -42,13 +42,13 @@ public class CrmCustomer {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = false, length = 320)
+    @Column(length = 320)
     private String email;
 
-    @Column(nullable = false, length = 64)
+    @Column(length = 64)
     private String phone;
 
-    @Column(name = "interest_destination", nullable = false, length = 512)
+    @Column(name = "interest_destination", length = 512)
     private String interestDestination;
 
     @Enumerated(EnumType.STRING)

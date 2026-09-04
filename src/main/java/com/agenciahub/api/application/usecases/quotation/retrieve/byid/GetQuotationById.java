@@ -4,6 +4,7 @@ import com.agenciahub.api.application.usecases.quotation.shared.QuotationRespons
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,9 @@ public class GetQuotationById implements GetQuotationByIdUseCase {
 
     @Override
     public QuotationSummaryResponseDTO execute(UUID id) {
+        UUID agencyId = TenantContext.requireAgencyId();
         return quotationRepository
-                .findById(id)
+                .findByIdAndAgency_Id(id, agencyId)
                 .map(quotationResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));
     }

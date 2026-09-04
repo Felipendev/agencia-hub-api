@@ -5,6 +5,7 @@ import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
 import com.agenciahub.api.application.persistence.repository.FinancialEntryRepository;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,9 @@ public class DeleteCustomer implements DeleteCustomerUseCase {
     @Override
     @Transactional
     public void execute(UUID id) {
+        UUID agencyId = TenantContext.requireAgencyId();
         CrmCustomer entity = customerRepository
-                .findById(id)
+                .findByIdAndAgency_Id(id, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("cliente não encontrado: " + id));
         UUID customerId = entity.getId();
         quotationRepository.deleteAll(quotationRepository.findByCustomer_IdOrderByCreatedAtDesc(customerId));

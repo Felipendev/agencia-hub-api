@@ -24,4 +24,6 @@ public interface SolicitacaoSubmissionRepository extends JpaRepository<Solicitac
     List<SolicitacaoSubmission> findByEmailAndTelefone(String email, String telefone);
 
     List<SolicitacaoSubmission> findByEmailIgnoreCase(String email);
+
+    List<SolicitacaoSubmission> findByEmailIgnoreCaseAndAgency_Id(String email, UUID agencyId);
 }

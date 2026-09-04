@@ -117,6 +117,14 @@ Environment / `application.yml` overrides:
 | `DB_USER`   | `agenciahub` |
 | `DB_PASSWORD` | `agenciahub` |
 
+### Produção: perfil obrigatório
+
+Qualquer deploy real (Railway ou outro host) **precisa** definir `SPRING_PROFILES_ACTIVE=production` (ou `prod`).
+Com esse perfil ativo, `ProductionSecurityConfiguration` recusa subir a aplicação se `JWT_SECRET` ou
+`CORS_ALLOWED_ORIGINS` não estiverem definidos com um valor seguro explícito — evita repetir em silêncio o
+segredo de desenvolvimento ou liberar CORS para qualquer origem. Sem esse perfil, a validação **não roda**;
+confirme a variável no painel do serviço a cada novo ambiente de produção.
+
 ## Project layout (clean / layered)
 
 ```
