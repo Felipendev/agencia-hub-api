@@ -8,6 +8,7 @@ import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRe
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class GetPublicSolicitacaoConfigBySlug implements GetPublicSolicitacaoCon
     private final ObjectMapper objectMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public SolicitacaoConfigSummaryResponseDTO execute(String slug) {
         return repository
                 .findFirstBySlug(slug)

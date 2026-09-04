@@ -7,6 +7,7 @@ import com.agenciahub.api.application.persistence.repository.FinancialEntryRepos
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ public class GetFinancialEntryById implements GetFinancialEntryByIdUseCase {
     private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public FinancialEntrySummaryResponseDTO execute(UUID id) {
         UUID agencyId = TenantContext.requireAgencyId();
         return financialEntryRepository.findByIdAndAgency_Id(id, agencyId)
