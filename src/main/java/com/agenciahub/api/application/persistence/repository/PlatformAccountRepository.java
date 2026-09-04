@@ -36,6 +36,11 @@ public interface PlatformAccountRepository extends JpaRepository<PlatformAccount
 
     List<PlatformAccount> findByAgency_Id(UUID agencyId);
 
+    List<PlatformAccount> findByAgency_IdOrderByNameAsc(UUID agencyId);
+
+    @EntityGraph(attributePaths = "agency")
+    Optional<PlatformAccount> findByIdAndAgency_Id(UUID id, UUID agencyId);
+
     long countByAgency_IdAndAccountKind(UUID agencyId, AccountKind accountKind);
 
     @Modifying

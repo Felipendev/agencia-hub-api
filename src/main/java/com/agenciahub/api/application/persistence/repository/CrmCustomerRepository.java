@@ -54,7 +54,19 @@ public interface CrmCustomerRepository extends JpaRepository<CrmCustomer, UUID> 
 
     Optional<CrmCustomer> findFirstByEmailIgnoreCaseAndAgency_Id(String email, UUID agencyId);
 
+    boolean existsByEmailIgnoreCaseAndAgency_Id(String email, UUID agencyId);
+
+    boolean existsByEmailIgnoreCaseAndAgency_IdAndIdNot(String email, UUID agencyId, UUID id);
+
     @Query("SELECT c FROM CrmCustomer c WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone AND c.agency.id = :agencyId")
     Optional<CrmCustomer> findFirstByNormalizedPhoneAndAgency_Id(
             @Param("phone") String phone, @Param("agencyId") UUID agencyId);
+
+    @Query("SELECT COUNT(c) > 0 FROM CrmCustomer c "
+            + "WHERE FUNCTION('regexp_replace', c.phone, '\\D', '', 'g') = :phone "
+            + "AND c.agency.id = :agencyId AND c.id <> :id")
+    boolean existsByNormalizedPhoneAndAgency_IdAndIdNot(
+            @Param("phone") String phone,
+            @Param("agencyId") UUID agencyId,
+            @Param("id") UUID id);
 }

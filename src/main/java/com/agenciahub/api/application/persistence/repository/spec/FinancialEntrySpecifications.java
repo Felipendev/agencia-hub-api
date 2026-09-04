@@ -18,6 +18,7 @@ public final class FinancialEntrySpecifications {
     }
 
     public static Specification<FinancialEntry> withFilters(
+            UUID agencyId,
             LocalDate from,
             LocalDate to,
             FinancialEntryType type,
@@ -28,6 +29,7 @@ public final class FinancialEntrySpecifications {
 
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("agency").get("id"), agencyId));
 
             if (from != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("entryDate"), from));

@@ -5,8 +5,10 @@ import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.platformaccount.create.CreatePlatformAccountRequestDTO;
 import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.usecases.platformaccount.shared.PublicLinkCodeSupport;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreatePlatformAccount implements CreatePlatformAccountUseCase {
 
     private final PlatformAccountRepository userRepository;
+    private final AgencyRepository agencyRepository;
     private final PasswordEncoder passwordEncoder;
     private final PublicLinkCodeSupport publicLinkCodeSupport;
     private final PlatformAccountResponseMapper userResponseMapper;
@@ -31,7 +34,9 @@ public class CreatePlatformAccount implements CreatePlatformAccountUseCase {
         if (userRepository.existsByEmail(request.email().trim().toLowerCase())) {
             throw new IllegalArgumentException("este e-mail já está cadastrado");
         }
+        java.util.UUID agencyId = TenantContext.requireAgencyId();
         PlatformAccount user = PlatformAccount.builder()
+                .agency(agencyRepository.getReferenceById(agencyId))
                 .name(request.name().strip())
                 .email(request.email().trim().toLowerCase())
                 .publicLinkCode(publicLinkCodeSupport.allocate())

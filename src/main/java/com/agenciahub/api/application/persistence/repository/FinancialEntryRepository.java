@@ -19,6 +19,9 @@ public interface FinancialEntryRepository extends JpaRepository<FinancialEntry, 
     Optional<FinancialEntry> findById(UUID id);
 
     @EntityGraph(attributePaths = "customer")
+    Optional<FinancialEntry> findByIdAndAgency_Id(UUID id, UUID agencyId);
+
+    @EntityGraph(attributePaths = "customer")
     @Override
     java.util.List<FinancialEntry> findAll();
 

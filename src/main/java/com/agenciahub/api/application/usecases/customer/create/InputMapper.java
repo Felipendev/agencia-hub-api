@@ -12,13 +12,15 @@ public final class InputMapper {
     }
 
     public static CrmCustomer toNewEntity(CreateCustomerRequestDTO request) {
-        String email = request.email().strip();
+        String email = blankToNull(request.email());
+        String phone = blankToNull(request.phone());
         String notes = request.notes() != null ? request.notes() : "";
+        String interestDestination = blankToNull(request.interestDestination());
         return CrmCustomer.builder()
                 .name(request.name().strip())
                 .email(email)
-                .phone(request.phone().strip())
-                .interestDestination(request.interestDestination().strip())
+                .phone(phone)
+                .interestDestination(interestDestination)
                 .status(request.status())
                 .notes(notes)
                 .build();
@@ -26,5 +28,13 @@ public final class InputMapper {
 
     public static String normalizedPhone(CreateCustomerRequestDTO request) {
         return CustomerPhoneNormalizer.normalize(request.phone());
+    }
+
+    private static String blankToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.strip();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

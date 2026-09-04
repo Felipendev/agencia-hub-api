@@ -6,6 +6,7 @@ import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAc
 import com.agenciahub.api.application.persistence.entity.PlatformAccount;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,9 @@ public class UpdatePlatformAccount implements UpdatePlatformAccountUseCase {
 
     @Override
     public PlatformAccountSummaryResponseDTO execute(UpdatePlatformAccountCommand command) {
+        java.util.UUID agencyId = TenantContext.requireAgencyId();
         PlatformAccount user = userRepository
-                .findById(command.id())
+                .findByIdAndAgency_Id(command.id(), agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + command.id()));
         UpdatePlatformAccountRequestDTO request = command.request();
 

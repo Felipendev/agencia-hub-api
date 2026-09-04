@@ -17,7 +17,7 @@ public class GetPlatformAccountEntityById implements GetPlatformAccountEntityByI
     @Override
     public PlatformAccount execute(UUID id) {
         return userRepository
-                .findById(id)
+                .findByIdWithAgency(id)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }
 }

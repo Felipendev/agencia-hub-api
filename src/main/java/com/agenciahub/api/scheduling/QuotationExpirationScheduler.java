@@ -14,18 +14,25 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
  * NOTIF-01: marks overdue quotations as EXPIRED and sends notification emails.
  * Also notifies about quotations expiring in 7 days.
+ *
+ * <p>Datas e o disparo do cron usam explicitamente {@link #AGENCY_ZONE} (o produto é
+ * BR-only). Sem isso, {@code LocalDate.now()} usaria o fuso padrão da JVM/host (em Railway,
+ * tipicamente UTC) — nas ~3h finais do dia em Brasília isso já é "amanhã" em UTC, adiantando
+ * em um dia tanto a expiração quanto o alvo do aviso de "vence em 7 dias".</p>
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class QuotationExpirationScheduler {
 
+    private static final ZoneId AGENCY_ZONE = ZoneId.of("America/Sao_Paulo");
     private static final List<QuotationStatus> ACTIVE_STATUSES =
             List.of(QuotationStatus.SENT, QuotationStatus.AWAITING_CLIENT);
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -34,10 +41,10 @@ public class QuotationExpirationScheduler {
     private final PlatformAccountRepository accountRepository;
     private final EmailService emailService;
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 0 8 * * *", zone = "America/Sao_Paulo")
     @Transactional
     public void processExpired() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(AGENCY_ZONE);
         List<Quotation> expired = quotationRepository.findExpired(ACTIVE_STATUSES, today);
         for (Quotation q : expired) {
             q.setStatus(QuotationStatus.EXPIRED);
@@ -49,16 +56,25 @@ public class QuotationExpirationScheduler {
         }
     }
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 0 8 * * *", zone = "America/Sao_Paulo")
     @Transactional
     public void notifyExpiringSoon() {
-        LocalDate in7Days = LocalDate.now().plusDays(7);
+        LocalDate today = LocalDate.now(AGENCY_ZONE);
+        LocalDate in7Days = today.plusDays(7);
         List<Quotation> expiringSoon = quotationRepository.findByStatusInAndValidUntil(ACTIVE_STATUSES, in7Days);
+        int sent = 0;
         for (Quotation q : expiringSoon) {
+            // Não avisar "vence em breve" para uma viagem cujo período já passou —
+            // o titular não tem mais o que decidir sobre uma data que já ocorreu.
+            if (q.getTravelEndDate() != null && q.getTravelEndDate().isBefore(today)) {
+                log.info("Skipping expiring-soon notification for quotation {}: travel already in the past", q.getId());
+                continue;
+            }
             notifyVencendo(q);
+            sent++;
         }
-        if (!expiringSoon.isEmpty()) {
-            log.info("Sent expiring-soon notifications for {} quotations", expiringSoon.size());
+        if (sent > 0) {
+            log.info("Sent expiring-soon notifications for {} quotations", sent);
         }
     }
 

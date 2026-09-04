@@ -22,14 +22,14 @@ public class CreateCustomer implements CreateCustomerUseCase {
     @Override
     @Transactional
     public CustomerSummaryResponseDTO execute(CreateCustomerRequestDTO request) {
-        String email = request.email().strip();
-        String phone = InputMapper.normalizedPhone(request);
+        String email = request.email() == null ? "" : request.email().strip();
+        java.util.UUID agencyId = TenantContext.requireAgencyId();
 
-        if (!email.isEmpty() && customerRepository.existsByEmailIgnoreCase(email)) {
+        if (!email.isEmpty() && customerRepository.existsByEmailIgnoreCaseAndAgency_Id(email, agencyId)) {
             throw new DuplicateCustomerException("e-mail", email);
         }
 
-        Agency agency = agencyRepository.getReferenceById(TenantContext.requireAgencyId());
+        Agency agency = agencyRepository.getReferenceById(agencyId);
         CrmCustomer entity = InputMapper.toNewEntity(request);
         entity.setAgency(agency);
         CrmCustomer saved = customerRepository.save(entity);

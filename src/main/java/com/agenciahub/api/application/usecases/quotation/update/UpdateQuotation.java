@@ -12,6 +12,7 @@ import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +33,9 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
     @Override
     @Transactional
     public QuotationSummaryResponseDTO execute(UpdateQuotationCommand command) {
+        UUID agencyId = TenantContext.requireAgencyId();
         Quotation entity = quotationRepository
-                .findById(command.id())
+                .findByIdAndAgency_Id(command.id(), agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + command.id()));
         UpdateQuotationRequestDTO request = command.request();
         QuotationStatus previousStatus = entity.getStatus();
@@ -42,7 +44,7 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
             entity.setSeller(null);
         } else if (request.sellerId() != null) {
             entity.setSeller(QuotationSupport.resolveSellerInAgency(
-                    userRepository, request.sellerId(), entity.getCustomer().getAgency().getId()));
+                    userRepository, request.sellerId(), agencyId));
         }
         if (request.title() != null) {
             entity.setTitle(request.title().strip());

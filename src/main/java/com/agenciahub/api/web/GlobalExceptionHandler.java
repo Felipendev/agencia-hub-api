@@ -50,12 +50,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMostSpecificCause().getMessage();
-        if (msg != null && msg.contains("idx_customers_email_unique")) {
+        if (msg != null && (msg.contains("idx_customers_email_unique") || msg.contains("idx_customers_agency_email_unique"))) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(new ApiError("já existe um cliente cadastrado com este e-mail", "DUPLICATE_CUSTOMER"));
         }
-        if (msg != null && msg.contains("idx_customers_phone_unique")) {
+        if (msg != null && (msg.contains("idx_customers_phone_unique") || msg.contains("idx_customers_agency_phone_unique"))) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(new ApiError("já existe um cliente cadastrado com este telefone", "DUPLICATE_CUSTOMER"));

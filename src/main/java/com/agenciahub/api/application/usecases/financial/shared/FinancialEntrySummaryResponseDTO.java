@@ -18,6 +18,14 @@ public record FinancialEntrySummaryResponseDTO(
         FinancialEntryStatus status,
         UUID customerId,
         String customerName,
-        String bankAccount
+        UUID supplierId,
+        String supplierName,
+        String bankAccount,
+        String recurrenceFrequency,
+        String notes,
+        BigDecimal saleAmount,
+        BigDecimal supplierCost,
+        BigDecimal commissionAmount,
+        BigDecimal profitAmount
 ) {
 }

@@ -4,6 +4,7 @@ import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAc
 import com.agenciahub.api.application.usecases.platformaccount.shared.PlatformAccountSummaryResponseDTO;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,9 @@ public class GetPlatformAccountById implements GetPlatformAccountByIdUseCase {
 
     @Override
     public PlatformAccountSummaryResponseDTO execute(UUID id) {
+        UUID agencyId = TenantContext.requireAgencyId();
         return userRepository
-                .findById(id)
+                .findByIdAndAgency_Id(id, agencyId)
                 .map(userResponseMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("usuário não encontrado: " + id));
     }

@@ -23,6 +23,9 @@ public interface QuotationRepository
     Optional<Quotation> findById(UUID id);
 
     @EntityGraph(attributePaths = {"customer", "seller", "createdByUser"})
+    Optional<Quotation> findByIdAndAgency_Id(UUID id, UUID agencyId);
+
+    @EntityGraph(attributePaths = {"customer", "seller", "createdByUser"})
     @Override
     List<Quotation> findAll(Specification<Quotation> spec, Sort sort);
 

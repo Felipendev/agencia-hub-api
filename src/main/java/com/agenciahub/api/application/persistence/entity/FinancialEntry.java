@@ -67,8 +67,27 @@ public class FinancialEntry {
     @JoinColumn(name = "customer_id")
     private CrmCustomer customer;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+
     @Column(name = "bank_account", length = 128)
     private String bankAccount;
+
+    @Column(name = "recurrence_frequency", length = 32)
+    private String recurrenceFrequency;
+
+    @Column(columnDefinition = "text")
+    private String notes;
+
+    @Column(name = "sale_amount", precision = 19, scale = 2)
+    private BigDecimal saleAmount;
+
+    @Column(name = "supplier_cost", precision = 19, scale = 2)
+    private BigDecimal supplierCost;
+
+    @Column(name = "commission_amount", precision = 19, scale = 2)
+    private BigDecimal commissionAmount;
 
     @PrePersist
     void prePersist() {

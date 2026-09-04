@@ -74,6 +74,24 @@ class CustomerHttpIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void create_withoutEmailAndPhone_returns201() throws Exception {
+        mockMvc.perform(http.authorized(
+                        mockMvc,
+                        post(IntegrationHttpSupport.API_PREFIX + "/customers")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                          "name": "Cliente sem contato",
+                                          "interestDestination": "Europa",
+                                          "status": "PROSPECT"
+                                        }
+                                        """)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").isEmpty())
+                .andExpect(jsonPath("$.phone").isEmpty());
+    }
+
+    @Test
     void create_invalidEmail_returns400() throws Exception {
         mockMvc.perform(http.authorized(
                         mockMvc,

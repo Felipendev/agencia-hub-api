@@ -1,6 +1,11 @@
 package com.agenciahub.api.integration.http;
 
+import com.agenciahub.api.application.persistence.entity.CrmCustomer;
+import com.agenciahub.api.application.persistence.repository.AgencyRepository;
+import com.agenciahub.api.application.persistence.repository.CrmCustomerRepository;
 import com.agenciahub.api.application.persistence.repository.DataDeletionRequestRepository;
+import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.domain.CustomerStatus;
 import com.agenciahub.api.domain.DataDeletionStatus;
 import com.agenciahub.api.support.AbstractIntegrationTest;
 import com.agenciahub.api.support.IntegrationHttpSupport;
@@ -29,7 +34,32 @@ class DataDeletionIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private DataDeletionRequestRepository repository;
 
+    @Autowired
+    private CrmCustomerRepository customerRepository;
+
+    @Autowired
+    private PlatformAccountRepository accountRepository;
+
+    @Autowired
+    private AgencyRepository agencyRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
+     * Processar uma solicitação só é permitido para uma agência que tenha dado correspondente
+     * ao e-mail (ver TODO-011): cria um cliente da agência do owner de teste com esse e-mail.
+     */
+    private void giveOwnerAgencyDataFor(String email) {
+        UUID ownerAgencyId = accountRepository.findByEmail(IntegrationHttpSupport.SEED_OWNER_EMAIL)
+                .orElseThrow().getAgency().getId();
+        customerRepository.save(CrmCustomer.builder()
+                .agency(agencyRepository.getReferenceById(ownerAgencyId))
+                .name("Titular " + email)
+                .email(email)
+                .status(CustomerStatus.PROSPECT)
+                .notes("")
+                .build());
+    }
 
     @Test
     void create_withValidEmail_returns201AndCreatesRequest() throws Exception {
@@ -92,6 +122,7 @@ class DataDeletionIntegrationTest extends AbstractIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
 
         UUID requestId = UUID.fromString(objectMapper.readTree(createResp).get("requestId").asText());
+        giveOwnerAgencyDataFor(email);
 
         mockMvc.perform(http.authorized(mockMvc,
                         post(PROCESS_URL_TEMPLATE.formatted(requestId))
@@ -116,6 +147,7 @@ class DataDeletionIntegrationTest extends AbstractIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
 
         UUID requestId = UUID.fromString(objectMapper.readTree(createResp).get("requestId").asText());
+        giveOwnerAgencyDataFor(email);
 
         mockMvc.perform(http.authorized(mockMvc,
                         post(PROCESS_URL_TEMPLATE.formatted(requestId))
