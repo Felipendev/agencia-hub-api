@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class ListFinancialEntries implements ListFinancialEntriesUseCase {
     private final FinancialEntryResponseMapper financialEntryResponseMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<FinancialEntrySummaryResponseDTO> execute(ListFinancialEntriesQuery query) {
         java.util.UUID agencyId = TenantContext.requireAgencyId();
         Specification<FinancialEntry> spec = FinancialEntrySpecifications.withFilters(

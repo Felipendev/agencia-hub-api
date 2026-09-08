@@ -7,6 +7,7 @@ import com.agenciahub.api.application.persistence.repository.QuotationRepository
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ public class GetQuotationById implements GetQuotationByIdUseCase {
     private final QuotationResponseMapper quotationResponseMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public QuotationSummaryResponseDTO execute(UUID id) {
         UUID agencyId = TenantContext.requireAgencyId();
         return quotationRepository
