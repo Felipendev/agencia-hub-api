@@ -29,13 +29,14 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
     private final PlatformAccountRepository userRepository;
     private final QuotationResponseMapper quotationResponseMapper;
     private final EmailService emailService;
+    private final com.agenciahub.api.application.usecases.quotation.shared.QuotationApprovalService approvalService;
 
     @Override
     @Transactional
     public QuotationSummaryResponseDTO execute(UpdateQuotationCommand command) {
         UUID agencyId = TenantContext.requireAgencyId();
         Quotation entity = quotationRepository
-                .findByIdAndAgency_Id(command.id(), agencyId)
+                .findForUpdate(command.id(), agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + command.id()));
         UpdateQuotationRequestDTO request = command.request();
         QuotationStatus previousStatus = entity.getStatus();
@@ -89,6 +90,7 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
             entity.setInternalNotes(request.internalNotes().strip());
         }
 
+        approvalService.synchronize(entity);
         QuotationSummaryResponseDTO result = quotationResponseMapper.toResponse(quotationRepository.save(entity));
 
         if (request.status() == QuotationStatus.ACCEPTED && previousStatus != QuotationStatus.ACCEPTED) {

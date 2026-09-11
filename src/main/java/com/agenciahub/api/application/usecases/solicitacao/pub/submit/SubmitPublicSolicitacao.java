@@ -12,6 +12,8 @@ import com.agenciahub.api.application.persistence.repository.ConsentimentoLogRep
 import com.agenciahub.api.application.persistence.repository.SolicitacaoConfigRepository;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
+import com.agenciahub.api.application.persistence.repository.CouponRepository;
+import com.agenciahub.api.application.usecases.coupon.CouponRedemptionService;
 import com.agenciahub.api.application.integrations.email.EmailService;
 import com.agenciahub.api.validation.PhoneValidator;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,6 +37,8 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
     private final EmailService emailService;
     private final SolicitacaoDetalhesValidator detalhesValidator;
     private final ConsentimentoLogRepository consentimentoLogRepository;
+    private final CouponRepository couponRepository;
+    private final CouponRedemptionService couponRedemptionService;
 
     @Value("${app.base-url:http://localhost:3000}")
     private String appBaseUrl;
@@ -78,6 +82,8 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
 
         submission = submissionRepository.save(submission);
 
+        recordCouponRedemptionIfAny(agency, detalhes, submission);
+
         if (consented) {
             consentimentoLogRepository.save(ConsentimentoLog.builder()
                     .submission(submission)
@@ -89,6 +95,25 @@ public class SubmitPublicSolicitacao implements SubmitPublicSolicitacaoUseCase {
 
         dispatchAlertEmail(agency, submission);
         return new PublicSolicitacaoSubmitResponseDTO(true, submission.getId());
+    }
+
+    /**
+     * Registra o resgate do cupom informado (1x por e-mail, ver CouponRedemptionService) quando o cliente
+     * conclui a solicitação com um código válido. Nunca bloqueia o envio — cupom é conveniência, não
+     * requisito para a agência receber o pedido do cliente.
+     */
+    private void recordCouponRedemptionIfAny(Agency agency, JsonNode detalhes, SolicitacaoSubmission submission) {
+        if (agency == null || detalhes == null) return;
+        String code = detalhes.path("cupomCodigo").asText("").trim();
+        String email = submission.getEmail();
+        if (code.isEmpty() || email == null || email.isBlank()) return;
+        try {
+            couponRepository.findByAgency_IdAndCodeIgnoreCase(agency.getId(), code)
+                    .filter(com.agenciahub.api.application.persistence.entity.Coupon::isValidNow)
+                    .ifPresent(coupon -> couponRedemptionService.redeem(coupon.getId(), agency.getId(), email, submission.getId()));
+        } catch (Exception ignored) {
+            // Falha ao registrar resgate não deve impedir o cliente de enviar a solicitação.
+        }
     }
 
     private void dispatchAlertEmail(Agency agency, SolicitacaoSubmission submission) {

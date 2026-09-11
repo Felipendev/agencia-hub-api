@@ -18,6 +18,10 @@ import java.util.UUID;
 public interface QuotationRepository
         extends JpaRepository<Quotation, UUID>, JpaSpecificationExecutor<Quotation> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select q from Quotation q where q.id = :id and q.agency.id = :agencyId")
+    Optional<Quotation> findForUpdate(UUID id, UUID agencyId);
+
     @EntityGraph(attributePaths = {"customer", "seller", "createdByUser"})
     @Override
     Optional<Quotation> findById(UUID id);

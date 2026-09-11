@@ -11,6 +11,11 @@ public record UpdateCustomerRequestDTO(
         String phone,
         String interestDestination,
         CustomerStatus status,
-        String notes
+        String notes,
+        com.fasterxml.jackson.databind.node.ObjectNode profileData
 ) {
+    public UpdateCustomerRequestDTO(String name, String email, String phone,
+            String interestDestination, CustomerStatus status, String notes) {
+        this(name, email, phone, interestDestination, status, notes, null);
+    }
 }

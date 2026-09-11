@@ -14,13 +14,17 @@ import java.util.UUID;
 public class DeleteQuotation implements DeleteQuotationUseCase {
 
     private final QuotationRepository quotationRepository;
+    private final com.agenciahub.api.application.persistence.repository.SaleRepository sales;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void execute(UUID id) {
         UUID agencyId = TenantContext.requireAgencyId();
         Quotation entity = quotationRepository
-                .findByIdAndAgency_Id(id, agencyId)
+                .findForUpdate(id, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));
+        if (!sales.findByQuotation_IdOrderByCreatedAtAsc(id).isEmpty())
+            throw new IllegalArgumentException("Esta cotação possui venda vinculada. Cancele a cotação para preservar o histórico.");
         quotationRepository.delete(entity);
     }
 }

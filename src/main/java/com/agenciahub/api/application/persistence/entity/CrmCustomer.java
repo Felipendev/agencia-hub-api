@@ -61,6 +61,10 @@ public class CrmCustomer {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    @Column(name = "profile_data", columnDefinition = "jsonb")
+    private com.fasterxml.jackson.databind.node.ObjectNode profileData;
+
     @PrePersist
     void prePersist() {
         if (createdAt == null) {

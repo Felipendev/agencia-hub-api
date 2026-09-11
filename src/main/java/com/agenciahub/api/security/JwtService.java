@@ -19,6 +19,9 @@ public class JwtService {
     private final SecretKey key;
     private final long expirationMs;
 
+    @Value("${jwt.max-session-ms:86400000}")
+    private long maxSessionMs = 86400000L;
+
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration-ms}") long expirationMs) {
@@ -45,11 +48,17 @@ public class JwtService {
      */
     public String generate(UUID userId, String accountKind, UUID agencyId, Instant passwordChangedAt) {
         long now = System.currentTimeMillis();
+        return generateSession(userId, accountKind, agencyId, passwordChangedAt, now, now + maxSessionMs);
+    }
+
+    private String generateSession(UUID userId, String accountKind, UUID agencyId,
+                                   Instant passwordChangedAt, long now, long sessionExpiresAt) {
         var builder = Jwts.builder()
                 .subject(userId.toString())
                 .claim("accountKind", accountKind)
                 .issuedAt(new Date(now))
-                .expiration(new Date(now + expirationMs));
+                .claim("session_exp", sessionExpiresAt / 1000)
+                .expiration(new Date(Math.min(now + expirationMs, sessionExpiresAt)));
 
         if (agencyId != null) {
             builder.claim("agency_id", agencyId.toString());
@@ -60,6 +69,23 @@ public class JwtService {
         }
 
         return builder.signWith(key).compact();
+    }
+
+    /** Only a still-valid access token may renew; the original deadline never slides. */
+    public String renew(String token, UUID userId, String accountKind, UUID agencyId, Instant passwordChangedAt) {
+        Claims claims = parse(token);
+        if (!userId.toString().equals(claims.getSubject())) {
+            throw new IllegalArgumentException("Sessão inválida");
+        }
+        long now = System.currentTimeMillis();
+        Number deadline = claims.get("session_exp", Number.class);
+        // Legacy tokens retain their original issued-at boundary.
+        long sessionExpiresAt = deadline == null
+                ? claims.getIssuedAt().getTime() + maxSessionMs : deadline.longValue() * 1000;
+        if (now >= sessionExpiresAt) throw new io.jsonwebtoken.ExpiredJwtException(null, claims, "Sessão encerrada");
+        long renewalWindow = Math.min(300000L, expirationMs / 3);
+        if (claims.getExpiration().getTime() - now > renewalWindow) return token;
+        return generateSession(userId, accountKind, agencyId, passwordChangedAt, now, sessionExpiresAt);
     }
 
     public Claims parse(String token) {

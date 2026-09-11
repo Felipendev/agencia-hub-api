@@ -19,6 +19,7 @@ public final class OutputMapper {
                 c.getInterestDestination(),
                 c.getStatus(),
                 c.getNotes(),
-                c.getCreatedAt());
+                c.getCreatedAt(),
+                c.getProfileData());
     }
 }
