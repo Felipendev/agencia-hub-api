@@ -21,6 +21,7 @@ public class UpdateCustomer implements UpdateCustomerUseCase {
     private final CrmCustomerRepository customerRepository;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public CustomerSummaryResponseDTO execute(UpdateCustomerCommand command) {
         UUID id = command.id();
         UUID agencyId = TenantContext.requireAgencyId();
@@ -61,6 +62,10 @@ public class UpdateCustomer implements UpdateCustomerUseCase {
             entity.setNotes(request.notes());
         }
 
+        if (request.profileData() != null) {
+            entity.setProfileData(com.agenciahub.api.application.usecases.customer.shared.CustomerProfile.merge(
+                    entity.getProfileData(), request.profileData()));
+        }
         return OutputMapper.toSummary(customerRepository.save(entity));
     }
 }

@@ -16,6 +16,7 @@ public class Sale {
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2) private BigDecimal totalAmount;
     @Column(name = "sale_date", nullable = false) private LocalDate saleDate;
     @Column(nullable = false, length = 32) private String status;
+    @Column(name = "approval_managed", nullable = false) private boolean approvalManaged;
     @Column(name = "recurrence_frequency", length = 32) private String recurrenceFrequency;
     @Column(nullable = false, columnDefinition = "text") private String notes;
     @Column(name = "created_at", nullable = false) private Instant createdAt;

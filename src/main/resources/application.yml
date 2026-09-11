@@ -65,6 +65,7 @@ openapi:
 jwt:
   secret: ${JWT_SECRET:agenciahub-dev-secret-change-in-production-min32chars}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}   # 24 h
+  max-session-ms: ${JWT_MAX_SESSION_MS:86400000} # absolute limit, including renewals
 
 # CORS — lista de origens separadas por virgula (ou * para dev)
 cors:

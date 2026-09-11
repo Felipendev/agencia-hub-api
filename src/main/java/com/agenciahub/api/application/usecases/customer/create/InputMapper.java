@@ -22,6 +22,7 @@ public final class InputMapper {
                 .phone(phone)
                 .interestDestination(interestDestination)
                 .status(request.status())
+                .profileData(request.profileData() == null ? null : request.profileData().deepCopy())
                 .notes(notes)
                 .build();
     }

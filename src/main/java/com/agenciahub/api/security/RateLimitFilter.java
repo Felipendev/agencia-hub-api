@@ -86,6 +86,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 perMinute(properties.getPublicTermsGetPerMinute()),
                 "public-terms"));
         rules.add(new Rule(
+                "GET",
+                "/public/coupons/validate",
+                perMinute(20),
+                "public-coupon-validate"));
+        rules.add(new Rule(
                 "POST",
                 "/auth/login",
                 perMinute(properties.getAuthLoginPerMinute()),

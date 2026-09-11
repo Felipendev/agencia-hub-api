@@ -38,6 +38,7 @@ public class CreateQuotation implements CreateQuotationUseCase {
     private final SolicitacaoSubmissionRepository solicitacaoSubmissionRepository;
     private final QuotationResponseMapper quotationResponseMapper;
     private final EmailService emailService;
+    private final com.agenciahub.api.application.usecases.quotation.shared.QuotationApprovalService approvalService;
 
     @Value("${app.base-url:http://localhost:3000}")
     private String appBaseUrl;
@@ -131,6 +132,7 @@ public class CreateQuotation implements CreateQuotationUseCase {
                 .build();
 
         QuotationSummaryResponseDTO response = quotationResponseMapper.toResponse(quotationRepository.save(entity));
+        approvalService.synchronize(entity);
 
         if (publicSub != null) {
             notifyReferralSeller(publicSub, entity);

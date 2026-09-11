@@ -22,6 +22,7 @@ public class SolicitacaoConfigController implements SolicitacaoConfigAgencyAPI {
     private final UpsertSolicitacaoConfigForAgencyUseCase upsertSolicitacaoConfigForAgencyUseCase;
 
     @Override
+    @PreAuthorize("hasAnyRole('AGENCY_OWNER','SALES_AGENT')")
     public SolicitacaoConfigSummaryResponseDTO get() {
         UUID agencyId = TenantContext.requireAgencyId();
         return getOrCreateSolicitacaoConfigForAgencyUseCase.execute(agencyId);

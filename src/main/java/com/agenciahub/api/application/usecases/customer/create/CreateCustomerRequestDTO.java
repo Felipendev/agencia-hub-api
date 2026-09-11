@@ -12,6 +12,11 @@ public record CreateCustomerRequestDTO(
         String phone,
         @Size(max = 512) String interestDestination,
         @NotNull CustomerStatus status,
-        String notes
+        String notes,
+        com.fasterxml.jackson.databind.node.ObjectNode profileData
 ) {
+    public CreateCustomerRequestDTO(String name, String email, String phone,
+            String interestDestination, CustomerStatus status, String notes) {
+        this(name, email, phone, interestDestination, status, notes, null);
+    }
 }
