@@ -26,9 +26,9 @@ public class ListSolicitacaoSubmissionsForAgency implements ListSolicitacaoSubmi
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "agência não identificada");
         }
         var rows = query.accountKind() == AccountKind.SALES_AGENT
-                ? submissionRepository.findByAgency_IdAndReferralSeller_IdOrderByCreatedAtDesc(
+                ? submissionRepository.findUnimportedByAgencyIdAndReferralSellerIdOrderByCreatedAtDesc(
                         query.agencyId(), query.currentUserId())
-                : submissionRepository.findByAgency_IdOrderByCreatedAtDesc(query.agencyId());
+                : submissionRepository.findUnimportedByAgencyIdOrderByCreatedAtDesc(query.agencyId());
 
         return rows.stream()
                 .map(solicitacaoSubmissionResponseMapper::toResponse)

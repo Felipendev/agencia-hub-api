@@ -1,8 +1,10 @@
 package com.agenciahub.api.application.usecases.quotation.delete;
 
 import com.agenciahub.api.application.persistence.entity.Quotation;
+import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
 import com.agenciahub.api.exception.ResourceNotFoundException;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
+import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ public class DeleteQuotation implements DeleteQuotationUseCase {
 
     private final QuotationRepository quotationRepository;
     private final com.agenciahub.api.application.persistence.repository.SaleRepository sales;
+    private final SolicitacaoSubmissionRepository submissionRepository;
 
     @Override
     @org.springframework.transaction.annotation.Transactional
@@ -25,6 +28,11 @@ public class DeleteQuotation implements DeleteQuotationUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + id));
         if (!sales.findByQuotation_IdOrderByCreatedAtAsc(id).isEmpty())
             throw new IllegalArgumentException("Esta cotação possui venda vinculada. Cancele a cotação para preservar o histórico.");
+        SolicitacaoSubmission publicSubmission = entity.getPublicSubmission();
         quotationRepository.delete(entity);
+        quotationRepository.flush();
+        if (publicSubmission != null) {
+            submissionRepository.delete(publicSubmission);
+        }
     }
 }
