@@ -20,6 +20,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -125,5 +127,29 @@ class TripMultiTenancyIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.segments.length()").value(2))
                 .andExpect(jsonPath("$.segments[0].segmentNumber").value(1))
                 .andExpect(jsonPath("$.segments[1].segmentNumber").value(2));
+    }
+
+    @Test
+    void ownerA_uploadsAndListsDocumentsForOwnTrip() throws Exception {
+        String token = http.loginOwner(mockMvc);
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String customerResponse = mockMvc.perform(post(IntegrationHttpSupport.API_PREFIX + "/customers")
+                        .header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Cliente anexo " + suffix + "\",\"status\":\"PROSPECT\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String customerId = http.parse(customerResponse).get("id").asText();
+        String tripResponse = mockMvc.perform(post(IntegrationHttpSupport.API_PREFIX + "/trips")
+                        .header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"customerId\":\"" + customerId + "\",\"serviceType\":\"FLIGHT\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String tripId = http.parse(tripResponse).get("trip").get("id").asText();
+
+        MockMultipartFile file = new MockMultipartFile("file", "voucher.txt", "text/plain", "Voucher do cliente".getBytes());
+        mockMvc.perform(multipart(IntegrationHttpSupport.API_PREFIX + "/attachments/trips/" + tripId)
+                        .file(file).header("Authorization", "Bearer " + token))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.filename").value("voucher.txt"));
+        mockMvc.perform(get(IntegrationHttpSupport.API_PREFIX + "/attachments/trips/" + tripId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].filename").value("voucher.txt"));
     }
 }

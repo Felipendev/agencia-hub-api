@@ -13,6 +13,7 @@ public class AgencyAttachment {
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "agency_id", nullable = false) private Agency agency;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "sale_id") private Sale sale;
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "financial_entry_id") private FinancialEntry financialEntry;
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "trip_id") private Trip trip;
     @Column(name = "original_filename", nullable = false) private String originalFilename;
     @Column(name = "content_type", nullable = false) private String contentType;
     @Column(name = "byte_size", nullable = false) private long byteSize;
