@@ -31,12 +31,23 @@ public class TripController {
    .map(TripSummary::from).toList();
  }
 
+ @GetMapping("/supplier-options") @Transactional public List<SupplierOption> supplierOptions(){
+  UUID agency=TenantContext.requireAgencyId();
+  List<SupplierOption> options=new ArrayList<>();
+  suppliers.findAllByAgency_IdOrderByNameAsc(agency).forEach(s->options.add(new SupplierOption(s.getId(),s.getName(),"supplier","Fornecedor cadastrado")));
+  customers.findAllByAgency_IdOrderByCreatedAtDesc(agency).stream()
+   .filter(this::isSupplierPerson)
+   .sorted(Comparator.comparing(CrmCustomer::getName,String.CASE_INSENSITIVE_ORDER))
+   .forEach(c->options.add(new SupplierOption(c.getId(),c.getName(),"person",personTypes(c))));
+  return options;
+ }
+
  @GetMapping("/{id}") @Transactional public TripDetails get(@PathVariable UUID id){Trip t=find(id);return TripDetails.from(t,segments.findByTrip_IdOrderBySegmentNumberAsc(id));}
 
  @PostMapping @ResponseStatus(HttpStatus.CREATED) @Transactional public TripDetails create(@Valid @RequestBody TripRequest r){
   UUID a=TenantContext.requireAgencyId();
   CrmCustomer customer=customers.findByIdAndAgency_Id(r.customerId(),a).orElseThrow(()->new ResourceNotFoundException("cliente não encontrado"));
-  Supplier supplier=r.supplierId()==null?null:suppliers.findByIdAndAgency_Id(r.supplierId(),a).orElseThrow(()->new ResourceNotFoundException("fornecedor não encontrado"));
+  Supplier supplier=resolveSupplier(r.supplierId(),r.supplierCustomerId(),a);
   Quotation quotation=r.quotationId()==null?null:quotations.findByIdAndAgency_Id(r.quotationId(),a).orElseThrow(()->new ResourceNotFoundException("cotação não encontrada"));
   if(quotation!=null&&!customer.getId().equals(quotation.getCustomer().getId()))throw new IllegalArgumentException("A cotação deve pertencer ao cliente da viagem");
   Sale sale=r.saleId()==null?null:sales.findByIdAndAgency_Id(r.saleId(),a).orElseThrow(()->new ResourceNotFoundException("venda não encontrada"));
@@ -51,7 +62,7 @@ public class TripController {
  @PatchMapping("/{id}") @Transactional public TripDetails update(@PathVariable UUID id,@Valid @RequestBody TripRequest r){
   UUID a=TenantContext.requireAgencyId(); Trip trip=find(id);
   CrmCustomer customer=customers.findByIdAndAgency_Id(r.customerId(),a).orElseThrow(()->new ResourceNotFoundException("cliente não encontrado"));
-  Supplier supplier=r.supplierId()==null?null:suppliers.findByIdAndAgency_Id(r.supplierId(),a).orElseThrow(()->new ResourceNotFoundException("fornecedor não encontrado"));
+  Supplier supplier=resolveSupplier(r.supplierId(),r.supplierCustomerId(),a);
   Quotation quotation=r.quotationId()==null?null:quotations.findByIdAndAgency_Id(r.quotationId(),a).orElseThrow(()->new ResourceNotFoundException("cotação não encontrada"));
   Sale sale=r.saleId()==null?null:sales.findByIdAndAgency_Id(r.saleId(),a).orElseThrow(()->new ResourceNotFoundException("venda não encontrada"));
   trip.setCustomer(customer);trip.setSupplier(supplier);trip.setQuotation(quotation);trip.setSale(sale);
@@ -68,11 +79,29 @@ public class TripController {
 
  private void saveSegments(Trip trip,List<SegmentRequest> list){int n=1;for(SegmentRequest s:safe(list))segments.save(TripSegment.builder().trip(trip).segmentNumber(n++).origin(s.origin()).destination(s.destination()).departureAt(s.departureAt()).arrivalAt(s.arrivalAt()).airline(s.airline()).flightNumber(s.flightNumber()).ticketNumber(s.ticketNumber()).build());}
  private Trip find(UUID id){return trips.findByIdAndAgency_Id(id,TenantContext.requireAgencyId()).orElseThrow(()->new ResourceNotFoundException("viagem não encontrada"));}
+ private Supplier resolveSupplier(UUID supplierId,UUID supplierCustomerId,UUID agencyId){
+  if(supplierCustomerId!=null){
+   CrmCustomer person=customers.findByIdAndAgency_Id(supplierCustomerId,agencyId).orElseThrow(()->new ResourceNotFoundException("pessoa fornecedora não encontrada"));
+   if(!isSupplierPerson(person))throw new IllegalArgumentException("A pessoa selecionada não está marcada como fornecedor.");
+   return suppliers.findFirstByAgency_IdAndNameIgnoreCase(agencyId,person.getName()).orElseGet(()->suppliers.save(Supplier.builder().agency(agencies.getReferenceById(agencyId)).name(person.getName()).contactName(person.getName()).email(blank(person.getEmail())).phone(blank(person.getPhone())).notes("Criado a partir da ficha de pessoa fornecedora.").build()));
+  }
+  return supplierId==null?null:suppliers.findByIdAndAgency_Id(supplierId,agencyId).orElseThrow(()->new ResourceNotFoundException("fornecedor não encontrado"));
+ }
+ private boolean isSupplierPerson(CrmCustomer customer){return customer.getProfileData()!=null&&customer.getProfileData().path("tipoFornecedor").asBoolean(false);}
+ private String personTypes(CrmCustomer customer){
+  List<String> types=new ArrayList<>(); var data=customer.getProfileData();
+  if(data.path("tipoCliente").asBoolean(false))types.add("Cliente");
+  if(data.path("tipoPassageiro").asBoolean(false))types.add("Passageiro");
+  if(data.path("tipoFornecedor").asBoolean(false))types.add("Fornecedor");
+  if(data.path("tipoRepresentante").asBoolean(false))types.add("Representante");
+  return String.join(" · ",types);
+ }
  private static <T> List<T> safe(List<T> list){return list==null?List.of():list;}
  private static String blank(String v){return v==null||v.isBlank()?null:v.strip();}
 
  public record SegmentRequest(String origin,String destination,Instant departureAt,Instant arrivalAt,String airline,String flightNumber,String ticketNumber){}
- public record TripRequest(@NotNull UUID customerId,UUID supplierId,UUID quotationId,UUID saleId,@NotNull String serviceType,String bookingLocator,String airline,String status,LocalDate saleDate,LocalDate travelStartDate,LocalDate travelEndDate,String notes,List<@Valid SegmentRequest> segments){}
+ public record TripRequest(@NotNull UUID customerId,UUID supplierId,UUID supplierCustomerId,UUID quotationId,UUID saleId,@NotNull String serviceType,String bookingLocator,String airline,String status,LocalDate saleDate,LocalDate travelStartDate,LocalDate travelEndDate,String notes,List<@Valid SegmentRequest> segments){}
+ public record SupplierOption(UUID id,String name,String source,String typeLabel){}
  public record SegmentResponse(UUID id,Integer segmentNumber,String origin,String destination,Instant departureAt,Instant arrivalAt,String airline,String flightNumber,String ticketNumber){static SegmentResponse from(TripSegment s){return new SegmentResponse(s.getId(),s.getSegmentNumber(),s.getOrigin(),s.getDestination(),s.getDepartureAt(),s.getArrivalAt(),s.getAirline(),s.getFlightNumber(),s.getTicketNumber());}}
  public record TripSummary(UUID id,UUID customerId,String customerName,String serviceType,String bookingLocator,String airline,String status,LocalDate travelStartDate,LocalDate travelEndDate){static TripSummary from(Trip t){return new TripSummary(t.getId(),t.getCustomer().getId(),t.getCustomer().getName(),t.getServiceType(),t.getBookingLocator(),t.getAirline(),t.getStatus(),t.getTravelStartDate(),t.getTravelEndDate());}}
  public record TripDetails(TripSummary trip,UUID supplierId,String supplierName,UUID quotationId,UUID saleId,LocalDate saleDate,String notes,List<SegmentResponse> segments){static TripDetails from(Trip t,List<TripSegment> s){return new TripDetails(TripSummary.from(t),t.getSupplier()==null?null:t.getSupplier().getId(),t.getSupplier()==null?null:t.getSupplier().getName(),t.getQuotation()==null?null:t.getQuotation().getId(),t.getSale()==null?null:t.getSale().getId(),t.getSaleDate(),t.getNotes(),s.stream().map(SegmentResponse::from).toList());}}

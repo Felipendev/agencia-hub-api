@@ -17,9 +17,10 @@ public class AgencyAttachment {
     @Column(name = "original_filename", nullable = false) private String originalFilename;
     @Column(name = "content_type", nullable = false) private String contentType;
     @Column(name = "byte_size", nullable = false) private long byteSize;
+    @Column(nullable = false, length = 1000) private String description;
     // Hibernate 6 mapeia byte[] para OID (large object) por padrão no dialeto Postgres;
     // a coluna é BYTEA (migração V36), então força VARBINARY para casar com o schema real.
     @JdbcTypeCode(SqlTypes.VARBINARY) @Column(nullable = false) private byte[] content;
     @Column(name = "created_at", nullable = false) private Instant createdAt;
-    @PrePersist void created() { if (createdAt == null) createdAt = Instant.now(); }
+    @PrePersist void created() { if (createdAt == null) createdAt = Instant.now(); if (description == null) description = ""; }
 }

@@ -9,5 +9,6 @@ import java.util.UUID;
 public interface SupplierRepository extends JpaRepository<Supplier, UUID> {
     List<Supplier> findAllByAgency_IdOrderByNameAsc(UUID agencyId);
     Optional<Supplier> findByIdAndAgency_Id(UUID id, UUID agencyId);
+    Optional<Supplier> findFirstByAgency_IdAndNameIgnoreCase(UUID agencyId, String name);
     boolean existsByAgency_IdAndNameIgnoreCase(UUID agencyId, String name);
 }
