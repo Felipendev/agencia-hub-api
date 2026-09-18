@@ -44,6 +44,15 @@ spring:
       mail.smtp.timeout: ${SMTP_READ_TIMEOUT_MS:15000}
       mail.smtp.writetimeout: ${SMTP_WRITE_TIMEOUT_MS:15000}
 
+flight-import:
+  api-key: ${FLIGHT_IMPORT_API_KEY:}
+  model: ${FLIGHT_IMPORT_MODEL:gemini-3.1-flash-lite}
+  monthly-requests: ${FLIGHT_IMPORT_MONTHLY_REQUESTS:1000}
+  monthly-budget-usd: ${FLIGHT_IMPORT_MONTHLY_BUDGET_USD:5.00}
+  reservation-usd: ${FLIGHT_IMPORT_RESERVATION_USD:0.10}
+  input-usd-per-million: ${FLIGHT_IMPORT_INPUT_USD_PER_MILLION:0.25}
+  output-usd-per-million: ${FLIGHT_IMPORT_OUTPUT_USD_PER_MILLION:1.50}
+
 springdoc:
   api-docs:
     path: /v3/api-docs

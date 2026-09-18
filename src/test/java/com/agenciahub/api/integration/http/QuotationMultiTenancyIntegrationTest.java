@@ -64,6 +64,8 @@ class QuotationMultiTenancyIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void ownerA_cannotReadUpdateOrDeleteAgencyBQuotation() throws Exception {
+        mockMvc.perform(http.authorized(mockMvc, get(IntegrationHttpSupport.API_PREFIX + "/quotations/" + agencyBQuotationId + "/flight-history")))
+                .andExpect(status().isNotFound());
         mockMvc.perform(http.authorized(mockMvc, get(IntegrationHttpSupport.API_PREFIX + "/quotations/" + agencyBQuotationId)))
                 .andExpect(status().isNotFound());
         mockMvc.perform(http.authorized(mockMvc, patch(IntegrationHttpSupport.API_PREFIX + "/quotations/" + agencyBQuotationId)

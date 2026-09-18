@@ -35,6 +35,11 @@ public record QuotationSummaryResponseDTO(
         QuotationCreationSource creationSource,
         UUID createdByUserId,
         String createdByUserName,
-        UUID publicSubmissionId
+        UUID publicSubmissionId,
+        JsonNode flightPlan
 ) {
+    /** Compatibility constructor for callers without a flight plan. */
+    public QuotationSummaryResponseDTO(UUID id, UUID customerId, String customerName, UUID sellerId, String sellerName, String title, String destination, String description, BigDecimal totalAmount, String currency, QuotationStatus status, LocalDate validUntil, LocalDate travelStartDate, LocalDate travelEndDate, JsonNode details, List<String> tags, boolean priority, String assignee, String internalNotes, Instant createdAt, Instant updatedAt, QuotationCreationSource creationSource, UUID createdByUserId, String createdByUserName, UUID publicSubmissionId) {
+        this(id, customerId, customerName, sellerId, sellerName, title, destination, description, totalAmount, currency, status, validUntil, travelStartDate, travelEndDate, details, tags, priority, assignee, internalNotes, createdAt, updatedAt, creationSource, createdByUserId, createdByUserName, publicSubmissionId, null);
+    }
 }

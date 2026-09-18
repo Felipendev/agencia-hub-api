@@ -31,6 +31,8 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
     private final EmailService emailService;
     private final com.agenciahub.api.application.usecases.quotation.shared.QuotationApprovalService approvalService;
 
+    private final com.agenciahub.api.application.services.flights.QuotationFlightPlans flightPlans;
+
     @Override
     @Transactional
     public QuotationSummaryResponseDTO execute(UpdateQuotationCommand command) {
@@ -40,6 +42,7 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
                 .orElseThrow(() -> new ResourceNotFoundException("cotação não encontrada: " + command.id()));
         UpdateQuotationRequestDTO request = command.request();
         QuotationStatus previousStatus = entity.getStatus();
+        java.math.BigDecimal previousAmount = entity.getTotalAmount();
 
         if (Boolean.TRUE.equals(request.unsetSeller())) {
             entity.setSeller(null);
@@ -90,8 +93,18 @@ public class UpdateQuotation implements UpdateQuotationUseCase {
             entity.setInternalNotes(request.internalNotes().strip());
         }
 
+        if (request.totalAmount() != null && request.flightPlan() == null && entity.getFlightPlan() != null
+                && request.totalAmount().compareTo(previousAmount) != 0) {
+            throw new IllegalArgumentException("Use a calculadora para alterar o valor de uma cotação com voos calculados.");
+        }
+        if (entity.getFlightPlan() != null && !"BRL".equals(entity.getCurrency())) {
+            throw new IllegalArgumentException("Cotações com cálculo de milhas usam BRL.");
+        }
+        flightPlans.apply(entity, request.flightPlan());
         approvalService.synchronize(entity);
         QuotationSummaryResponseDTO result = quotationResponseMapper.toResponse(quotationRepository.save(entity));
+
+        if (request.flightPlan() != null) flightPlans.record(entity);
 
         if (request.status() == QuotationStatus.ACCEPTED && previousStatus != QuotationStatus.ACCEPTED) {
             notifyQuotationAccepted(entity);

@@ -40,6 +40,8 @@ public class CreateQuotation implements CreateQuotationUseCase {
     private final EmailService emailService;
     private final com.agenciahub.api.application.usecases.quotation.shared.QuotationApprovalService approvalService;
 
+    private final com.agenciahub.api.application.services.flights.QuotationFlightPlans flightPlans;
+
     @Value("${app.base-url:http://localhost:3000}")
     private String appBaseUrl;
 
@@ -68,7 +70,7 @@ public class CreateQuotation implements CreateQuotationUseCase {
                     request.assignee(),
                     request.internalNotes(),
                     request.creationSource(),
-                    request.publicSubmissionId());
+                    request.publicSubmissionId(), request.flightPlan());
         }
 
         final CreateQuotationRequestDTO effective = request;
@@ -131,7 +133,9 @@ public class CreateQuotation implements CreateQuotationUseCase {
                 .publicSubmission(publicSub)
                 .build();
 
-        QuotationSummaryResponseDTO response = quotationResponseMapper.toResponse(quotationRepository.save(entity));
+        flightPlans.apply(entity, effective.flightPlan());
+        QuotationSummaryResponseDTO response = quotationResponseMapper.toResponse(quotationRepository.saveAndFlush(entity));
+        if (effective.flightPlan() != null) flightPlans.record(entity);
         approvalService.synchronize(entity);
 
         if (publicSub != null) {

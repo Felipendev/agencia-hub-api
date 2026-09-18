@@ -174,6 +174,41 @@ class QuotationHttpIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void flightPlanPersistsAndRecalculationKeepsPreviousSnapshot() throws Exception {
+        UUID customerId = createCustomerId();
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var plan = mapper.readTree("""
+                {"selectedOptionId":"flight","options":[{"id":"flight","nome":"Voo","cia":"LATAM","qtdPessoas":1,
+                  "segmentos":[{"origin":"BPS","destination":"REC","departureDate":"2026-09-20","arrivalDate":"2026-09-20",
+                    "departureTime":"17:25","arrivalTime":"23:20","durationMinutes":355,"stops":1}],
+                  "calculo":{"tipo":"so_ida","milhasIda":20000,"milhasVolta":0,"custoPorMilheiro":25,"taxas":50,
+                    "taxasAdicionais":0,"valorMala":0,"qtdMalas":0,"revisado":true,
+                    "lucroConfig":{"usarPct":true,"pct":10,"usarFixo":false,"fixo":0}}}]}
+                """);
+        var body = mapper.createObjectNode().put("customerId", customerId.toString()).put("title", "Importada")
+                .put("destination", "Recife").put("totalAmount", 1).put("validUntil", "2026-12-31");
+        body.set("flightPlan", plan);
+        String created = mockMvc.perform(http.authorized(mockMvc, post("/quotations")
+                .contentType(MediaType.APPLICATION_JSON).content(body.toString())))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.totalAmount").value(605.0))
+                .andReturn().getResponse().getContentAsString();
+        String id = http.parse(created).path("id").asText();
+        mockMvc.perform(http.authorized(mockMvc, get("/quotations/" + id)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.flightPlan.options[0].calculo.milhasIda").value(20000));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) plan.path("options").get(0).path("calculo")).put("taxasAdicionais", 10);
+        var patchBody = mapper.createObjectNode(); patchBody.set("flightPlan", plan);
+        mockMvc.perform(http.authorized(mockMvc, patch("/quotations/" + id)
+                .contentType(MediaType.APPLICATION_JSON).content(patchBody.toString())))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalAmount").value(616.0));
+        mockMvc.perform(http.authorized(mockMvc, get("/quotations/" + id + "/flight-history")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[1].options[0].precoTotal").value(605.0));
+        mockMvc.perform(http.authorized(mockMvc, patch("/quotations/" + id)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"totalAmount\":1}")))
+                .andExpect(status().isBadRequest());
+    }
+
     private UUID createCustomerId() throws Exception {
         String unique = UUID.randomUUID().toString().replace("-", "").substring(0, 9);
         String email = "customer-" + unique + "@quotation.test";

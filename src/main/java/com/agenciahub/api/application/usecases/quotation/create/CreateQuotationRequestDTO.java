@@ -39,6 +39,11 @@ public record CreateQuotationRequestDTO(
         @Schema(description = "INTERNAL (default) or PUBLIC_FORM when imported from public link.")
         QuotationCreationSource creationSource,
         @Schema(description = "ID of solicitacao_submissions row when created from public form import.")
-        UUID publicSubmissionId
+        UUID publicSubmissionId,
+        JsonNode flightPlan
 ) {
+    /** Compatibility constructor for callers without a flight plan. */
+    public CreateQuotationRequestDTO(UUID customerId, UUID sellerId, String title, String destination, String description, BigDecimal totalAmount, String currency, QuotationStatus status, LocalDate validUntil, LocalDate travelStartDate, LocalDate travelEndDate, JsonNode details, List<String> tags, Boolean priority, String assignee, String internalNotes, QuotationCreationSource creationSource, UUID publicSubmissionId) {
+        this(customerId, sellerId, title, destination, description, totalAmount, currency, status, validUntil, travelStartDate, travelEndDate, details, tags, priority, assignee, internalNotes, creationSource, publicSubmissionId, null);
+    }
 }

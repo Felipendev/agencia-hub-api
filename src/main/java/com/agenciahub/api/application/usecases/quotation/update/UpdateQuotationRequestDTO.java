@@ -27,6 +27,11 @@ public record UpdateQuotationRequestDTO(
         Boolean priority,
         String assignee,
         String internalNotes,
-        Boolean unsetSeller
+        Boolean unsetSeller,
+        JsonNode flightPlan
 ) {
+    /** Compatibility constructor for callers without a flight plan. */
+    public UpdateQuotationRequestDTO(UUID sellerId, String title, String destination, String description, BigDecimal totalAmount, String currency, QuotationStatus status, LocalDate validUntil, LocalDate travelStartDate, LocalDate travelEndDate, JsonNode details, List<String> tags, Boolean priority, String assignee, String internalNotes, Boolean unsetSeller) {
+        this(sellerId, title, destination, description, totalAmount, currency, status, validUntil, travelStartDate, travelEndDate, details, tags, priority, assignee, internalNotes, unsetSeller, null);
+    }
 }

@@ -46,6 +46,6 @@ public class QuotationResponseMapper {
                 src,
                 createdBy != null ? createdBy.getId() : null,
                 createdBy != null ? createdBy.getName() : null,
-                pubId);
+                pubId, q.getFlightPlan());
     }
 }

@@ -104,6 +104,11 @@ public class Quotation {
     @Column(name = "details_json")
     private JsonNode detailsJson;
 
+    /** Authenticated agency-only calculation and commercial flight snapshot. Never expose publicly. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "flight_plan")
+    private JsonNode flightPlan;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false)
     private List<String> tags;
