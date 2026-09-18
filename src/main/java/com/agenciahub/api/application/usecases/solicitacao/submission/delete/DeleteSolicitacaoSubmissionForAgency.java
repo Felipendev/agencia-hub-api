@@ -1,6 +1,8 @@
 package com.agenciahub.api.application.usecases.solicitacao.submission.delete;
 
 import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.domain.SolicitacaoSubmissionStatus;
+import java.time.Instant;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,7 @@ public class DeleteSolicitacaoSubmissionForAgency implements DeleteSolicitacaoSu
         var row = submissionRepository
                 .findByIdAndAgency_Id(command.submissionId(), command.agencyId())
                 .orElseThrow(() -> new ResourceNotFoundException("submissão não encontrada: " + command.submissionId()));
-        submissionRepository.delete(row);
+        row.setStatus(SolicitacaoSubmissionStatus.DELETED);
+        row.setStatusUpdatedAt(Instant.now());
     }
 }

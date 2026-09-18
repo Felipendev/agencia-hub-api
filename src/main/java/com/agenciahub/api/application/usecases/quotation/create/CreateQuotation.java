@@ -22,8 +22,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -89,11 +92,12 @@ public class CreateQuotation implements CreateQuotationUseCase {
         SolicitacaoSubmission publicSub = null;
         if (effective.publicSubmissionId() != null) {
             publicSub = solicitacaoSubmissionRepository
-                    .findById(effective.publicSubmissionId())
+                    .findWithLockByIdAndAgency_Id(effective.publicSubmissionId(), agencyId)
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "submissão pública não encontrada: " + effective.publicSubmissionId()));
-            if (publicSub.getAgency() == null || !publicSub.getAgency().getId().equals(agencyId)) {
-                throw new IllegalArgumentException("submissão pública não pertence a esta agência.");
+            if (publicSub.getStatus() != com.agenciahub.api.domain.SolicitacaoSubmissionStatus.PENDING) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Esta solicitação já foi tratada e não pode gerar outra cotação.");
             }
         }
 
@@ -135,6 +139,11 @@ public class CreateQuotation implements CreateQuotationUseCase {
 
         flightPlans.apply(entity, effective.flightPlan());
         QuotationSummaryResponseDTO response = quotationResponseMapper.toResponse(quotationRepository.saveAndFlush(entity));
+        if (publicSub != null) {
+            publicSub.setStatus(com.agenciahub.api.domain.SolicitacaoSubmissionStatus.CONVERTED);
+            publicSub.setConvertedAt(Instant.now());
+            publicSub.setStatusUpdatedAt(Instant.now());
+        }
         if (effective.flightPlan() != null) flightPlans.record(entity);
         approvalService.synchronize(entity);
 

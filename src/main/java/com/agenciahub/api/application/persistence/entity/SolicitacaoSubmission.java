@@ -21,6 +21,9 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
+import com.agenciahub.api.domain.SolicitacaoSubmissionStatus;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Table(name = "solicitacao_submissions")
@@ -65,6 +68,16 @@ public class SolicitacaoSubmission {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 16)
+    private SolicitacaoSubmissionStatus status;
+
+    @Column(name = "status_updated_at", nullable = false)
+    private Instant statusUpdatedAt;
+
+    @Column(name = "converted_at")
+    private Instant convertedAt;
+
     /** Consentimento LGPD — true quando o cliente autorizou o uso dos dados no formulário público. */
     @Column(name = "consentimento_lgpd", nullable = false)
     private boolean consentimentoLgpd;
@@ -89,5 +102,7 @@ public class SolicitacaoSubmission {
         if (email == null) {
             email = "";
         }
+        if (status == null) status = SolicitacaoSubmissionStatus.PENDING;
+        if (statusUpdatedAt == null) statusUpdatedAt = Instant.now();
     }
 }

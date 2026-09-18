@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
+import com.agenciahub.api.application.usecases.solicitacao.submission.update.UpdateSolicitacaoSubmissionStatusRequestDTO;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,4 +33,9 @@ public interface SolicitacaoSubmissionAgencyAPI {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Remove submissão", description = "Após importar na cotação ou descartar o lead.")
     void delete(@Parameter(description = "id da submissão") @PathVariable UUID id);
+
+    @PatchMapping("/{id}/status")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Atualiza estado", description = "Arquiva, restaura ou move uma solicitação para a lixeira.")
+    void updateStatus(@PathVariable UUID id, @Valid @RequestBody UpdateSolicitacaoSubmissionStatusRequestDTO request);
 }

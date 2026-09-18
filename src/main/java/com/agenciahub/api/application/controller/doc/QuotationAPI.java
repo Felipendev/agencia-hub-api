@@ -40,8 +40,8 @@ public interface QuotationAPI {
     @Operation(
             summary = "Lista cotações com filtros opcionais",
             description = """
-                    - **AGENCY_OWNER**: vê todas as cotações da agência (filtros aplicam-se normalmente).
-                    - **SALES_AGENT**: resultados restritos às cotações em que ele é o vendedor (`seller`), independentemente dos filtros de texto.""")
+                    - **AGENCY_OWNER** e **SALES_AGENT**: veem todas as cotações da própria agência; os filtros aplicam-se normalmente.
+                    - A atribuição de vendedor é um filtro comercial, não uma regra de visibilidade.""")
     List<QuotationSummaryResponseDTO> list(
             @RequestParam(required = false) UUID customerId,
             @RequestParam(required = false) QuotationStatus status,

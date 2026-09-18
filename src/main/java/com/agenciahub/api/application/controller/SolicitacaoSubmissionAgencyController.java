@@ -6,6 +6,8 @@ import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.l
 import com.agenciahub.api.application.usecases.solicitacao.submission.retrieve.list.ListSubmissionsQuery;
 import com.agenciahub.api.application.controller.doc.SolicitacaoSubmissionAgencyAPI;
 import com.agenciahub.api.application.usecases.solicitacao.shared.SolicitacaoSubmissionSummaryResponseDTO;
+import com.agenciahub.api.application.usecases.solicitacao.submission.update.UpdateSolicitacaoSubmissionStatus;
+import com.agenciahub.api.application.usecases.solicitacao.submission.update.UpdateSolicitacaoSubmissionStatusRequestDTO;
 import com.agenciahub.api.security.SecurityContextUsers;
 import com.agenciahub.api.security.TenantContext;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class SolicitacaoSubmissionAgencyController implements SolicitacaoSubmiss
 
     private final ListSolicitacaoSubmissionsForAgencyUseCase listSolicitacaoSubmissionsForAgencyUseCase;
     private final DeleteSolicitacaoSubmissionForAgencyUseCase deleteSolicitacaoSubmissionForAgencyUseCase;
+    private final UpdateSolicitacaoSubmissionStatus updateSolicitacaoSubmissionStatus;
 
     @Override
     public List<SolicitacaoSubmissionSummaryResponseDTO> list() {
@@ -36,5 +39,10 @@ public class SolicitacaoSubmissionAgencyController implements SolicitacaoSubmiss
         UUID agencyId = TenantContext.requireAgencyId();
         deleteSolicitacaoSubmissionForAgencyUseCase.execute(
                 new DeleteSolicitacaoSubmissionCommand(id, agencyId));
+    }
+
+    @Override
+    public void updateStatus(UUID id, UpdateSolicitacaoSubmissionStatusRequestDTO request) {
+        updateSolicitacaoSubmissionStatus.execute(id, TenantContext.requireAgencyId(), request.status());
     }
 }

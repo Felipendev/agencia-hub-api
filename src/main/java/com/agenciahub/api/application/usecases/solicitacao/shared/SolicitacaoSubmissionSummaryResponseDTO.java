@@ -15,6 +15,16 @@ public record SolicitacaoSubmissionSummaryResponseDTO(
         UUID referralSellerId,
         String referralSellerName,
         JsonNode detalhes,
-        String observacoes
+        String observacoes,
+        String status,
+        Instant statusUpdatedAt,
+        Instant convertedAt
 ) {
+    /** Compatibilidade com consumidores que ainda não exibem o ciclo de vida. */
+    public SolicitacaoSubmissionSummaryResponseDTO(
+            UUID id, String slug, Instant createdAt, String nome, String email, String telefone,
+            UUID referralSellerId, String referralSellerName, JsonNode detalhes, String observacoes) {
+        this(id, slug, createdAt, nome, email, telefone, referralSellerId, referralSellerName,
+                detalhes, observacoes, "PENDING", createdAt, null);
+    }
 }

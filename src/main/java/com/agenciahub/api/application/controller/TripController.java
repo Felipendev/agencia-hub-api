@@ -14,20 +14,23 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.Comparator;
 
 /** Viagens/vendas emitidas: localizador, itinerário e vínculo opcional com cliente, fornecedor, cotação e venda. */
 @RestController @RequestMapping("/trips") @PreAuthorize("hasAnyRole('AGENCY_OWNER','SALES_AGENT')") @RequiredArgsConstructor
 public class TripController {
  private final TripRepository trips; private final TripSegmentRepository segments; private final AgencyRepository agencies; private final CrmCustomerRepository customers; private final SupplierRepository suppliers; private final QuotationRepository quotations; private final SaleRepository sales;
 
- @GetMapping @Transactional public List<TripSummary> list(@RequestParam(required=false) UUID customerId,@RequestParam(required=false) String locator,@RequestParam(required=false) String status,@RequestParam(required=false) LocalDate from,@RequestParam(required=false) LocalDate to){
+ @GetMapping @Transactional public List<TripSummary> list(@RequestParam(required=false) UUID customerId,@RequestParam(required=false) String locator,@RequestParam(required=false) String status,@RequestParam(required=false) LocalDate from,@RequestParam(required=false) LocalDate to,@RequestParam(defaultValue="TRAVEL_START_ASC") TripSort sort){
   UUID a=TenantContext.requireAgencyId();
-  List<Trip> all=customerId==null?trips.findAllByAgency_IdOrderByTravelStartDateDesc(a):trips.findAllByAgency_IdAndCustomer_IdOrderByTravelStartDateDesc(a,customerId);
+  List<Trip> all=customerId==null?trips.findAllByAgency_Id(a):trips.findAllByAgency_IdAndCustomer_Id(a,customerId);
   return all.stream()
    .filter(t->locator==null||locator.isBlank()||(t.getBookingLocator()!=null&&t.getBookingLocator().toLowerCase().contains(locator.toLowerCase())))
    .filter(t->status==null||status.isBlank()||status.equalsIgnoreCase(t.getStatus()))
-   .filter(t->from==null||t.getTravelStartDate()==null||!t.getTravelStartDate().isBefore(from))
-   .filter(t->to==null||t.getTravelStartDate()==null||!t.getTravelStartDate().isAfter(to))
+   // Quando há filtro de período, uma viagem sem partida não pertence ao resultado.
+   .filter(t->from==null||(t.getTravelStartDate()!=null&&!t.getTravelStartDate().isBefore(from)))
+   .filter(t->to==null||(t.getTravelStartDate()!=null&&!t.getTravelStartDate().isAfter(to)))
+   .sorted(sort.comparator())
    .map(TripSummary::from).toList();
  }
 
@@ -75,7 +78,7 @@ public class TripController {
   return TripDetails.from(trip,segments.findByTrip_IdOrderBySegmentNumberAsc(id));
  }
 
- @DeleteMapping("/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) @PreAuthorize("hasRole('AGENCY_OWNER')") public void delete(@PathVariable UUID id){trips.delete(find(id));}
+ @DeleteMapping("/{id}") @ResponseStatus(HttpStatus.NO_CONTENT) public void delete(@PathVariable UUID id){trips.delete(find(id));}
 
  private void saveSegments(Trip trip,List<SegmentRequest> list){int n=1;for(SegmentRequest s:safe(list))segments.save(TripSegment.builder().trip(trip).segmentNumber(n++).origin(s.origin()).destination(s.destination()).departureAt(s.departureAt()).arrivalAt(s.arrivalAt()).airline(s.airline()).flightNumber(s.flightNumber()).ticketNumber(s.ticketNumber()).build());}
  private Trip find(UUID id){return trips.findByIdAndAgency_Id(id,TenantContext.requireAgencyId()).orElseThrow(()->new ResourceNotFoundException("viagem não encontrada"));}
@@ -103,6 +106,14 @@ public class TripController {
  public record TripRequest(@NotNull UUID customerId,UUID supplierId,UUID supplierCustomerId,UUID quotationId,UUID saleId,@NotNull String serviceType,String bookingLocator,String airline,String status,LocalDate saleDate,LocalDate travelStartDate,LocalDate travelEndDate,String notes,List<@Valid SegmentRequest> segments){}
  public record SupplierOption(UUID id,String name,String source,String typeLabel){}
  public record SegmentResponse(UUID id,Integer segmentNumber,String origin,String destination,Instant departureAt,Instant arrivalAt,String airline,String flightNumber,String ticketNumber){static SegmentResponse from(TripSegment s){return new SegmentResponse(s.getId(),s.getSegmentNumber(),s.getOrigin(),s.getDestination(),s.getDepartureAt(),s.getArrivalAt(),s.getAirline(),s.getFlightNumber(),s.getTicketNumber());}}
- public record TripSummary(UUID id,UUID customerId,String customerName,String serviceType,String bookingLocator,String airline,String status,LocalDate travelStartDate,LocalDate travelEndDate){static TripSummary from(Trip t){return new TripSummary(t.getId(),t.getCustomer().getId(),t.getCustomer().getName(),t.getServiceType(),t.getBookingLocator(),t.getAirline(),t.getStatus(),t.getTravelStartDate(),t.getTravelEndDate());}}
+ public enum TripSort {
+  TRAVEL_START_ASC(Comparator.comparing(Trip::getTravelStartDate, Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(Trip::getId)),
+  TRAVEL_START_DESC(Comparator.comparing(Trip::getTravelStartDate, Comparator.nullsLast(Comparator.reverseOrder())).thenComparing(Trip::getId)),
+  CREATED_AT_DESC(Comparator.comparing(Trip::getCreatedAt, Comparator.reverseOrder()).thenComparing(Trip::getId));
+  private final Comparator<Trip> comparator;
+  TripSort(Comparator<Trip> comparator){this.comparator=comparator;}
+  Comparator<Trip> comparator(){return comparator;}
+ }
+ public record TripSummary(UUID id,UUID customerId,String customerName,String serviceType,String bookingLocator,String airline,String status,LocalDate travelStartDate,LocalDate travelEndDate,Instant createdAt){static TripSummary from(Trip t){return new TripSummary(t.getId(),t.getCustomer().getId(),t.getCustomer().getName(),t.getServiceType(),t.getBookingLocator(),t.getAirline(),t.getStatus(),t.getTravelStartDate(),t.getTravelEndDate(),t.getCreatedAt());}}
  public record TripDetails(TripSummary trip,UUID supplierId,String supplierName,UUID quotationId,UUID saleId,LocalDate saleDate,String notes,List<SegmentResponse> segments){static TripDetails from(Trip t,List<TripSegment> s){return new TripDetails(TripSummary.from(t),t.getSupplier()==null?null:t.getSupplier().getId(),t.getSupplier()==null?null:t.getSupplier().getName(),t.getQuotation()==null?null:t.getQuotation().getId(),t.getSale()==null?null:t.getSale().getId(),t.getSaleDate(),t.getNotes(),s.stream().map(SegmentResponse::from).toList());}}
 }

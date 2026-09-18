@@ -8,6 +8,7 @@ import com.agenciahub.api.application.persistence.repository.AgencyRepository;
 import com.agenciahub.api.application.persistence.repository.PlatformAccountRepository;
 import com.agenciahub.api.application.persistence.repository.SolicitacaoSubmissionRepository;
 import com.agenciahub.api.domain.AgencyStatus;
+import com.agenciahub.api.domain.SolicitacaoSubmissionStatus;
 import com.agenciahub.api.support.AbstractIntegrationTest;
 import com.agenciahub.api.support.IntegrationHttpSupport;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -25,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -127,6 +129,9 @@ class NotificationEmailIntegrationTest extends AbstractIntegrationTest {
                                          "publicSubmissionId":"%s"}
                                         """.formatted(customerId, submissionId))))
                 .andExpect(status().isCreated());
+
+        assertThat(submissionRepository.findById(submissionId).orElseThrow().getStatus())
+                .isEqualTo(SolicitacaoSubmissionStatus.CONVERTED);
 
         verify(emailService, atLeastOnce()).sendNewSubmissionAlert(
                 anyString(), anyString(), anyString(), anyString(), anyString(), anyString(), anyString());

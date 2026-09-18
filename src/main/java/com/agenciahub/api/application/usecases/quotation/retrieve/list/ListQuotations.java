@@ -2,7 +2,6 @@ package com.agenciahub.api.application.usecases.quotation.retrieve.list;
 
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSupport;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationResponseMapper;
-import com.agenciahub.api.domain.enums.AccountKind;
 import com.agenciahub.api.application.usecases.quotation.shared.QuotationSummaryResponseDTO;
 import com.agenciahub.api.application.persistence.entity.Quotation;
 import com.agenciahub.api.application.persistence.repository.QuotationRepository;
@@ -26,12 +25,8 @@ public class ListQuotations implements ListQuotationsUseCase {
     @Transactional(readOnly = true)
     public List<QuotationSummaryResponseDTO> execute(ListQuotationsQuery query) {
         UUID agencyId = TenantContext.requireAgencyId();
-        UUID callerId = query.caller() != null ? query.caller().getId() : null;
-        AccountKind callerRole = query.caller() != null ? query.caller().getAccountKind() : AccountKind.AGENCY_OWNER;
-        UUID effectiveSellerId = (callerRole == AccountKind.SALES_AGENT) ? callerId : null;
-
         var spec = QuotationSupport.quotationSearchSpec(
-                agencyId, query.customerId(), query.status(), query.search(), effectiveSellerId);
+                agencyId, query.customerId(), query.status(), query.search(), null);
         List<Quotation> rows = quotationRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
         return rows.stream().map(quotationResponseMapper::toResponse).toList();
     }

@@ -1,8 +1,10 @@
 package com.agenciahub.api.application.persistence.repository;
 
 import com.agenciahub.api.application.persistence.entity.SolicitacaoSubmission;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -46,6 +48,9 @@ public interface SolicitacaoSubmissionRepository extends JpaRepository<Solicitac
     List<SolicitacaoSubmission> findByReferralSeller_IdAndCreatedAtAfterOrderByCreatedAtDesc(UUID referralSellerId, Instant after);
 
     Optional<SolicitacaoSubmission> findByIdAndAgency_Id(UUID id, UUID agencyId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<SolicitacaoSubmission> findWithLockByIdAndAgency_Id(UUID id, UUID agencyId);
 
     List<SolicitacaoSubmission> findByEmailAndTelefone(String email, String telefone);
 

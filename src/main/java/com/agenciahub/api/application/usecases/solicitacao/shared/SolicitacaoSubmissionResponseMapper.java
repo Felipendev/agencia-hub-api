@@ -24,6 +24,9 @@ public class SolicitacaoSubmissionResponseMapper {
                 refId,
                 refName,
                 s.getDetalhes(),
-                s.getObservacoes());
+                s.getObservacoes(),
+                s.getStatus().name(),
+                s.getStatusUpdatedAt(),
+                s.getConvertedAt());
     }
 }
