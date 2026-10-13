@@ -22,6 +22,8 @@ public class PhoneValidator {
      */
     public static String normalize(String phone) {
         if (phone == null) return "";
+        String raw=phone.strip();
+        if (raw.startsWith("+") || raw.startsWith("00")) return "+"+DIGITS_ONLY.matcher(raw.replaceFirst("^00", "")).replaceAll("");
         String digits = DIGITS_ONLY.matcher(phone).replaceAll("");
         // Remove country code if present
         if (digits.startsWith("55") && digits.length() >= 12) {
@@ -38,7 +40,9 @@ public class PhoneValidator {
      * @return true if the phone number is valid
      */
     public static boolean isValid(String phone) {
+        if(phone==null || !phone.strip().matches("[+\\d\\s().-]+")) return false;
         String digits = normalize(phone);
+        if(digits.startsWith("+")) return digits.matches("\\+[1-9]\\d{6,14}");
         return digits.length() == 10 || digits.length() == 11;
     }
 
@@ -51,6 +55,7 @@ public class PhoneValidator {
      */
     public static String formatForStorage(String phone) {
         String digits = normalize(phone);
+        if(digits.startsWith("+")) return digits;
         if (!isValid(phone)) return digits;
         return "+55" + digits;
     }

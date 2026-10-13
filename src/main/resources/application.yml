@@ -11,7 +11,7 @@ spring:
   servlet:
     multipart:
       max-file-size: 5MB
-      max-request-size: 5MB
+      max-request-size: 6MB
   datasource:
     # Default: PostgreSQL on localhost:5432. If auth fails, see README (wrong host vs Docker, or stale volume).
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:agenciahub}
@@ -74,7 +74,7 @@ openapi:
 jwt:
   secret: ${JWT_SECRET:agenciahub-dev-secret-change-in-production-min32chars}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}   # 24 h
-  max-session-ms: ${JWT_MAX_SESSION_MS:86400000} # absolute limit, including renewals
+  max-session-ms: ${JWT_MAX_SESSION_MS:604800000} # seven days, including renewals
 
 # CORS — lista de origens separadas por virgula (ou * para dev)
 cors:

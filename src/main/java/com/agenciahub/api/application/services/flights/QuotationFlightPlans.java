@@ -38,6 +38,10 @@ public class QuotationFlightPlans {
             if (option.path("id").asText().equals(normalized.path("selectedOptionId").asText()))
                 quotation.setTotalAmount(option.path("precoTotal").decimalValue());
         }
+        LocalDate start = FlightPlanSelection.start(quotation);
+        LocalDate end = FlightPlanSelection.end(quotation);
+        if (start != null) quotation.setTravelStartDate(start);
+        if (end != null) quotation.setTravelEndDate(end);
     }
 
     public void record(Quotation q) {
@@ -95,6 +99,12 @@ public class QuotationFlightPlans {
             }
             JsonNode source = raw.path("calculo");
             ObjectNode calculation = option.putObject("calculo");
+            String sourceType = string(source, "fonteTipo", 20, false);
+            if (!sourceType.isEmpty() && !Set.of("MILHAS", "CIA", "CONSOLIDADORA", "PESQUISA").contains(sourceType))
+                throw new IllegalArgumentException("Fonte do preço inválida.");
+            calculation.put("fonteTipo", sourceType.isEmpty() ? "MILHAS" : sourceType);
+            calculation.put("empresaVendedora", string(source, "empresaVendedora", 150, false));
+            calculation.put("observacoesComparativo", string(source, "observacoesComparativo", 1000, false));
             if (!source.path("revisado").asBoolean()) throw new IllegalArgumentException("Confira os dados e confirme a revisão da opção.");
             calculation.put("revisado", true);
             String type = string(source, "tipo", 20, true);

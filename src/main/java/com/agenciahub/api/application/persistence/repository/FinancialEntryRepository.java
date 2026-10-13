@@ -30,4 +30,6 @@ public interface FinancialEntryRepository extends JpaRepository<FinancialEntry, 
     int unlinkCustomer(@Param("customerId") UUID customerId);
 
     java.util.List<FinancialEntry> findByAgency_Id(UUID agencyId);
+    @Query(value="SELECT EXISTS(SELECT 1 FROM receivables WHERE financial_entry_id=:id UNION ALL SELECT 1 FROM payables WHERE financial_entry_id=:id)",nativeQuery=true)
+    boolean linkedToSale(@Param("id") UUID id);
 }

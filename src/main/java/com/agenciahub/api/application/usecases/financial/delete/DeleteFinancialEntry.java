@@ -19,6 +19,7 @@ public class DeleteFinancialEntry implements DeleteFinancialEntryUseCase {
         UUID agencyId = TenantContext.requireAgencyId();
         var entry = financialEntryRepository.findByIdAndAgency_Id(id, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
+        if (financialEntryRepository.linkedToSale(id)) throw new IllegalArgumentException("Este lançamento pertence a uma venda. Reverta pela tela Vendas ou pela aprovação da cotação.");
         financialEntryRepository.delete(entry);
     }
 }

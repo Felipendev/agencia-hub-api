@@ -32,6 +32,7 @@ public class UpdateFinancialEntry implements UpdateFinancialEntryUseCase {
         UUID agencyId = TenantContext.requireAgencyId();
         FinancialEntry entity = financialEntryRepository.findByIdAndAgency_Id(id, agencyId)
                 .orElseThrow(() -> new ResourceNotFoundException("lançamento financeiro não encontrado: " + id));
+        if (financialEntryRepository.linkedToSale(id)) throw new IllegalArgumentException("Este lançamento pertence a uma venda. Edite ou quite pela tela Vendas para manter os valores sincronizados.");
         if (request.description() != null) {
             entity.setDescription(request.description().strip());
         }

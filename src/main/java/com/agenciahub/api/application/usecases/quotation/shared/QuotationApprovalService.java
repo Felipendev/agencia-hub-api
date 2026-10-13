@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.math.BigDecimal;
+import com.agenciahub.api.application.services.flights.FlightPlanSelection;
+import com.agenciahub.api.domain.*;
 import java.util.List;
 
 /** Runs inside the quotation transaction, with the quotation row locked before the sale. */
@@ -18,6 +21,7 @@ public class QuotationApprovalService {
     private final ReceivableRepository receivables;
     private final PayableRepository payables;
     private final TripRepository trips;
+    private final FinancialEntryRepository financialEntries;
 
     @Transactional
     public void synchronize(Quotation quotation) {
@@ -28,8 +32,8 @@ public class QuotationApprovalService {
             if (sale != null && !"CANCELLED".equals(sale.getStatus())) {
                 assertUnsettled(sale);
                 sale.setStatus("CANCELLED");
-                receivables.findBySale_Id(sale.getId()).forEach(r -> r.setStatus("CANCELLED"));
-                payables.findBySale_Id(sale.getId()).forEach(p -> p.setStatus("CANCELLED"));
+                receivables.findBySale_Id(sale.getId()).forEach(r -> { r.setStatus("CANCELLED"); if (r.getFinancialEntry() != null) r.getFinancialEntry().setStatus(FinancialEntryStatus.CANCELLED); });
+                payables.findBySale_Id(sale.getId()).forEach(p -> { p.setStatus("CANCELLED"); if (p.getFinancialEntry() != null) p.getFinancialEntry().setStatus(FinancialEntryStatus.CANCELLED); });
                 trips.findByQuotation_Id(quotation.getId()).forEach(t -> t.setStatus("CANCELLED"));
             }
             return;
@@ -64,17 +68,62 @@ public class QuotationApprovalService {
                 payables.findBySale_Id(sale.getId()).forEach(p -> p.setStatus("PENDING"));
             }
         }
+        if (sale.isApprovalManaged()) synchronizeCostsAndForecast(sale, quotation);
         List<Trip> linkedTrips = trips.findByQuotation_Id(quotation.getId());
         if (linkedTrips.isEmpty()) {
             trips.save(Trip.builder().agency(quotation.getAgency()).customer(quotation.getCustomer())
-                    .quotation(quotation).sale(sale).serviceType("PACKAGE").status("UPCOMING")
-                    .saleDate(sale.getSaleDate()).travelStartDate(quotation.getTravelStartDate())
-                    .travelEndDate(quotation.getTravelEndDate()).notes(quotation.getTitle() + " — " + quotation.getDestination()).build());
+                    .quotation(quotation).sale(sale).serviceType(FlightPlanSelection.option(quotation) == null ? "PACKAGE" : "FLIGHT").status("UPCOMING")
+                    .saleDate(sale.getSaleDate()).travelStartDate(FlightPlanSelection.start(quotation))
+                    .travelEndDate(FlightPlanSelection.end(quotation)).notes(quotation.getTitle() + " — " + quotation.getDestination()).build());
         } else for (Trip trip : linkedTrips) {
             if (trip.getSale() != null && !trip.getSale().getId().equals(sale.getId()))
                 throw new IllegalArgumentException("A viagem já está vinculada a outra venda.");
             trip.setSale(sale);
+            if (trip.getBookingLocator() == null || trip.getBookingLocator().isBlank()) {
+                trip.setTravelStartDate(FlightPlanSelection.start(quotation));
+                trip.setTravelEndDate(FlightPlanSelection.end(quotation));
+            }
             if ("CANCELLED".equals(trip.getStatus())) trip.setStatus("UPCOMING");
+        }
+    }
+
+    private void synchronizeCostsAndForecast(Sale sale, Quotation quotation) {
+        BigDecimal cost = FlightPlanSelection.cost(quotation);
+        if (cost == null) return; // Manual quotations do not imply zero supplier cost.
+        List<SaleItem> lines = items.findBySale_Id(sale.getId());
+        if (lines.size() != 1) throw new IllegalArgumentException("Revise os itens da venda antes de alterar os custos da cotação.");
+        SaleItem line = lines.get(0);
+        if (line.getSupplierCost() != null && line.getSupplierCost().compareTo(cost) != 0) assertUnsettled(sale);
+        line.setSupplierCost(cost);
+        line.setSaleAmount(sale.getTotalAmount());
+        items.save(line);
+        for (Receivable row : receivables.findBySale_Id(sale.getId())) {
+            if (!"PENDING".equals(row.getStatus())) continue;
+            FinancialEntry entry = row.getFinancialEntry();
+            if (entry == null) entry = FinancialEntry.builder().agency(sale.getAgency()).customer(sale.getCustomer())
+                    .type(FinancialEntryType.INCOME).category(FinancialEntryCategory.PACKAGE_SOLD).build();
+            entry.setDescription("Recebimento previsto — " + quotation.getTitle());
+            entry.setAmount(row.getAmount()); entry.setEntryDate(row.getDueDate());
+            entry.setStatus(FinancialEntryStatus.PENDING); entry.setSaleAmount(row.getAmount());
+            entry.setSupplierCost(cost.multiply(row.getAmount()).divide(sale.getTotalAmount(),2,java.math.RoundingMode.HALF_UP)); entry.setCommissionAmount(BigDecimal.ZERO);
+            row.setFinancialEntry(financialEntries.save(entry)); receivables.save(row);
+        }
+        List<Payable> costs = payables.findBySale_Id(sale.getId()).stream().filter(p -> "SUPPLIER".equals(p.getPayableType())).toList();
+        if (costs.isEmpty() && receivables.findBySale_Id(sale.getId()).stream().anyMatch(r -> "PAID".equals(r.getStatus()))) return;
+        if (costs.size() > 1) throw new IllegalArgumentException("Revise os custos da venda antes de alterar a cotação.");
+        Payable payable = costs.isEmpty() ? null : costs.get(0);
+        if (payable == null && cost.signum() > 0) payable = Payable.builder().sale(sale).payableType("SUPPLIER").dueDate(LocalDate.now()).status("PENDING").build();
+        if (payable != null && !"PAID".equals(payable.getStatus())) {
+            payable.setAmount(cost); payable.setStatus(cost.signum() == 0 ? "CANCELLED" : "PENDING");
+            FinancialEntry entry = payable.getFinancialEntry();
+            if (entry == null && cost.signum() > 0) entry = FinancialEntry.builder().agency(sale.getAgency()).customer(sale.getCustomer())
+                    .type(FinancialEntryType.EXPENSE).category(FinancialEntryCategory.OTHER).build();
+            if (entry != null) {
+                entry.setDescription("Custo previsto — " + quotation.getTitle()); entry.setAmount(cost);
+                entry.setEntryDate(payable.getDueDate()); entry.setStatus(cost.signum() == 0 ? FinancialEntryStatus.CANCELLED : FinancialEntryStatus.PENDING);
+                payable.setFinancialEntry(financialEntries.save(entry));
+            }
+            payables.save(payable);
         }
     }
 
