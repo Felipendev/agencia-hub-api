@@ -10,4 +10,5 @@ public interface TripRepository extends JpaRepository<Trip, UUID> {
     List<Trip> findAllByAgency_Id(UUID agencyId);
     List<Trip> findAllByAgency_IdAndCustomer_Id(UUID agencyId, UUID customerId);
     Optional<Trip> findByIdAndAgency_Id(UUID id, UUID agencyId);
+    Optional<Trip> findByAgency_IdAndCreationRequestId(UUID agencyId, UUID requestId);
 }

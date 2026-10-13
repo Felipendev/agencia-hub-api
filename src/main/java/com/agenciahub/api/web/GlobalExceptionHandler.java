@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.agenciahub.api.exception.TripConflictException.class)
+    public ResponseEntity<ApiError> handleTripConflict(com.agenciahub.api.exception.TripConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "TRIP_CONFLICT"));
+    }
 
     @ExceptionHandler(AccountDeletionPendingException.class)
     public ResponseEntity<ApiError> handleAccountDeletionPending(AccountDeletionPendingException ex) {

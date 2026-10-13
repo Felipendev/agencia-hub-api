@@ -24,6 +24,8 @@ public class Trip {
  @Column(nullable = false, columnDefinition = "text") private String notes;
  @Column(name = "created_at", nullable = false) private Instant createdAt;
  @Column(name = "updated_at", nullable = false) private Instant updatedAt;
+ @Column(name = "creation_request_id") private UUID creationRequestId;
+ @Column(name = "creation_request_hash", length = 64) private String creationRequestHash;
  @PrePersist void prePersist() { Instant now = Instant.now(); createdAt = now; updatedAt = now; if (notes == null) notes = ""; if (status == null) status = "UPCOMING"; }
  @PreUpdate void preUpdate() { updatedAt = Instant.now(); }
 }
