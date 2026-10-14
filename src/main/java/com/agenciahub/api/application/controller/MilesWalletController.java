@@ -15,6 +15,11 @@ import java.util.UUID;
 @PreAuthorize("hasAnyRole('AGENCY_OWNER','SALES_AGENT')")
 public class MilesWalletController {
     private final MilesWalletService service;
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public com.agenciahub.api.exception.ApiError forbidden() {
+        return new com.agenciahub.api.exception.ApiError("Seu perfil não tem acesso à carteira de milhas.","WALLET_ACCESS_DENIED");
+    }
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public com.agenciahub.api.exception.ApiError invalidBody() {

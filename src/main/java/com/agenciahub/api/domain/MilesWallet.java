@@ -31,7 +31,7 @@ public final class MilesWallet {
         public void validate(Kind kind) {
             switch(kind) {
                 case ACCOUNT -> { required(program,"Programa"); required(holder,"Titular"); required(source,"Fonte do saldo");
-                    if(declaredOn==null||declaredOn.isAfter(LocalDate.now())||openingBalance==null)invalid("Informe a data e o saldo inicial declarado."); }
+                    if(declaredOn==null||declaredOn.isAfter(today())||openingBalance==null)invalid("Informe a data e o saldo inicial declarado."); }
                 case CARD -> { required(issuer,"Emissor"); required(category,"Categoria"); }
                 case CLUB -> { required(program,"Programa do clube"); if(monthlyCost==null||monthlyPoints==null)invalid("Informe custo e pontos mensais do clube."); }
                 case EXPIRY -> { if(accountId==null||quantity==null||expiresOn==null)invalid("Informe a conta, quantidade e data do vencimento."); }
@@ -48,5 +48,6 @@ public final class MilesWallet {
                            UUID reversesId, String author, OffsetDateTime createdAt, boolean reversed) {}
     public record Audit(UUID id, UUID resourceId, String action, Object snapshot, String author, OffsetDateTime createdAt) {}
     public record View(ProfileRow profile, List<Item> items, List<Movement> movements, List<Audit> history) {}
+    public static LocalDate today() { return LocalDate.now(java.time.ZoneId.of("America/Fortaleza")); }
     public static void invalid(String message) { throw new IllegalArgumentException(message); }
 }

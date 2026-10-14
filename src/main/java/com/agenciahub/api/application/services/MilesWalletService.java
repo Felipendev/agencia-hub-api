@@ -100,6 +100,7 @@ public class MilesWalletService {
         UUID existing=jdbc.query("SELECT id FROM customer_miles_movements WHERE account_id=? AND request_key=?",(r,n)->r.getObject(1,UUID.class),account,input.requestKey()).stream().findFirst().orElse(null);
         if(existing!=null){Movement old=movement(customer,existing);if(old.quantity()!=input.quantity()||!old.reason().equals(input.reason())||!old.occurredOn().equals(input.occurredOn()))conflict("A confirmação já foi utilizada para outra movimentação.");return old;}
         active(row);if(input.quantity()==0)invalid("A quantidade deve ser diferente de zero.");
+        if(input.occurredOn().isAfter(com.agenciahub.api.domain.MilesWallet.today()))invalid("A data da movimentação não pode ser futura.");
         if(row.balance()+input.quantity()<0)conflict("A saída excede o saldo declarado disponível.");
         UUID id=UUID.randomUUID();insertMovement(id,account,input.quantity(),input.reason(),input.occurredOn(),null,author,input.requestKey());
         Movement move=movement(customer,id);audit(customer,id,"MOVEMENT_CREATED",move,author);return move;
@@ -111,7 +112,7 @@ public class MilesWalletService {
         Movement existing=movements(customer).stream().filter(m->id.equals(m.reversesId())).findFirst().orElse(null);if(existing!=null)return existing;
         Item account=item(customer,original.accountId());active(account);
         if(account.balance()-original.quantity()<0)conflict("O estorno deixaria o saldo negativo. Revise as movimentações posteriores.");
-        UUID reversal=UUID.randomUUID();insertMovement(reversal,account.id(),-original.quantity(),reason,LocalDate.now(),id,author);
+        UUID reversal=UUID.randomUUID();insertMovement(reversal,account.id(),-original.quantity(),reason,com.agenciahub.api.domain.MilesWallet.today(),id,author);
         Movement row=movement(customer,reversal);audit(customer,reversal,"MOVEMENT_REVERSED",row,author);return row;
     }
     private Movement movement(UUID customer,UUID id) {return movements(customer).stream().filter(m->m.id().equals(id)).findFirst().orElseThrow(()->new ResourceNotFoundException("Movimentação não encontrada."));}
