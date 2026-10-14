@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.agenciahub.api.exception.WalletConflictException.class)
+    public ResponseEntity<ApiError> handleWalletConflict(com.agenciahub.api.exception.WalletConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "WALLET_CONFLICT"));
+    }
     @ExceptionHandler(com.agenciahub.api.exception.SimulationConflictException.class)
     public ResponseEntity<ApiError> handleSimulationConflict(com.agenciahub.api.exception.SimulationConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "SIMULATION_VERSION_CONFLICT"));
@@ -58,6 +62,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMostSpecificCause().getMessage();
+        if (msg != null && msg.contains("customer_miles_movements_account_id_fkey")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Esta pessoa possui histórico de milhas. Inative a pessoa e arquive as contas para preservar as movimentações.", "WALLET_HISTORY_EXISTS"));
+        }
         if (msg != null && (msg.contains("idx_customers_email_unique") || msg.contains("idx_customers_agency_email_unique"))) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
