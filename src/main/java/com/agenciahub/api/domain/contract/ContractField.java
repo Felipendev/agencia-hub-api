@@ -26,6 +26,7 @@ public enum ContractField {
     AGENCIA_ENDERECO("agencia.endereco", "Endereço da agência", Source.AGENCY),
     AGENCIA_EMAIL("agencia.email", "E-mail comercial da agência", Source.AGENCY),
     AGENCIA_TELEFONE("agencia.telefone", "Telefone da agência", Source.AGENCY),
+    CONTRATO_PRODUTO("contrato.produto", "Produto contratado (Viagens ou Milhas)", Source.CONTRACT),
     CONTRATO_TITULO("contrato.titulo", "Título do contrato", Source.CONTRACT),
     CONTRATO_PLANO("contrato.plano", "Plano ou serviço contratado", Source.CONTRACT),
     CONTRATO_VALOR("contrato.valor", "Valor total", Source.CONTRACT),

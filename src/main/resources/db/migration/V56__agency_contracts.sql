@@ -1,9 +1,11 @@
 -- F02 — Contratos versionados por agência (TODO-046).
 -- Versão provisória: o integrador atribui a numeração final antes do merge.
 
+-- Viagens e Milhas são produtos distintos: modelo, contrato e documento emitido registram o produto.
 CREATE TABLE contract_templates (
  id UUID PRIMARY KEY,
  agency_id UUID NOT NULL REFERENCES agencies(id),
+ product VARCHAR(8) NOT NULL CHECK (product IN ('TRAVEL','MILES')),
  name VARCHAR(200) NOT NULL,
  description VARCHAR(1000),
  current_version INTEGER NOT NULL DEFAULT 1 CHECK (current_version >= 1),
@@ -11,9 +13,10 @@ CREATE TABLE contract_templates (
  row_version INTEGER NOT NULL DEFAULT 1,
  created_by VARCHAR(255) NOT NULL,
  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
- updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+ updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+ UNIQUE (id, product)
 );
-CREATE INDEX contract_templates_agency_idx ON contract_templates(agency_id, archived, lower(name));
+CREATE INDEX contract_templates_agency_idx ON contract_templates(agency_id, product, archived, lower(name));
 
 -- Cada alteração do conteúdo gera uma nova versão imutável.
 CREATE TABLE contract_template_versions (
@@ -31,7 +34,8 @@ CREATE TABLE contracts (
  id UUID PRIMARY KEY,
  agency_id UUID NOT NULL REFERENCES agencies(id),
  customer_id UUID NOT NULL REFERENCES customers(id),
- template_id UUID NOT NULL REFERENCES contract_templates(id),
+ product VARCHAR(8) NOT NULL CHECK (product IN ('TRAVEL','MILES')),
+ template_id UUID NOT NULL,
  template_version INTEGER NOT NULL,
  title VARCHAR(200) NOT NULL,
  plan_name VARCHAR(200),
@@ -53,10 +57,12 @@ CREATE TABLE contracts (
  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
  CHECK (end_date IS NULL OR start_date IS NULL OR end_date >= start_date),
+ -- O contrato só usa modelo do mesmo produto.
+ FOREIGN KEY (template_id, product) REFERENCES contract_templates(id, product),
  FOREIGN KEY (template_id, template_version) REFERENCES contract_template_versions(template_id, version)
 );
 CREATE INDEX contracts_agency_customer_idx ON contracts(agency_id, customer_id, created_at DESC);
-CREATE INDEX contracts_agency_status_idx ON contracts(agency_id, status, updated_at DESC);
+CREATE INDEX contracts_agency_status_idx ON contracts(agency_id, product, status, updated_at DESC);
 
 -- Documento emitido: retrato imutável do modelo e dos dados usados na geração.
 CREATE TABLE contract_documents (
@@ -64,6 +70,7 @@ CREATE TABLE contract_documents (
  contract_id UUID NOT NULL REFERENCES contracts(id),
  agency_id UUID NOT NULL REFERENCES agencies(id),
  version INTEGER NOT NULL CHECK (version >= 1),
+ product VARCHAR(8) NOT NULL CHECK (product IN ('TRAVEL','MILES')),
  data_revision INTEGER NOT NULL,
  template_id UUID NOT NULL,
  template_version INTEGER NOT NULL,

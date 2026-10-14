@@ -1,6 +1,7 @@
 package com.agenciahub.api.domain.contract;
 
 import com.agenciahub.api.domain.contract.Contracts.PaymentMode;
+import com.agenciahub.api.domain.contract.Contracts.Product;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
@@ -21,10 +22,11 @@ class ContractValuesTest {
         var values = ContractValues.resolve(
                 new ContractValues.Customer("Ana", "ana@x.com", null, profile),
                 new ContractValues.Agency("Agência X", "00.000.000/0001-00", "Av. B, 1", null, null),
-                new ContractValues.Terms("Assessoria", "Plano Ouro", new BigDecimal("1234.50"), LocalDate.of(2026, 11, 1),
+                new ContractValues.Terms(Product.MILES, "Assessoria", "Plano Ouro", new BigDecimal("1234.50"), LocalDate.of(2026, 11, 1),
                         null, PaymentMode.INSTALLMENTS, 3, "Boleto mensal"),
                 LocalDate.of(2026, 10, 14));
         assertThat(values)
+                .containsEntry(ContractField.CONTRATO_PRODUTO, "Milhas")
                 .containsEntry(ContractField.CLIENTE_CPF_CNPJ, "123.456.789-00")
                 .containsEntry(ContractField.CLIENTE_DATA_NASCIMENTO, "20/05/1990")
                 .containsEntry(ContractField.CLIENTE_PROFISSAO, "Engenheira")
@@ -41,8 +43,9 @@ class ContractValuesTest {
     void cashPaymentMeansSingleInstallmentAndMissingProfileIsTolerated() {
         var values = ContractValues.resolve(new ContractValues.Customer("Ana", null, null, null),
                 new ContractValues.Agency("X", null, null, null, null),
-                new ContractValues.Terms("T", null, null, null, null, PaymentMode.CASH, null, null), LocalDate.of(2026, 1, 1));
-        assertThat(values).containsEntry(ContractField.CONTRATO_FORMA_PAGAMENTO, "À vista")
+                new ContractValues.Terms(Product.TRAVEL, "T", null, null, null, null, PaymentMode.CASH, null, null), LocalDate.of(2026, 1, 1));
+        assertThat(values).containsEntry(ContractField.CONTRATO_PRODUTO, "Viagens")
+                .containsEntry(ContractField.CONTRATO_FORMA_PAGAMENTO, "À vista")
                 .containsEntry(ContractField.CONTRATO_PARCELAS, "1")
                 .doesNotContainKeys(ContractField.CLIENTE_ENDERECO, ContractField.CONTRATO_VALOR);
     }

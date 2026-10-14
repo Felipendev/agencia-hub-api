@@ -33,7 +33,7 @@ public class ContractTemplateService {
             FROM contract_templates t WHERE t.agency_id = ?""";
 
     private static final RowMapper<TemplateSummary> SUMMARY = (rs, n) -> new TemplateSummary(
-            rs.getObject("id", UUID.class), rs.getString("name"), rs.getString("description"),
+            rs.getObject("id", UUID.class), Product.valueOf(rs.getString("product")), rs.getString("name"), rs.getString("description"),
             rs.getInt("current_version"), rs.getBoolean("archived"), rs.getInt("row_version"),
             rs.getLong("contract_count"), rs.getObject("updated_at", OffsetDateTime.class));
 
@@ -42,9 +42,10 @@ public class ContractTemplateService {
     }
 
     @Transactional(readOnly = true)
-    public List<TemplateSummary> list(boolean includeArchived) {
-        return jdbc.query(SUMMARY_SQL + (includeArchived ? "" : " AND NOT t.archived") + " ORDER BY t.archived, lower(t.name), t.id",
-                SUMMARY, support.agency());
+    public List<TemplateSummary> list(boolean includeArchived, Product product) {
+        String sql = SUMMARY_SQL + (includeArchived ? "" : " AND NOT t.archived") + (product == null ? "" : " AND t.product = ?")
+                + " ORDER BY t.archived, lower(t.name), t.id";
+        return product == null ? jdbc.query(sql, SUMMARY, support.agency()) : jdbc.query(sql, SUMMARY, support.agency(), product.name());
     }
 
     @Transactional(readOnly = true)
@@ -66,12 +67,13 @@ public class ContractTemplateService {
     @Transactional
     public TemplateDetail create(TemplateInput input) {
         String body = validated(input);
+        if (input.product() == null) throw new IllegalArgumentException("Informe se o modelo é de Viagens ou de Milhas.");
         UUID id = UUID.randomUUID();
         String author = support.author();
-        jdbc.update("INSERT INTO contract_templates(id, agency_id, name, description, created_by) VALUES (?, ?, ?, ?, ?)",
-                id, support.agency(), input.name().strip(), blankToNull(input.description()), author);
+        jdbc.update("INSERT INTO contract_templates(id, agency_id, product, name, description, created_by) VALUES (?, ?, ?, ?, ?, ?)",
+                id, support.agency(), input.product().name(), input.name().strip(), blankToNull(input.description()), author);
         insertVersion(id, 1, body, author);
-        support.audit(TEMPLATE, id, null, "TEMPLATE_CREATED", auditDetail(input.name(), 1));
+        support.audit(TEMPLATE, id, null, "TEMPLATE_CREATED", auditDetail(input.product(), input.name(), 1));
         return get(id);
     }
 
@@ -81,6 +83,9 @@ public class ContractTemplateService {
         TemplateSummary before = summary(id, true);
         if (before.archived()) throw new ContractConflictException("Reative o modelo antes de editá-lo.");
         support.expectVersion(before.rowVersion(), input.expectedVersion());
+        if (input.product() != null && input.product() != before.product()) {
+            throw new IllegalArgumentException("O produto do modelo não pode ser alterado. Crie um novo modelo para o outro produto.");
+        }
         String body = validated(input);
         String currentBody = version(id, before.currentVersion()).body();
         boolean bodyChanged = !currentBody.equals(body);
@@ -90,7 +95,7 @@ public class ContractTemplateService {
                 UPDATE contract_templates SET name = ?, description = ?, current_version = ?, row_version = row_version + 1,
                 updated_at = now() WHERE id = ? AND agency_id = ?""",
                 input.name().strip(), blankToNull(input.description()), nextVersion, id, support.agency());
-        support.audit(TEMPLATE, id, null, bodyChanged ? "TEMPLATE_VERSIONED" : "TEMPLATE_UPDATED", auditDetail(input.name(), nextVersion));
+        support.audit(TEMPLATE, id, null, bodyChanged ? "TEMPLATE_VERSIONED" : "TEMPLATE_UPDATED", auditDetail(before.product(), input.name(), nextVersion));
         return get(id);
     }
 
@@ -101,13 +106,13 @@ public class ContractTemplateService {
         support.expectVersion(before.rowVersion(), expectedVersion);
         if (before.contractCount() == 0) {
             jdbc.update("DELETE FROM contract_templates WHERE id = ? AND agency_id = ?", id, support.agency());
-            support.audit(TEMPLATE, id, null, "TEMPLATE_DELETED", auditDetail(before.name(), before.currentVersion()));
+            support.audit(TEMPLATE, id, null, "TEMPLATE_DELETED", auditDetail(before.product(), before.name(), before.currentVersion()));
             return new DeleteOutcome("DELETED", "Modelo excluído.");
         }
         if (!before.archived()) {
             jdbc.update("UPDATE contract_templates SET archived = true, row_version = row_version + 1, updated_at = now() WHERE id = ? AND agency_id = ?",
                     id, support.agency());
-            support.audit(TEMPLATE, id, null, "TEMPLATE_ARCHIVED", auditDetail(before.name(), before.currentVersion()));
+            support.audit(TEMPLATE, id, null, "TEMPLATE_ARCHIVED", auditDetail(before.product(), before.name(), before.currentVersion()));
         }
         return new DeleteOutcome("ARCHIVED",
                 "O modelo já foi usado em contratos e foi arquivado para preservar o histórico. Ele não aparece para novos rascunhos.");
@@ -120,7 +125,7 @@ public class ContractTemplateService {
         support.expectVersion(before.rowVersion(), expectedVersion);
         jdbc.update("UPDATE contract_templates SET archived = false, row_version = row_version + 1, updated_at = now() WHERE id = ? AND agency_id = ?",
                 id, support.agency());
-        support.audit(TEMPLATE, id, null, "TEMPLATE_RESTORED", auditDetail(before.name(), before.currentVersion()));
+        support.audit(TEMPLATE, id, null, "TEMPLATE_RESTORED", auditDetail(before.product(), before.name(), before.currentVersion()));
         return get(id);
     }
 
@@ -167,8 +172,9 @@ public class ContractTemplateService {
         return ContractTemplateRenderer.validate(body).stream().map(ContractField::key).toList();
     }
 
-    private static Map<String, Object> auditDetail(String name, int version) {
+    private static Map<String, Object> auditDetail(Product product, String name, int version) {
         Map<String, Object> detail = new LinkedHashMap<>();
+        detail.put("product", product.name());
         detail.put("name", name == null ? null : name.strip());
         detail.put("templateVersion", version);
         return detail;

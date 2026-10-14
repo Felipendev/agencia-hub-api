@@ -24,8 +24,9 @@ public class ContractTemplateController {
     public List<FieldView> fields() { return service.fields(); }
 
     @GetMapping
-    public List<TemplateSummary> list(@RequestParam(defaultValue = "false") boolean includeArchived) {
-        return service.list(includeArchived);
+    public List<TemplateSummary> list(@RequestParam(defaultValue = "false") boolean includeArchived,
+                                      @RequestParam(required = false) Product product) {
+        return service.list(includeArchived, product);
     }
 
     @GetMapping("/{id}")

@@ -74,8 +74,12 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
     }
 
     private JsonNode template(String jwt, String body) throws Exception {
-        String payload = "{\"name\":\"Assessoria %s\",\"description\":\"Modelo da agência\",\"body\":%s}"
-                .formatted(UUID.randomUUID(), quote(body));
+        return template(jwt, body, "TRAVEL");
+    }
+
+    private JsonNode template(String jwt, String body, String product) throws Exception {
+        String payload = "{\"product\":\"%s\",\"name\":\"Assessoria %s\",\"description\":\"Modelo da agência\",\"body\":%s}"
+                .formatted(product, UUID.randomUUID(), quote(body));
         return json(jwt, jsonBody(post("/contract-templates"), payload), 201);
     }
 
@@ -84,7 +88,12 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
     }
 
     private static String draft(String customerId, String templateId, String extra) {
-        return "{\"customerId\":\"%s\",\"templateId\":\"%s\",\"title\":\"Assessoria anual\"%s}".formatted(customerId, templateId, extra);
+        return draft("TRAVEL", customerId, templateId, extra);
+    }
+
+    private static String draft(String product, String customerId, String templateId, String extra) {
+        return "{\"product\":\"%s\",\"customerId\":\"%s\",\"templateId\":\"%s\",\"title\":\"Assessoria anual\"%s}"
+                .formatted(product, customerId, templateId, extra);
     }
 
     private static final String COMPLETE = ",\"planName\":\"Plano Ouro\",\"price\":1200.00,\"startDate\":\"2026-11-01\",\"paymentMode\":\"INSTALLMENTS\",\"installments\":3";
@@ -115,7 +124,8 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
     void templateCrudKeepsImmutableVersionsAndArchivesWhenUsed() throws Exception {
         String jwt = http.loginOwner(mockMvc);
         json(jwt, get("/contract-templates/fields"), 200);
-        json(jwt, jsonBody(post("/contract-templates"), "{\"name\":\"Inválido\",\"body\":\"Olá {{cliente.apelido}}\"}"), 400);
+        json(jwt, jsonBody(post("/contract-templates"), "{\"product\":\"TRAVEL\",\"name\":\"Inválido\",\"body\":\"Olá {{cliente.apelido}}\"}"), 400);
+        json(jwt, jsonBody(post("/contract-templates"), "{\"name\":\"Sem produto\",\"body\":\"Texto\"}"), 400);
 
         JsonNode created = template(jwt, BODY);
         String id = created.path("template").path("id").asText();
@@ -310,6 +320,42 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
         assertThat(json(jwt, get("/contracts/" + id), 200).path("documents").size()).isEqualTo(1);
     }
 
+    @Test
+    void travelAndMilesContractsOfTheSamePersonAreIndependent() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "Dois produtos");
+        String travelTemplate = template(jwt, BODY + " Produto: {{contrato.produto}}.", "TRAVEL").path("template").path("id").asText();
+        JsonNode milesCreated = template(jwt, BODY + " Produto: {{contrato.produto}}.", "MILES");
+        String milesTemplate = milesCreated.path("template").path("id").asText();
+        assertThat(milesCreated.path("template").path("product").asText()).isEqualTo("MILES");
+
+        // Produto do modelo é fixo; contrato não usa modelo de outro produto.
+        String changeProduct = "{\"product\":\"TRAVEL\",\"name\":\"Milhas\",\"body\":%s,\"expectedVersion\":1}".formatted(quote(BODY));
+        json(jwt, jsonBody(patch("/contract-templates/" + milesTemplate), changeProduct), 400);
+        json(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft("TRAVEL", person, milesTemplate, COMPLETE)), 400);
+        json(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft(person, travelTemplate, COMPLETE).replace("\"product\":\"TRAVEL\",", "")), 400);
+
+        String travel = createDraft(jwt, person, travelTemplate, COMPLETE).path("contract").path("id").asText();
+        JsonNode miles = json(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft("MILES", person, milesTemplate, COMPLETE)), 201);
+        String milesId = miles.path("contract").path("id").asText();
+        assertThat(miles.path("contract").path("product").asText()).isEqualTo("MILES");
+        json(jwt, jsonBody(patch("/contracts/" + milesId), draft("TRAVEL", person, milesTemplate, COMPLETE + ",\"expectedVersion\":1")), 400);
+
+        assertThat(json(jwt, get("/contracts").param("customerId", person).param("product", "MILES"), 200).toString()).contains(milesId).doesNotContain(travel);
+        assertThat(json(jwt, get("/contracts").param("customerId", person).param("product", "TRAVEL"), 200).toString()).contains(travel).doesNotContain(milesId);
+        assertThat(json(jwt, get("/contract-templates").param("product", "MILES"), 200).toString()).contains(milesTemplate).doesNotContain(travelTemplate);
+
+        JsonNode document = json(jwt, jsonBody(post("/contracts/" + milesId + "/documents"), "{\"expectedVersion\":1}"), 201);
+        assertThat(document.path("product").asText()).isEqualTo("MILES");
+        JsonNode issued = json(jwt, get("/contracts/" + milesId + "/documents/1"), 200);
+        assertThat(issued.path("renderedContent").asText()).contains("Produto: Milhas.");
+        assertThat(issued.path("dataSnapshot").path("product").asText()).isEqualTo("MILES");
+
+        json(jwt, jsonBody(post("/contracts/" + milesId + "/cancel"), "{\"expectedVersion\":1,\"reason\":\"Encerrou acompanhamento de milhas\"}"), 200);
+        assertThat(json(jwt, get("/contracts/" + travel), 200).path("contract").path("status").asText()).isEqualTo("DRAFT");
+        json(jwt, get("/customers/" + person), 200);
+    }
+
     // ------------------------------------------------------------------ recebíveis, perfis e agências
 
     @Test
@@ -343,7 +389,7 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
         String person = customer(owner, "Equipe");
         String templateId = template(owner, BODY).path("template").path("id").asText();
 
-        json(agent, jsonBody(post("/contract-templates"), "{\"name\":\"Agente\",\"body\":\"Texto\"}"), 403);
+        json(agent, jsonBody(post("/contract-templates"), "{\"product\":\"TRAVEL\",\"name\":\"Agente\",\"body\":\"Texto\"}"), 403);
         json(agent, delete("/contract-templates/" + templateId).param("expectedVersion", "1"), 403);
         assertThat(json(agent, get("/contract-templates"), 200).toString()).contains(templateId);
 
@@ -370,11 +416,11 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
                 .subscriptionStatus(SubscriptionStatus.ACTIVE).build());
         CrmCustomer foreignPerson = customers.save(CrmCustomer.builder().agency(other).name("Pessoa isolada").status(CustomerStatus.ACTIVE).notes("").build());
         UUID foreignTemplate = UUID.randomUUID();
-        jdbc.update("INSERT INTO contract_templates(id, agency_id, name, created_by) VALUES (?, ?, 'Alheio', 'teste')", foreignTemplate, other.getId());
+        jdbc.update("INSERT INTO contract_templates(id, agency_id, product, name, created_by) VALUES (?, ?, 'TRAVEL', 'Alheio', 'teste')", foreignTemplate, other.getId());
         jdbc.update("INSERT INTO contract_template_versions(id, template_id, agency_id, version, body, author) VALUES (?, ?, ?, 1, 'Texto', 'teste')",
                 UUID.randomUUID(), foreignTemplate, other.getId());
         UUID foreignContract = UUID.randomUUID();
-        jdbc.update("INSERT INTO contracts(id, agency_id, customer_id, template_id, template_version, title, created_by) VALUES (?, ?, ?, ?, 1, 'Alheio', 'teste')",
+        jdbc.update("INSERT INTO contracts(id, agency_id, product, customer_id, template_id, template_version, title, created_by) VALUES (?, ?, 'TRAVEL', ?, ?, 1, 'Alheio', 'teste')",
                 foreignContract, other.getId(), foreignPerson.getId(), foreignTemplate);
 
         String ownTemplate = template(jwt, BODY).path("template").path("id").asText();

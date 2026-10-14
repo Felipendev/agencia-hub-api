@@ -1,6 +1,7 @@
 package com.agenciahub.api.domain.contract;
 
 import com.agenciahub.api.domain.contract.Contracts.PaymentMode;
+import com.agenciahub.api.domain.contract.Contracts.Product;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
@@ -26,7 +27,7 @@ public final class ContractValues {
 
     public record Agency(String name, String cnpj, String address, String email, String phone) {}
 
-    public record Terms(String title, String planName, BigDecimal price, LocalDate startDate, LocalDate endDate,
+    public record Terms(Product product, String title, String planName, BigDecimal price, LocalDate startDate, LocalDate endDate,
                         PaymentMode paymentMode, Integer installments, String paymentTerms) {}
 
     public static Map<ContractField, String> resolve(Customer customer, Agency agency, Terms terms, LocalDate issueDate) {
@@ -47,6 +48,10 @@ public final class ContractValues {
         put(values, ContractField.AGENCIA_ENDERECO, agency.address());
         put(values, ContractField.AGENCIA_EMAIL, agency.email());
         put(values, ContractField.AGENCIA_TELEFONE, agency.phone());
+        put(values, ContractField.CONTRATO_PRODUTO, terms.product() == null ? null : switch (terms.product()) {
+            case TRAVEL -> "Viagens";
+            case MILES -> "Milhas";
+        });
         put(values, ContractField.CONTRATO_TITULO, terms.title());
         put(values, ContractField.CONTRATO_PLANO, terms.planName());
         put(values, ContractField.CONTRATO_VALOR, terms.price() == null ? null : NumberFormat.getCurrencyInstance(PT_BR).format(terms.price()).replace(' ', ' '));
