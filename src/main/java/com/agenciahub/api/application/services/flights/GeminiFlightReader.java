@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 @Component
+@lombok.extern.slf4j.Slf4j
 public class GeminiFlightReader {
     private final ObjectMapper mapper;
     private final FlightImportProperties config;
@@ -17,8 +18,12 @@ public class GeminiFlightReader {
             .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
             .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT)
             .build();
-    private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
-    public GeminiFlightReader(ObjectMapper mapper, FlightImportProperties config) { this.mapper = mapper; this.config = config; }
+    private final HttpClient client;
+    @org.springframework.beans.factory.annotation.Autowired
+    public GeminiFlightReader(ObjectMapper mapper, FlightImportProperties config) {
+        this(mapper,config,HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build());
+    }
+    GeminiFlightReader(ObjectMapper mapper,FlightImportProperties config,HttpClient client) { this.mapper=mapper;this.config=config;this.client=client; }
     public record Reading(FlightExtraction extraction, int inputTokens, int outputTokens, BigDecimal cost) {}
     public boolean configured() { return !config.getApiKey().isBlank(); }
 
@@ -46,8 +51,13 @@ public class GeminiFlightReader {
         var request = HttpRequest.newBuilder(URI.create("https://generativelanguage.googleapis.com/v1beta/models/" + config.getModel() + ":generateContent"))
                 .timeout(Duration.ofSeconds(50)).header("Content-Type", "application/json")
                 .header("x-goog-api-key", config.getApiKey()).POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body))).build();
-        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) throw new IllegalStateException("O serviço de leitura está indisponível. Tente mais tarde ou preencha manualmente.");
+        HttpResponse<String> response;
+        try { response=client.send(request,HttpResponse.BodyHandlers.ofString()); }
+        catch(HttpTimeoutException e) {
+            log.warn("Flight reader timed out: model={}",config.getModel());
+            throw new IllegalStateException("A leitura demorou além do esperado. Aguarde antes de tentar novamente ou preencha manualmente.");
+        }
+        if (response.statusCode() != 200) throw providerFailure(response.statusCode(),response.body());
         if (response.body().length() > 250_000) throw new IllegalStateException("A leitura excedeu o limite de resposta.");
         JsonNode root = mapper.readTree(response.body());
         JsonNode candidate = root.path("candidates").path(0);
@@ -68,6 +78,30 @@ public class GeminiFlightReader {
         }
         return new Reading(extraction, Math.max(input, 0), Math.max(output, 0), cost);
     }
+
+    private IllegalStateException providerFailure(int http,String body) {
+        String status="UNKNOWN",reason="UNKNOWN";
+        if(body!=null&&body.length()<=250_000) {
+            try {
+                JsonNode error=mapper.readTree(body).path("error");
+                status=safeCode(error.path("status").asText());
+                for(JsonNode detail:error.path("details")) {
+                    String candidate=safeCode(detail.path("reason").asText());
+                    if(!"UNKNOWN".equals(candidate)){reason=candidate;break;}
+                }
+            } catch(Exception ignored) { /* Never log the raw response: it may contain sensitive data. */ }
+        }
+        log.warn("Flight reader rejected request: http={} model={} status={} reason={}",http,config.getModel(),status,reason);
+        String message;
+        if(http==401||http==403||reason.startsWith("API_KEY")||reason.equals("SERVICE_DISABLED")||reason.equals("BILLING_DISABLED"))
+            message="O serviço de leitura não está autorizado ou configurado corretamente. Contate o administrador.";
+        else if(http==429) message="O limite de uso do serviço de leitura foi atingido. Aguarde antes de tentar novamente ou preencha manualmente.";
+        else if(http==404) message="O modelo do serviço de leitura está indisponível. Contate o administrador.";
+        else if(http==400) message="O serviço rejeitou a solicitação de leitura. Tente outro arquivo; se o problema continuar, contate o administrador.";
+        else message="O serviço de leitura está temporariamente indisponível. Tente mais tarde ou preencha manualmente.";
+        return new IllegalStateException(message);
+    }
+    private static String safeCode(String value) { return value!=null&&value.matches("[A-Z][A-Z0-9_]{0,63}")?value:"UNKNOWN"; }
 
     private static Map<String, Object> nullable(String type) { return Map.of("type", List.of(type, "null")); }
     private static Map<String, Object> object(Map<String, Object> properties) {
