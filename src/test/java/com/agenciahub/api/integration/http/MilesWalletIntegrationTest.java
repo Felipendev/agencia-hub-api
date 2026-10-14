@@ -14,6 +14,8 @@ class MilesWalletIntegrationTest extends AbstractIntegrationTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired com.agenciahub.api.application.persistence.repository.AgencyRepository agencies;
     @Autowired com.agenciahub.api.application.persistence.repository.CrmCustomerRepository customers;
+    @Autowired com.agenciahub.api.application.persistence.repository.PlatformAccountRepository accounts;
+    @Autowired org.springframework.security.crypto.password.PasswordEncoder passwords;
     private static final String ACCOUNT="""
       {"kind":"ACCOUNT","data":{"program":"Smiles","holder":"Titular declarado","source":"Extrato manual","declaredOn":"2026-01-01","openingBalance":1000}}
       """;
@@ -88,5 +90,19 @@ class MilesWalletIntegrationTest extends AbstractIntegrationTest {
         for(String body:new String[]{ACCOUNT.replace("1000","1.5"),ACCOUNT.replace("1000","-1"),ACCOUNT.replace("2026-01-01","2099-01-01"),ACCOUNT.replace("Extrato manual","")})
             mockMvc.perform(post(base+"/items").header("Authorization","Bearer "+jwt).header("Idempotency-Key",UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isBadRequest());
         mockMvc.perform(get(base).header("Authorization","Bearer "+jwt)).andExpect(jsonPath("$.items.length()").value(0));
+    }
+    @Test void authorizedSellerSharesPersistentProfileButPlatformRoleCannotAccessWallet() throws Exception {
+        String owner=http.loginOwner(mockMvc),base=customer(owner);
+        var agency=customers.findById(UUID.fromString(base.split("/")[2])).orElseThrow().getAgency();
+        for(var kind:java.util.List.of(com.agenciahub.api.domain.enums.AccountKind.SALES_AGENT,com.agenciahub.api.domain.enums.AccountKind.PLATFORM_ADMIN)){
+            String email="wallet-role-"+UUID.randomUUID()+"@test.local";
+            accounts.save(com.agenciahub.api.application.persistence.entity.PlatformAccount.builder().agency(agency).name("Operador carteira").email(email).passwordHash(passwords.encode("wallet-test-password")).accountKind(kind).active(true).emailVerified(true).termsAccepted(true).build());
+            String login=mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content("{\"email\":\"%s\",\"password\":\"wallet-test-password\"}".formatted(email))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            String jwt=http.parse(login).path("token").asText();
+            if(kind==com.agenciahub.api.domain.enums.AccountKind.SALES_AGENT){
+                mockMvc.perform(put(base+"/profile").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content("{\"data\":{\"goals\":\"Meta compartilhada\"},\"expectedVersion\":0}")).andExpect(status().isOk());
+                mockMvc.perform(get(base).header("Authorization","Bearer "+owner)).andExpect(jsonPath("$.profile.data.goals").value("Meta compartilhada"));
+            }else mockMvc.perform(get(base).header("Authorization","Bearer "+jwt)).andExpect(status().isForbidden());
+        }
     }
 }
