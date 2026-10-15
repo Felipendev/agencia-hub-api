@@ -45,6 +45,8 @@ class AgencyDeletionSchedulerIntegrationTest extends AbstractIntegrationTest {
     @Autowired private InvitationRepository invitationRepository;
     @Autowired private AgencyAuditLogRepository auditLogRepository;
     @Autowired private VerificationCodeRepository verificationCodeRepository;
+    @Autowired private org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @Autowired private com.agenciahub.api.application.persistence.repository.CrmCustomerRepository customers;
 
     @Test
     void executeScheduledDeletions_clearsAllRelatedEntities() {
@@ -101,6 +103,19 @@ class AgencyDeletionSchedulerIntegrationTest extends AbstractIntegrationTest {
                 .linksSociais(JsonNodeFactory.instance.objectNode())
                 .build());
 
+        UUID person = customers.save(com.agenciahub.api.application.persistence.entity.CrmCustomer.builder()
+                .agency(agency).name("Pessoa com contrato").status(com.agenciahub.api.domain.CustomerStatus.ACTIVE).notes("").build()).getId();
+        UUID template = UUID.randomUUID(), contract = UUID.randomUUID();
+        jdbc.update("INSERT INTO contract_templates(id,agency_id,product,name,created_by) VALUES(?,?,'MILES','Modelo','Teste')", template, agencyId);
+        jdbc.update("INSERT INTO contract_template_versions(id,template_id,agency_id,version,body,author) VALUES(?,?,?,1,'Texto','Teste')", UUID.randomUUID(), template, agencyId);
+        jdbc.update("INSERT INTO contracts(id,agency_id,product,customer_id,template_id,template_version,title,created_by) VALUES(?,?,'MILES',?,?,1,'Contrato','Teste')", contract, agencyId, person, template);
+        jdbc.update("INSERT INTO contract_documents(id,contract_id,agency_id,version,product,data_revision,template_id,template_version,template_body,rendered_content,data_snapshot,content_sha256,author) VALUES(?,?,?,1,'MILES',1,?,1,'Texto','Texto','{}',?,'Teste')", UUID.randomUUID(), contract, agencyId, template, "a".repeat(64));
+        jdbc.update("INSERT INTO contract_attachments(id,contract_id,agency_id,kind,filename,content_type,byte_size,content,author) VALUES(?,?,?,'SUPPORTING','teste.pdf','application/pdf',1,?,'Teste')", UUID.randomUUID(), contract, agencyId, new byte[]{1});
+        jdbc.update("INSERT INTO contract_audit(id,agency_id,resource_type,resource_id,customer_id,action,detail,author) VALUES(?,?,'CONTRACT',?,?,'CONTRACT_CREATED','{}','Teste')", UUID.randomUUID(), agencyId, contract, person);
+        Agency retained = agencyRepository.save(Agency.builder().name("Outra agência preservada").status(AgencyStatus.ACTIVE).subscriptionStatus(SubscriptionStatus.TRIAL).build());
+        UUID retainedTemplate = UUID.randomUUID();
+        jdbc.update("INSERT INTO contract_templates(id,agency_id,product,name,created_by) VALUES(?,?,'TRAVEL','Preservado','Teste')", retainedTemplate, retained.getId());
+
         // Execute the scheduler
         scheduler.executeScheduledDeletions();
 
@@ -114,5 +129,9 @@ class AgencyDeletionSchedulerIntegrationTest extends AbstractIntegrationTest {
         assertThat(submissionRepository.findByAgency_IdOrderByCreatedAtDesc(agencyId)).isEmpty();
         assertThat(invitationRepository.findByAgency_IdOrderByCreatedAtDesc(agencyId)).isEmpty();
         assertThat(auditLogRepository.findByAgency_IdOrderByCreatedAtDesc(agencyId)).isEmpty();
+        for (String table : java.util.List.of("contract_audit", "contract_attachments", "contract_documents", "contracts", "contract_templates", "contract_template_versions")) {
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE agency_id=?", Long.class, agencyId)).isZero();
+        }
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM contract_templates WHERE id=?", Long.class, retainedTemplate)).isEqualTo(1);
     }
 }
