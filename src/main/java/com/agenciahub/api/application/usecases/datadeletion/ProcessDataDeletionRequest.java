@@ -40,6 +40,7 @@ public class ProcessDataDeletionRequest {
     private final SolicitacaoSubmissionRepository submissionRepository;
     private final CrmCustomerRepository customerRepository;
     private final EmailService emailService;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     @Transactional
     public void execute(UUID requestId, ProcessDataDeletionRequestDTO dto, PlatformAccount processor) {
@@ -66,6 +67,14 @@ public class ProcessDataDeletionRequest {
         boolean excluir = "EXCLUIR".equals(dto.acao());
 
         if (excluir) {
+            // Não declarar concluída uma anonimização que deixaria snapshots/anexos pessoais intactos.
+            for (CrmCustomer customer : ownCustomers) {
+                Boolean hasContracts = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM contracts WHERE agency_id=? AND customer_id=?)",
+                        Boolean.class, agencyId, customer.getId());
+                if (Boolean.TRUE.equals(hasContracts)) {
+                    throw new IllegalStateException("Esta pessoa possui contratos. A solicitação continua pendente e exige revisão da retenção ou anonimização de documentos e anexos antes de concluir.");
+                }
+            }
             for (SolicitacaoSubmission s : ownSubmissions) {
                 s.setEmail("");
                 s.setNome("EXCLUÍDO");

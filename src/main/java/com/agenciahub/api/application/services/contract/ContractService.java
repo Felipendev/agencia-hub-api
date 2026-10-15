@@ -142,8 +142,10 @@ public class ContractService {
                 .format(meta.createdAt().atZoneSameInstant(Contracts.AGENCY_ZONE));
         String footer = "Documento v%d · Modelo v%d · Emitido em %s · SHA-256 %s"
                 .formatted(meta.version(), meta.templateVersion(), issued, meta.contentSha256().substring(0, 16));
-        byte[] bytes = pdf.render(row.title(), view.renderedContent(), footer);
-        return new FileContent(safeFilename(row.title()) + "-v" + meta.version() + ".pdf", "application/pdf", bytes);
+        JsonNode snapshot = mapper.valueToTree(view.dataSnapshot());
+        String issuedTitle = snapshot.path("fields").path("contrato.titulo").asText(row.title());
+        byte[] bytes = pdf.render(issuedTitle, view.renderedContent(), footer);
+        return new FileContent(safeFilename(issuedTitle) + "-v" + meta.version() + ".pdf", "application/pdf", bytes);
     }
 
     @Transactional(readOnly = true)

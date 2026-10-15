@@ -114,6 +114,54 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
         return http.parse(login).path("token").asText();
     }
 
+    @Test
+    void customerDeletionAndPrivacyProcessingDoNotSilentlyDiscardContracts() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "Retenção");
+        String email = "contracts-" + UUID.randomUUID() + "@test.local";
+        json(jwt, jsonBody(patch("/customers/" + person), "{\"email\":\"%s\"}".formatted(email)), 200);
+        String id = createDraft(jwt, person, template(jwt, BODY).path("template").path("id").asText(), COMPLETE).path("contract").path("id").asText();
+        json(jwt, jsonBody(post("/contracts/" + id + "/documents"), "{\"expectedVersion\":1}"), 201);
+        assertThat(json(jwt, delete("/customers/" + person), 409).path("code").asText()).isEqualTo("CONTRACT_HISTORY_EXISTS");
+        String requestId = json(jwt, jsonBody(post("/public/data-deletion-request"), "{\"email\":\"%s\"}".formatted(email)), 201).path("requestId").asText();
+        JsonNode denied = json(jwt, jsonBody(post("/agency/data-deletion-requests/" + requestId + "/process"), "{\"acao\":\"EXCLUIR\"}"), 400);
+        assertThat(denied.path("message").asText()).contains("continua pendente");
+        assertThat(jdbc.queryForObject("SELECT status FROM data_deletion_requests WHERE id=?::uuid", String.class, requestId)).isEqualTo("PENDING");
+        assertThat(json(jwt, get("/customers/" + person), 200).path("email").asText()).isEqualTo(email);
+        assertThat(json(jwt, get("/contracts/" + id + "/documents/1"), 200).path("renderedContent").asText()).contains("Retenção");
+    }
+
+    @Test
+    void previousPdfKeepsIssuedTitleAfterDraftIsEdited() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "PDF imutável");
+        String model = template(jwt, BODY).path("template").path("id").asText();
+        String id = createDraft(jwt, person, model, COMPLETE).path("contract").path("id").asText();
+        json(jwt, jsonBody(post("/contracts/" + id + "/documents"), "{\"expectedVersion\":1}"), 201);
+        json(jwt, jsonBody(patch("/contracts/" + id), draft(person, model, COMPLETE + ",\"expectedVersion\":1").replace("Assessoria anual", "Novo título posterior")), 200);
+        var response = mockMvc.perform(as(jwt, get("/contracts/" + id + "/documents/1/pdf"))).andExpect(status().isOk()).andReturn().getResponse();
+        assertThat(response.getHeader("Content-Disposition")).contains("assessoria-anual").doesNotContain("novo-titulo");
+        try (var loaded = Loader.loadPDF(response.getContentAsByteArray())) {
+            assertThat(new PDFTextStripper().getText(loaded)).contains("Assessoria anual").doesNotContain("Novo título posterior");
+        }
+    }
+
+    @Test
+    void differentPeopleCanCreateContractsWithTheSameModelConcurrently() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String model = template(jwt, BODY).path("template").path("id").asText();
+        String first = customer(jwt, "Primeira pessoa"), second = customer(jwt, "Segunda pessoa");
+        var executor = Executors.newFixedThreadPool(2);
+        try {
+            List<Callable<Integer>> calls = List.of(
+                    () -> mockMvc.perform(as(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft(first, model, COMPLETE)))).andReturn().getResponse().getStatus(),
+                    () -> mockMvc.perform(as(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft(second, model, COMPLETE)))).andReturn().getResponse().getStatus());
+            var results = executor.invokeAll(calls, 20, java.util.concurrent.TimeUnit.SECONDS);
+            assertThat(results).noneMatch(java.util.concurrent.Future::isCancelled);
+            assertThat(List.of(results.get(0).get(), results.get(1).get())).containsExactly(201, 201);
+        } finally { executor.shutdownNow(); }
+    }
+
     private long count(String table) {
         return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class);
     }

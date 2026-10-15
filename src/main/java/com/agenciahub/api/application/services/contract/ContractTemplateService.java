@@ -29,7 +29,7 @@ public class ContractTemplateService {
     private final ContractSupport support;
 
     private static final String SUMMARY_SQL = """
-            SELECT t.*, (SELECT count(*) FROM contracts c WHERE c.template_id = t.id) AS contract_count
+            SELECT t.*, (SELECT count(*) FROM contracts c WHERE c.template_id = t.id AND c.agency_id = t.agency_id) AS contract_count
             FROM contract_templates t WHERE t.agency_id = ?""";
 
     private static final RowMapper<TemplateSummary> SUMMARY = (rs, n) -> new TemplateSummary(
