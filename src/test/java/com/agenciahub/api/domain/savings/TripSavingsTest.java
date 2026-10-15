@@ -52,7 +52,7 @@ class TripSavingsTest {
         var result = TripSavings.compute(new Data(notEquivalent, COSTS, MilesUsage.NOT_USED, null, "m", null), false);
         assertThat(result.available()).isFalse();
         assertThat(result.savings()).isNull();
-        assertThat(result.reasons()).extracting(Reason::code).containsExactly(Unavailable.NOT_EQUIVALENT);
+        assertThat(result.reasons()).extracting(Reason::code).contains(Unavailable.NOT_EQUIVALENT, Unavailable.MISSING_COMPARISON_DETAILS);
 
         var unknownMiles = TripSavings.compute(new Data(equivalent("5000"), COSTS, MilesUsage.UNKNOWN, null, "m", null), false);
         assertThat(unknownMiles.reasons()).extracting(Reason::code).containsExactly(Unavailable.MILES_COST_UNKNOWN);
@@ -81,6 +81,16 @@ class TripSavingsTest {
                 MilesUsage.KNOWN, null, "m", null);
         TripSavings.validate(known);
         assertThat(TripSavings.compute(known, false).savings()).isEqualByComparingTo("4100.00");
+    }
+
+    @Test
+    void confirmationsWithoutDocumentedComparisonDetailsNeverProduceSavings() {
+        Comparison incomplete = new Comparison(new BigDecimal("5000"), SourceType.OTHER, "Pesquisa", null,
+                TripSavings.today(), " ", null, null, null, "", "", true, true, true, true, null);
+        Result result = TripSavings.compute(new Data(incomplete, COSTS, MilesUsage.NOT_USED, null, "Mesmas condições", null), false);
+        assertThat(result.available()).isFalse();
+        assertThat(result.savings()).isNull();
+        assertThat(result.reasons()).extracting(Reason::code).contains(Unavailable.MISSING_COMPARISON_DETAILS);
     }
 
     @Test

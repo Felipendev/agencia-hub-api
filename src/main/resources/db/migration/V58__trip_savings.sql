@@ -1,5 +1,5 @@
 -- F03 — Economia realizada do cliente (TODO-047), produto Viagens.
--- Versão provisória: pressupõe a V56 da F02 integrada antes; o integrador define a numeração final.
+-- V56/V57 de contratos já publicadas; numeração final integrada após main.
 
 -- Uma análise por viagem; o conteúdo editável fica em JSONB e cada edição gera uma versão imutável.
 CREATE TABLE trip_savings (
@@ -44,7 +44,7 @@ CREATE INDEX trip_savings_evidence_idx ON trip_savings_evidence(savings_id, crea
 CREATE TABLE trip_savings_reports (
  id UUID PRIMARY KEY,
  agency_id UUID NOT NULL REFERENCES agencies(id),
- customer_id UUID NOT NULL,
+ customer_id UUID NOT NULL REFERENCES customers(id),
  period_from DATE,
  period_to DATE,
  options JSONB NOT NULL,

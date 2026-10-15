@@ -6,6 +6,7 @@ import com.agenciahub.api.application.services.savings.TripSavingsService.Totals
 import com.agenciahub.api.domain.savings.TripSavings;
 import com.agenciahub.api.domain.savings.TripSavings.Data;
 import com.agenciahub.api.exception.ResourceNotFoundException;
+import com.agenciahub.api.exception.SavingsConflictException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -38,7 +39,8 @@ public class SavingsReportService {
     public record Options(boolean hideCustomerName, boolean hideLocators, boolean hideSources, boolean hideNotes,
                           @Size(max = 200) String title, @Size(max = 2000) String message) {}
 
-    public record ReportInput(@NotNull UUID customerId, LocalDate from, LocalDate to, @NotNull @Valid Options options) {}
+    public record ReportInput(@NotNull UUID customerId, LocalDate from, LocalDate to, @NotNull @Valid Options options,
+                              @Size(max = 64) String expectedPreviewHash) {}
 
     public record Cost(String kind, BigDecimal amount, String description, String origin) {}
 
@@ -48,10 +50,11 @@ public class SavingsReportService {
                        boolean available, List<String> unavailableReasons, BigDecimal comparablePrice, String sourceType,
                        String source, LocalDate researchedOn, String route, Integer passengers, String fareConditions,
                        String baggage, String differences, String milesUsage, List<Cost> costs, List<Adjustment> adjustments,
-                       BigDecimal effectiveCost, BigDecimal savings, BigDecimal savingsPercent, String methodology, String notes) {}
+                       BigDecimal effectiveCost, BigDecimal savings, BigDecimal savingsPercent, String methodology, String notes,
+                       LocalDate comparisonOutboundDate, LocalDate comparisonReturnDate) {}
 
     public record Content(String title, String customerLabel, LocalDate from, LocalDate to, String message, List<Line> lines,
-                          Totals totals, LocalDate generatedOn) {}
+                          Totals totals, LocalDate generatedOn, String previewHash) {}
 
     public record SharedReport(UUID id, UUID customerId, LocalDate from, LocalDate to, Options options, Content content,
                                String author, OffsetDateTime createdAt) {}
@@ -64,12 +67,22 @@ public class SavingsReportService {
     public Content preview(ReportInput input) {
         String customerName = customerName(input.customerId());
         Report report = savings.report(input.customerId(), input.from(), input.to());
-        return content(report, customerName, input.options());
+        Content content = content(report, customerName, input.options());
+        String hash;
+        try {
+            hash = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(support.json(content).getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException e) { throw new IllegalStateException(e); }
+        return new Content(content.title(), content.customerLabel(), content.from(), content.to(), content.message(),
+                content.lines(), content.totals(), content.generatedOn(), hash);
     }
 
     @Transactional
     public SharedReport create(ReportInput input) {
         Content content = preview(input);
+        if (!content.previewHash().equals(input.expectedPreviewHash())) {
+            throw new SavingsConflictException("Revise uma nova prévia antes de gerar: os dados ou as opções podem ter mudado.");
+        }
         UUID id = UUID.randomUUID();
         jdbc.update("""
                 INSERT INTO trip_savings_reports(id, agency_id, customer_id, period_from, period_to, options, content, author)
@@ -132,7 +145,7 @@ public class SavingsReportService {
         String customer = options.hideCustomerName() ? "Cliente" : customerName;
         List<Line> lines = report.rows().stream().map(row -> line(row, options)).toList();
         String message = options.message() == null || options.message().isBlank() ? null : options.message().strip();
-        return new Content(title, customer, report.from(), report.to(), message, lines, report.totals(), TripSavings.today());
+        return new Content(title, customer, report.from(), report.to(), message, lines, report.totals(), TripSavings.today(), null);
     }
 
     private static Line line(SavingsRow row, Options options) {
@@ -157,6 +170,7 @@ public class SavingsReportService {
                 c == null ? null : c.fareConditions(), c == null ? null : c.baggage(), c == null ? null : c.differences(),
                 data == null || data.milesUsage() == null ? null : data.milesUsage().name(), costs, adjustments,
                 result.effectiveCost(), result.savings(), result.savingsPercent(),
-                data == null ? null : data.methodology(), data == null || options.hideNotes() ? null : data.notes());
+                data == null ? null : data.methodology(), data == null || options.hideNotes() ? null : data.notes(),
+                c == null ? null : c.outboundDate(), c == null ? null : c.returnDate());
     }
 }

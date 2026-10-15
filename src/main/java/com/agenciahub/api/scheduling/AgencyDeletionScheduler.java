@@ -49,6 +49,12 @@ public class AgencyDeletionScheduler {
         for (Agency agency : toDelete) {
             UUID agencyId = agency.getId();
             log.info("Starting hard-delete of agency {} scheduled for {}", agencyId, agency.getDeletionScheduledAt());
+            for (String table : List.of("trip_savings_audit", "trip_savings_reports", "trip_savings_evidence",
+                    "trip_savings_versions", "trip_savings")) {
+                jdbc.update("DELETE FROM " + table + " WHERE agency_id=?", agencyId);
+            }
+            // Viagens devem sair antes das pessoas; versões/evidências seguem suas FKs.
+            jdbc.update("DELETE FROM trips WHERE agency_id=?", agencyId);
             // Descarte autorizado da agência inclui todos os documentos; ordem respeita as FKs do F02.
             for (String table : List.of("contract_audit", "contract_receivable_links", "contract_attachments",
                     "contract_documents", "contracts", "contract_template_versions", "contract_templates")) {

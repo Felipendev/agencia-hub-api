@@ -104,6 +104,8 @@ public class SavingsReportPdf {
                         line.researchedOn() == null ? null : "pesquisado em " + date(line.researchedOn()), line.source()), false));
             }
             if (line.differences() != null) out.add(new Text("Diferenças registradas: " + line.differences(), false));
+            if (line.comparisonOutboundDate() != null) out.add(new Text("Datas do comparativo: " + date(line.comparisonOutboundDate())
+                    + (line.comparisonReturnDate() == null ? " (somente ida)" : " a " + date(line.comparisonReturnDate())), false));
             for (var cost : line.costs()) {
                 out.add(new Text("  Custo — " + COST.getOrDefault(cost.kind(), cost.kind()) + ": " + money(cost.amount()) + " · " + cost.description()
                         + (cost.origin() == null ? "" : " (origem: " + cost.origin() + ")"), false));

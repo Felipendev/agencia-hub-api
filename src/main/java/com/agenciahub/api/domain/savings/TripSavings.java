@@ -49,6 +49,7 @@ public final class TripSavings {
         MISSING_SOURCE("Falta a fonte do preço comparável"),
         MISSING_RESEARCH_DATE("Falta a data da pesquisa"),
         NOT_EQUIVALENT("Comparação não confirmada como equivalente (rota, datas, passageiros e condições)"),
+        MISSING_COMPARISON_DETAILS("Faltam rota, data de ida, passageiros, tarifa ou bagagem do comparativo"),
         MISSING_COSTS("Falta o custo efetivo da viagem"),
         MILES_USAGE_NOT_INFORMED("Falta informar se a emissão usou milhas"),
         MILES_COST_UNKNOWN("Custo de aquisição das milhas desconhecido"),
@@ -172,6 +173,8 @@ public final class TripSavings {
         if (c == null || c.sourceType() == null || blank(c.sourceDescription())) reasons.add(Unavailable.MISSING_SOURCE);
         if (c == null || c.researchedOn() == null) reasons.add(Unavailable.MISSING_RESEARCH_DATE);
         if (c == null || !c.equivalent()) reasons.add(Unavailable.NOT_EQUIVALENT);
+        if (c == null || blank(c.route()) || c.outboundDate() == null || c.passengers() == null
+                || blank(c.fareConditions()) || blank(c.baggage())) reasons.add(Unavailable.MISSING_COMPARISON_DETAILS);
         if (data.costs().isEmpty()) reasons.add(Unavailable.MISSING_COSTS);
         if (data.milesUsage() == null) reasons.add(Unavailable.MILES_USAGE_NOT_INFORMED);
         if (data.milesUsage() == MilesUsage.UNKNOWN) reasons.add(Unavailable.MILES_COST_UNKNOWN);

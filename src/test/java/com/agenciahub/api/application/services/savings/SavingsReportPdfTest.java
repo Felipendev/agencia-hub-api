@@ -23,7 +23,7 @@ class SavingsReportPdfTest {
                 LocalDate.of(2026, 2, 1), "FOR-LIS", 2, "Econômica", "1 mala", null, "NOT_USED",
                 List.of(new Cost("TAXES", new BigDecimal("400.00"), "Taxas de embarque", null)), List.of(),
                 new BigDecimal("3550.50"), available ? new BigDecimal("1449.50") : null, available ? new BigDecimal("29.0") : null,
-                available ? "Mesma rota" : null, null);
+                available ? "Mesma rota" : null, null, LocalDate.of(2026, 3, 10), null);
     }
 
     @Test
@@ -32,18 +32,18 @@ class SavingsReportPdfTest {
         lines.add(line(false));
         Content content = new Content("Resultado 2026", "Cliente", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), null, lines,
                 new Totals(41, 40, 1, 0, new BigDecimal("200000.00"), new BigDecimal("142020.00"), new BigDecimal("57980.00"), new BigDecimal("29.0")),
-                LocalDate.of(2026, 10, 14));
+                LocalDate.of(2026, 10, 14), null);
         try (var document = Loader.loadPDF(new SavingsReportPdf().render(content))) {
             assertThat(document.getNumberOfPages()).isGreaterThan(1);
             String text = new PDFTextStripper().getText(document);
-            assertThat(text).contains("Resultado 2026", "Economia realizada: R$ 57.980,00", "Custo - Taxas: R$ 400,00", "Falta a metodologia", "Página 1 de");
+            assertThat(text).contains("Resultado 2026", "Economia realizada: R$ 57.980,00", "Custo — Taxas: R$ 400,00", "Falta a metodologia", "Página 1 de");
         }
     }
 
     @Test
     void reportWithoutDocumentedTripsSaysUnavailable() throws Exception {
         Content content = new Content("Relatório", "Ana", null, null, "Mensagem 🚀", List.of(line(false)),
-                new Totals(1, 0, 1, 0, null, null, null, null), LocalDate.of(2026, 10, 14));
+                new Totals(1, 0, 1, 0, null, null, null, null), LocalDate.of(2026, 10, 14), null);
         try (var document = Loader.loadPDF(new SavingsReportPdf().render(content))) {
             assertThat(new PDFTextStripper().getText(document)).contains("Economia realizada indisponível", "Mensagem ?", "todas as viagens");
         }

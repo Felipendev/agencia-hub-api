@@ -179,7 +179,8 @@ class TripSavingsIntegrationTest extends AbstractIntegrationTest {
         assertThat(preview.toString()).doesNotContain(personName, locator, "example.com", "Cliente pediu janela").contains("Resultado 2026");
         assertThat(count("trip_savings_reports")).isZero();
 
-        JsonNode shared = json(jwt, body(post("/savings/shared-reports"), request), 201);
+        String reviewed = request.substring(0, request.length() - 1) + ",\"expectedPreviewHash\":\"" + preview.path("previewHash").asText() + "\"}";
+        JsonNode shared = json(jwt, body(post("/savings/shared-reports"), reviewed), 201);
         String id = shared.path("id").asText();
         assertThat(shared.path("content").path("customerLabel").asText()).isEqualTo("Cliente");
         assertThat(shared.path("content").path("totals").path("savings").decimalValue()).isEqualByComparingTo("1449.50");
@@ -199,6 +200,48 @@ class TripSavingsIntegrationTest extends AbstractIntegrationTest {
         assertThat(json(jwt, get("/savings/shared-reports").param("customerId", person), 200).size()).isEqualTo(1);
         json(jwt, delete("/savings/shared-reports/" + id), 204);
         json(jwt, get("/savings/shared-reports/" + id), 404);
+    }
+
+    @Test
+    void generationRequiresTheReviewedSnapshotAndRejectsChangedSources() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "Prévia consistente");
+        String tripId = trip(jwt, person, "2026-06-10", "COMPLETED");
+        json(jwt, body(put("/trips/" + tripId + "/savings"), save(COMPLETE, 0)), 200);
+        String request = "{\"customerId\":\"%s\",\"options\":{\"hideCustomerName\":true,\"hideLocators\":true,\"hideSources\":true,\"hideNotes\":true}}".formatted(person);
+        JsonNode preview = json(jwt, body(post("/savings/shared-reports/preview"), request), 200);
+        json(jwt, body(post("/savings/shared-reports"), request), 409);
+        String reviewed = request.substring(0, request.length() - 1) + ",\"expectedPreviewHash\":\"" + preview.path("previewHash").asText() + "\"}";
+        json(jwt, body(put("/trips/" + tripId + "/savings"), save(COMPLETE.replace("3000", "3200"), 1)), 200);
+        json(jwt, body(post("/savings/shared-reports"), reviewed), 409);
+        JsonNode fresh = json(jwt, body(post("/savings/shared-reports/preview"), request), 200);
+        reviewed = request.substring(0, request.length() - 1) + ",\"expectedPreviewHash\":\"" + fresh.path("previewHash").asText() + "\"}";
+        JsonNode shared = json(jwt, body(post("/savings/shared-reports"), reviewed), 201);
+        assertThat(shared.path("content")).isEqualTo(fresh);
+        json(jwt, delete("/savings/shared-reports/" + shared.path("id").asText()), 204);
+    }
+
+    @Test
+    void retainedReportsBlockCustomerDeletionAndPartialAnonymization() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "Relatório preservado");
+        String email = "savings-" + UUID.randomUUID() + "@test.local";
+        json(jwt, body(patch("/customers/" + person), "{\"email\":\"%s\"}".formatted(email)), 200);
+        String tripId = trip(jwt, person, "2026-06-10", "COMPLETED");
+        json(jwt, body(put("/trips/" + tripId + "/savings"), save(COMPLETE, 0)), 200);
+        String request = "{\"customerId\":\"%s\",\"options\":{}}".formatted(person);
+        JsonNode preview = json(jwt, body(post("/savings/shared-reports/preview"), request), 200);
+        request = request.substring(0, request.length() - 1) + ",\"expectedPreviewHash\":\"" + preview.path("previewHash").asText() + "\"}";
+        String reportId = json(jwt, body(post("/savings/shared-reports"), request), 201).path("id").asText();
+        json(jwt, delete("/trips/" + tripId), 204);
+        assertThat(json(jwt, get("/savings/shared-reports/" + reportId), 200).path("content").path("lines").size()).isEqualTo(1);
+        assertThat(json(jwt, delete("/customers/" + person), 409).path("code").asText()).isEqualTo("SAVINGS_REPORT_HISTORY_EXISTS");
+        String deletionId = json(jwt, body(post("/public/data-deletion-request"), "{\"email\":\"%s\"}".formatted(email)), 201).path("requestId").asText();
+        JsonNode blocked = json(jwt, body(post("/agency/data-deletion-requests/" + deletionId + "/process"), "{\"acao\":\"EXCLUIR\"}"), 400);
+        assertThat(blocked.path("message").asText()).contains("continua pendente");
+        assertThat(jdbc.queryForObject("SELECT status FROM data_deletion_requests WHERE id=?::uuid", String.class, deletionId)).isEqualTo("PENDING");
+        assertThat(json(jwt, get("/customers/" + person), 200).path("email").asText()).isEqualTo(email);
+        json(jwt, delete("/savings/shared-reports/" + reportId), 204);
     }
 
     @Test
