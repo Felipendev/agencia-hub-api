@@ -29,11 +29,11 @@ public class ContractTemplateService {
     private final ContractSupport support;
 
     private static final String SUMMARY_SQL = """
-            SELECT t.*, (SELECT count(*) FROM contracts c WHERE c.template_id = t.id) AS contract_count
+            SELECT t.*, (SELECT count(*) FROM contracts c WHERE c.template_id = t.id AND c.agency_id = t.agency_id) AS contract_count
             FROM contract_templates t WHERE t.agency_id = ?""";
 
     private static final RowMapper<TemplateSummary> SUMMARY = (rs, n) -> new TemplateSummary(
-            rs.getObject("id", UUID.class), rs.getString("name"), rs.getString("description"),
+            rs.getObject("id", UUID.class), rs.getString("product") == null ? null : Product.valueOf(rs.getString("product")), rs.getString("name"), rs.getString("description"),
             rs.getInt("current_version"), rs.getBoolean("archived"), rs.getInt("row_version"),
             rs.getLong("contract_count"), rs.getObject("updated_at", OffsetDateTime.class));
 
@@ -68,10 +68,10 @@ public class ContractTemplateService {
         String body = validated(input);
         UUID id = UUID.randomUUID();
         String author = support.author();
-        jdbc.update("INSERT INTO contract_templates(id, agency_id, name, description, created_by) VALUES (?, ?, ?, ?, ?)",
-                id, support.agency(), input.name().strip(), blankToNull(input.description()), author);
+        jdbc.update("INSERT INTO contract_templates(id, agency_id, product, name, description, created_by) VALUES (?, ?, ?, ?, ?, ?)",
+                id, support.agency(), input.product().name(), input.name().strip(), blankToNull(input.description()), author);
         insertVersion(id, 1, body, author);
-        support.audit(TEMPLATE, id, null, "TEMPLATE_CREATED", auditDetail(input.name(), 1));
+        support.audit(TEMPLATE, id, null, "TEMPLATE_CREATED", auditDetail(input.name(), 1, input.product()));
         return get(id);
     }
 
@@ -81,16 +81,19 @@ public class ContractTemplateService {
         TemplateSummary before = summary(id, true);
         if (before.archived()) throw new ContractConflictException("Reative o modelo antes de editá-lo.");
         support.expectVersion(before.rowVersion(), input.expectedVersion());
+        if (before.product() != null && before.product() != input.product() && before.contractCount() > 0) {
+            throw new ContractConflictException("O produto de um modelo já usado não pode ser alterado. Crie um modelo para o outro produto.");
+        }
         String body = validated(input);
         String currentBody = version(id, before.currentVersion()).body();
         boolean bodyChanged = !currentBody.equals(body);
         int nextVersion = bodyChanged ? before.currentVersion() + 1 : before.currentVersion();
         if (bodyChanged) insertVersion(id, nextVersion, body, support.author());
         jdbc.update("""
-                UPDATE contract_templates SET name = ?, description = ?, current_version = ?, row_version = row_version + 1,
+                UPDATE contract_templates SET name = ?, description = ?, current_version = ?, product = ?, row_version = row_version + 1,
                 updated_at = now() WHERE id = ? AND agency_id = ?""",
-                input.name().strip(), blankToNull(input.description()), nextVersion, id, support.agency());
-        support.audit(TEMPLATE, id, null, bodyChanged ? "TEMPLATE_VERSIONED" : "TEMPLATE_UPDATED", auditDetail(input.name(), nextVersion));
+                input.name().strip(), blankToNull(input.description()), nextVersion, input.product().name(), id, support.agency());
+        support.audit(TEMPLATE, id, null, bodyChanged ? "TEMPLATE_VERSIONED" : "TEMPLATE_UPDATED", auditDetail(input.name(), nextVersion, input.product()));
         return get(id);
     }
 
@@ -101,13 +104,13 @@ public class ContractTemplateService {
         support.expectVersion(before.rowVersion(), expectedVersion);
         if (before.contractCount() == 0) {
             jdbc.update("DELETE FROM contract_templates WHERE id = ? AND agency_id = ?", id, support.agency());
-            support.audit(TEMPLATE, id, null, "TEMPLATE_DELETED", auditDetail(before.name(), before.currentVersion()));
+            support.audit(TEMPLATE, id, null, "TEMPLATE_DELETED", auditDetail(before.name(), before.currentVersion(), before.product()));
             return new DeleteOutcome("DELETED", "Modelo excluído.");
         }
         if (!before.archived()) {
             jdbc.update("UPDATE contract_templates SET archived = true, row_version = row_version + 1, updated_at = now() WHERE id = ? AND agency_id = ?",
                     id, support.agency());
-            support.audit(TEMPLATE, id, null, "TEMPLATE_ARCHIVED", auditDetail(before.name(), before.currentVersion()));
+            support.audit(TEMPLATE, id, null, "TEMPLATE_ARCHIVED", auditDetail(before.name(), before.currentVersion(), before.product()));
         }
         return new DeleteOutcome("ARCHIVED",
                 "O modelo já foi usado em contratos e foi arquivado para preservar o histórico. Ele não aparece para novos rascunhos.");
@@ -120,7 +123,7 @@ public class ContractTemplateService {
         support.expectVersion(before.rowVersion(), expectedVersion);
         jdbc.update("UPDATE contract_templates SET archived = false, row_version = row_version + 1, updated_at = now() WHERE id = ? AND agency_id = ?",
                 id, support.agency());
-        support.audit(TEMPLATE, id, null, "TEMPLATE_RESTORED", auditDetail(before.name(), before.currentVersion()));
+        support.audit(TEMPLATE, id, null, "TEMPLATE_RESTORED", auditDetail(before.name(), before.currentVersion(), before.product()));
         return get(id);
     }
 
@@ -167,9 +170,10 @@ public class ContractTemplateService {
         return ContractTemplateRenderer.validate(body).stream().map(ContractField::key).toList();
     }
 
-    private static Map<String, Object> auditDetail(String name, int version) {
+    private static Map<String, Object> auditDetail(String name, int version, Product product) {
         Map<String, Object> detail = new LinkedHashMap<>();
         detail.put("name", name == null ? null : name.strip());
+        detail.put("product", product == null ? null : product.name());
         detail.put("templateVersion", version);
         return detail;
     }

@@ -17,6 +17,7 @@ public final class Contracts {
     public static LocalDate today() { return LocalDate.now(AGENCY_ZONE); }
 
     public enum Status { DRAFT, SENT, SIGNED, CANCELLED }
+    public enum Product { TRAVEL, MILES }
 
     public enum PaymentMode { CASH, INSTALLMENTS }
 
@@ -25,12 +26,13 @@ public final class Contracts {
     // ---- Modelos ----
 
     public record TemplateInput(
+            @NotNull Product product,
             @NotBlank @Size(max = 200) String name,
             @Size(max = 1000) String description,
             @NotBlank @Size(max = ContractTemplateRenderer.MAX_BODY_LENGTH) String body,
             @Min(0) Integer expectedVersion) {}
 
-    public record TemplateSummary(UUID id, String name, String description, int currentVersion, boolean archived,
+    public record TemplateSummary(UUID id, Product product, String name, String description, int currentVersion, boolean archived,
                                   int rowVersion, long contractCount, OffsetDateTime updatedAt) {}
 
     public record TemplateVersion(int version, String body, List<String> usedFields, String author, OffsetDateTime createdAt) {}
@@ -49,6 +51,7 @@ public final class Contracts {
     // ---- Contratos ----
 
     public record DraftInput(
+            @NotNull Product product,
             @NotNull UUID customerId,
             @NotNull UUID templateId,
             @Min(1) Integer templateVersion,
@@ -69,7 +72,7 @@ public final class Contracts {
 
     public record ReasonInput(@NotNull @Min(1) Integer expectedVersion, @NotBlank @Size(max = 1000) String reason) {}
 
-    public record ContractSummary(UUID id, UUID customerId, String customerName, UUID templateId, String templateName,
+    public record ContractSummary(UUID id, Product product, UUID customerId, String customerName, UUID templateId, String templateName,
                                   int templateVersion, String title, Status status, String planName, BigDecimal price,
                                   LocalDate startDate, LocalDate endDate, Integer latestDocumentVersion,
                                   boolean documentCurrent, int rowVersion, OffsetDateTime updatedAt) {}

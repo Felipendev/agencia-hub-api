@@ -26,8 +26,9 @@ public class ContractController {
     private final ContractService service;
 
     @GetMapping
-    public List<ContractSummary> list(@RequestParam(required = false) UUID customerId, @RequestParam(required = false) Status status) {
-        return service.list(customerId, status);
+    public List<ContractSummary> list(@RequestParam(required = false) UUID customerId, @RequestParam(required = false) Status status,
+                                      @RequestParam(required = false) Product product) {
+        return service.list(customerId, status, product);
     }
 
     @GetMapping("/{id}")

@@ -38,6 +38,7 @@ public class AgencyDeletionScheduler {
     private final InvitationRepository invitationRepository;
     private final AgencyAuditLogRepository auditLogRepository;
     private final VerificationCodeRepository verificationCodeRepository;
+    private final org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     @Scheduled(cron = "0 0 3 * * *")
     @Transactional
@@ -48,6 +49,11 @@ public class AgencyDeletionScheduler {
         for (Agency agency : toDelete) {
             UUID agencyId = agency.getId();
             log.info("Starting hard-delete of agency {} scheduled for {}", agencyId, agency.getDeletionScheduledAt());
+            // Descarte autorizado da agência inclui todos os documentos; ordem respeita as FKs do F02.
+            for (String table : List.of("contract_audit", "contract_receivable_links", "contract_attachments",
+                    "contract_documents", "contracts", "contract_template_versions", "contract_templates")) {
+                jdbc.update("DELETE FROM " + table + " WHERE agency_id=?", agencyId);
+            }
 
             List<UUID> userIds = platformAccountRepository.findByAgency_Id(agencyId)
                     .stream().map(PlatformAccount::getId).toList();

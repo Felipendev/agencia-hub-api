@@ -52,7 +52,7 @@ public class ContractService {
     private final ObjectMapper mapper;
 
     /** Linha completa da tabela {@code contracts}. */
-    record Row(UUID id, UUID customerId, String customerName, UUID templateId, String templateName, int templateVersion,
+    record Row(UUID id, Product product, UUID customerId, String customerName, UUID templateId, String templateName, int templateVersion,
                int latestTemplateVersion, String title, String planName, BigDecimal price, LocalDate startDate,
                LocalDate endDate, PaymentMode paymentMode, Integer installments, String paymentTerms, String notes,
                Status status, int dataRevision, int rowVersion, LocalDate sentOn, LocalDate signedOn,
@@ -64,7 +64,7 @@ public class ContractService {
         }
 
         ContractSummary summary() {
-            return new ContractSummary(id, customerId, customerName, templateId, templateName, templateVersion, title, status,
+            return new ContractSummary(id, product, customerId, customerName, templateId, templateName, templateVersion, title, status,
                     planName, price, startDate, endDate, latestDocumentVersion, documentCurrent(), rowVersion, updatedAt);
         }
 
@@ -84,7 +84,7 @@ public class ContractService {
             WHERE c.agency_id = ?""";
 
     private static final RowMapper<Row> ROW = (rs, n) -> new Row(
-            rs.getObject("id", UUID.class), rs.getObject("customer_id", UUID.class), rs.getString("customer_name"),
+            rs.getObject("id", UUID.class), rs.getString("product") == null ? null : Product.valueOf(rs.getString("product")), rs.getObject("customer_id", UUID.class), rs.getString("customer_name"),
             rs.getObject("template_id", UUID.class), rs.getString("template_name"), rs.getInt("template_version"),
             rs.getInt("latest_template_version"), rs.getString("title"), rs.getString("plan_name"), rs.getBigDecimal("price"),
             rs.getObject("start_date", LocalDate.class), rs.getObject("end_date", LocalDate.class),
@@ -99,11 +99,12 @@ public class ContractService {
     // ------------------------------------------------------------------ consultas
 
     @Transactional(readOnly = true)
-    public List<ContractSummary> list(UUID customerId, Status status) {
+    public List<ContractSummary> list(UUID customerId, Status status, Product product) {
         StringBuilder sql = new StringBuilder(ROW_SQL);
         List<Object> args = new ArrayList<>(List.of(support.agency()));
         if (customerId != null) { sql.append(" AND c.customer_id = ?"); args.add(customerId); }
         if (status != null) { sql.append(" AND c.status = ?"); args.add(status.name()); }
+        if (product != null) { sql.append(" AND c.product = ?"); args.add(product.name()); }
         sql.append(" ORDER BY c.updated_at DESC, c.id");
         return jdbc.query(sql.toString(), ROW, args.toArray()).stream().map(Row::summary).toList();
     }
@@ -141,8 +142,10 @@ public class ContractService {
                 .format(meta.createdAt().atZoneSameInstant(Contracts.AGENCY_ZONE));
         String footer = "Documento v%d · Modelo v%d · Emitido em %s · SHA-256 %s"
                 .formatted(meta.version(), meta.templateVersion(), issued, meta.contentSha256().substring(0, 16));
-        byte[] bytes = pdf.render(row.title(), view.renderedContent(), footer);
-        return new FileContent(safeFilename(row.title()) + "-v" + meta.version() + ".pdf", "application/pdf", bytes);
+        JsonNode snapshot = mapper.valueToTree(view.dataSnapshot());
+        String issuedTitle = snapshot.path("fields").path("contrato.titulo").asText(row.title());
+        byte[] bytes = pdf.render(issuedTitle, view.renderedContent(), footer);
+        return new FileContent(safeFilename(issuedTitle) + "-v" + meta.version() + ".pdf", "application/pdf", bytes);
     }
 
     @Transactional(readOnly = true)
@@ -163,7 +166,7 @@ public class ContractService {
         if (existing.isPresent()) {
             Row row = existing.get();
             if (!row.customerId().equals(input.customerId()) || !row.templateId().equals(input.templateId())
-                    || !row.title().equals(input.title().strip())) {
+                    || row.product() != input.product() || !row.title().equals(input.title().strip())) {
                 throw new ContractConflictException("A confirmação já foi utilizada para outro contrato.");
             }
             return detail(row);
@@ -174,12 +177,13 @@ public class ContractService {
             throw new ContractConflictException("Este rascunho já foi excluído. Recarregue a página antes de criar outro.");
         }
         int templateVersion = activeTemplateVersion(input.templateId(), input.templateVersion());
+        requireTemplateProduct(input.templateId(), input.product());
         Terms terms = terms(input);
         jdbc.update("""
-                INSERT INTO contracts(id, agency_id, customer_id, template_id, template_version, title, plan_name, price,
+                INSERT INTO contracts(id, agency_id, product, customer_id, template_id, template_version, title, plan_name, price,
                     start_date, end_date, payment_mode, installments, payment_terms, notes, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                requestKey, support.agency(), input.customerId(), input.templateId(), templateVersion, terms.title(),
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                requestKey, support.agency(), input.product().name(), input.customerId(), input.templateId(), templateVersion, terms.title(),
                 terms.planName(), terms.price(), terms.startDate(), terms.endDate(), name(terms.paymentMode()),
                 terms.installments(), terms.paymentTerms(), terms.notes(), support.author());
         Row row = row(requestKey, false);
@@ -192,6 +196,10 @@ public class ContractService {
         Row before = row(id, true);
         requireStatus(before, Status.DRAFT, "Somente rascunhos podem ser editados. Para alterar um contrato enviado, inicie uma revisão.");
         support.expectVersion(before.rowVersion(), input.expectedVersion());
+        if (before.product() != null && before.product() != input.product()) {
+            throw new ContractConflictException("O produto do contrato não pode ser trocado. Crie um rascunho para o outro produto.");
+        }
+        requireTemplateProduct(input.templateId(), input.product());
         if (!before.customerId().equals(input.customerId())) {
             invalid("A pessoa do contrato não pode ser trocada. Crie um novo rascunho para outra pessoa.");
         }
@@ -202,16 +210,16 @@ public class ContractService {
                 ? before.templateVersion()
                 : activeTemplateVersion(input.templateId(), requested);
         Terms terms = terms(input);
-        boolean unchanged = before.templateId().equals(input.templateId()) && before.templateVersion() == templateVersion
+        boolean unchanged = before.product() == input.product() && before.templateId().equals(input.templateId()) && before.templateVersion() == templateVersion
                 && terms.equals(new Terms(before.title(), before.planName(), before.price(), before.startDate(), before.endDate(),
                 before.paymentMode(), before.installments(), before.paymentTerms(), before.notes()));
         if (unchanged) return detail(before);
         jdbc.update("""
-                UPDATE contracts SET template_id = ?, template_version = ?, title = ?, plan_name = ?, price = ?, start_date = ?,
+                UPDATE contracts SET product = ?, template_id = ?, template_version = ?, title = ?, plan_name = ?, price = ?, start_date = ?,
                     end_date = ?, payment_mode = ?, installments = ?, payment_terms = ?, notes = ?,
                     data_revision = data_revision + 1, row_version = row_version + 1, updated_at = now()
                 WHERE id = ? AND agency_id = ?""",
-                input.templateId(), templateVersion, terms.title(), terms.planName(), terms.price(), terms.startDate(),
+                input.product().name(), input.templateId(), templateVersion, terms.title(), terms.planName(), terms.price(), terms.startDate(),
                 terms.endDate(), name(terms.paymentMode()), terms.installments(), terms.paymentTerms(), terms.notes(),
                 id, support.agency());
         Row row = row(id, false);
@@ -243,6 +251,7 @@ public class ContractService {
     @Transactional
     public DocumentMeta generate(UUID id, Integer expectedVersion) {
         Row row = row(id, true);
+        if (row.product() == null) invalid("Classifique o produto do contrato antes de emitir o documento.");
         requireStatus(row, Status.DRAFT, "Inicie uma revisão para gerar uma nova versão do documento.");
         support.expectVersion(row.rowVersion(), expectedVersion);
         LocalDate issueDate = Contracts.today();
@@ -419,6 +428,14 @@ public class ContractService {
         return version;
     }
 
+    private void requireTemplateProduct(UUID templateId, Product product) {
+        List<String> products = jdbc.query("SELECT product FROM contract_templates WHERE id=? AND agency_id=? FOR SHARE",
+                (rs, n) -> rs.getString(1), templateId, support.agency());
+        if (products.isEmpty() || !product.name().equals(products.get(0))) {
+            invalid("Escolha um modelo do mesmo produto do contrato (Viagens ou Milhas).");
+        }
+    }
+
     private void lockCustomer(UUID customerId) {
         List<UUID> found = jdbc.query("SELECT id FROM customers WHERE id = ? AND agency_id = ? FOR UPDATE",
                 (rs, n) -> rs.getObject(1, UUID.class), customerId, support.agency());
@@ -471,6 +488,7 @@ public class ContractService {
         Map<ContractField, String> values = ContractValues.resolve(customer, agency, row.terms(), issueDate);
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("issueDate", issueDate.toString());
+        data.put("product", name(row.product()));
         data.put("customerId", row.customerId());
         data.put("templateId", row.templateId());
         data.put("templateName", row.templateName());
@@ -572,6 +590,7 @@ public class ContractService {
     private Map<String, Object> termsDetail(Row row) {
         Map<String, Object> detail = new LinkedHashMap<>();
         detail.put("title", row.title());
+        detail.put("product", name(row.product()));
         detail.put("templateId", row.templateId());
         detail.put("templateVersion", row.templateVersion());
         detail.put("planName", row.planName());

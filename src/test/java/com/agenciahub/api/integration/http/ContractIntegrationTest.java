@@ -74,7 +74,7 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
     }
 
     private JsonNode template(String jwt, String body) throws Exception {
-        String payload = "{\"name\":\"Assessoria %s\",\"description\":\"Modelo da agência\",\"body\":%s}"
+        String payload = "{\"product\":\"MILES\",\"name\":\"Assessoria %s\",\"description\":\"Modelo da agência\",\"body\":%s}"
                 .formatted(UUID.randomUUID(), quote(body));
         return json(jwt, jsonBody(post("/contract-templates"), payload), 201);
     }
@@ -84,7 +84,7 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
     }
 
     private static String draft(String customerId, String templateId, String extra) {
-        return "{\"customerId\":\"%s\",\"templateId\":\"%s\",\"title\":\"Assessoria anual\"%s}".formatted(customerId, templateId, extra);
+        return "{\"product\":\"MILES\",\"customerId\":\"%s\",\"templateId\":\"%s\",\"title\":\"Assessoria anual\"%s}".formatted(customerId, templateId, extra);
     }
 
     private static final String COMPLETE = ",\"planName\":\"Plano Ouro\",\"price\":1200.00,\"startDate\":\"2026-11-01\",\"paymentMode\":\"INSTALLMENTS\",\"installments\":3";
@@ -105,6 +105,76 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
         return http.parse(login).path("token").asText();
     }
 
+    @Test
+    void productIsRequiredAndContractsOfTheSamePersonRemainIndependent() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "Dois produtos");
+        String milesTemplate = template(jwt, BODY).path("template").path("id").asText();
+        JsonNode travelTemplate = json(jwt, jsonBody(post("/contract-templates"), "{\"product\":\"TRAVEL\",\"name\":\"Viagem\",\"body\":\"Cliente {{cliente.nome}}\"}"), 201);
+        String travelId = travelTemplate.path("template").path("id").asText();
+        String payload = draft(person, milesTemplate, COMPLETE);
+        json(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), payload.replace("\"product\":\"MILES\",", "")), 400);
+        json(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), payload.replace("\"MILES\"", "\"TRAVEL\"")), 400);
+        JsonNode miles = createDraft(jwt, person, milesTemplate, COMPLETE);
+        JsonNode travel = json(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft(person, travelId, COMPLETE).replace("\"MILES\"", "\"TRAVEL\"")), 201);
+        String milesId = miles.path("contract").path("id").asText();
+        assertThat(json(jwt, get("/contracts").param("customerId", person).param("product", "MILES"), 200).size()).isEqualTo(1);
+        assertThat(json(jwt, get("/contracts").param("customerId", person).param("product", "TRAVEL"), 200).size()).isEqualTo(1);
+        json(jwt, jsonBody(post("/contracts/" + milesId + "/documents"), "{\"expectedVersion\":1}"), 201);
+        assertThat(json(jwt, get("/contracts/" + milesId + "/documents/1"), 200).path("dataSnapshot").path("product").asText()).isEqualTo("MILES");
+        json(jwt, jsonBody(post("/contracts/" + milesId + "/cancel"), "{\"expectedVersion\":1,\"reason\":\"Encerrar apenas milhas\"}"), 200);
+        assertThat(json(jwt, get("/contracts/" + travel.path("contract").path("id").asText()), 200).path("contract").path("status").asText()).isEqualTo("DRAFT");
+        json(jwt, jsonBody(patch("/contract-templates/" + milesTemplate), "{\"product\":\"TRAVEL\",\"name\":\"Mudança inválida\",\"body\":\"Texto\",\"expectedVersion\":1}"), 409);
+    }
+
+    @Test
+    void customerDeletionAndPrivacyProcessingDoNotSilentlyDiscardContracts() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "Retenção");
+        String email = "contracts-" + UUID.randomUUID() + "@test.local";
+        json(jwt, jsonBody(patch("/customers/" + person), "{\"email\":\"%s\"}".formatted(email)), 200);
+        String id = createDraft(jwt, person, template(jwt, BODY).path("template").path("id").asText(), COMPLETE).path("contract").path("id").asText();
+        json(jwt, jsonBody(post("/contracts/" + id + "/documents"), "{\"expectedVersion\":1}"), 201);
+        assertThat(json(jwt, delete("/customers/" + person), 409).path("code").asText()).isEqualTo("CONTRACT_HISTORY_EXISTS");
+        String requestId = json(jwt, jsonBody(post("/public/data-deletion-request"), "{\"email\":\"%s\"}".formatted(email)), 201).path("requestId").asText();
+        JsonNode denied = json(jwt, jsonBody(post("/agency/data-deletion-requests/" + requestId + "/process"), "{\"acao\":\"EXCLUIR\"}"), 400);
+        assertThat(denied.path("message").asText()).contains("continua pendente");
+        assertThat(jdbc.queryForObject("SELECT status FROM data_deletion_requests WHERE id=?::uuid", String.class, requestId)).isEqualTo("PENDING");
+        assertThat(json(jwt, get("/customers/" + person), 200).path("email").asText()).isEqualTo(email);
+        assertThat(json(jwt, get("/contracts/" + id + "/documents/1"), 200).path("renderedContent").asText()).contains("Retenção");
+    }
+
+    @Test
+    void previousPdfKeepsIssuedTitleAfterDraftIsEdited() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String person = customer(jwt, "PDF imutável");
+        String model = template(jwt, BODY).path("template").path("id").asText();
+        String id = createDraft(jwt, person, model, COMPLETE).path("contract").path("id").asText();
+        json(jwt, jsonBody(post("/contracts/" + id + "/documents"), "{\"expectedVersion\":1}"), 201);
+        json(jwt, jsonBody(patch("/contracts/" + id), draft(person, model, COMPLETE + ",\"expectedVersion\":1").replace("Assessoria anual", "Novo título posterior")), 200);
+        var response = mockMvc.perform(as(jwt, get("/contracts/" + id + "/documents/1/pdf"))).andExpect(status().isOk()).andReturn().getResponse();
+        assertThat(response.getHeader("Content-Disposition")).contains("assessoria-anual").doesNotContain("novo-titulo");
+        try (var loaded = Loader.loadPDF(response.getContentAsByteArray())) {
+            assertThat(new PDFTextStripper().getText(loaded)).contains("Assessoria anual").doesNotContain("Novo título posterior");
+        }
+    }
+
+    @Test
+    void differentPeopleCanCreateContractsWithTheSameModelConcurrently() throws Exception {
+        String jwt = http.loginOwner(mockMvc);
+        String model = template(jwt, BODY).path("template").path("id").asText();
+        String first = customer(jwt, "Primeira pessoa"), second = customer(jwt, "Segunda pessoa");
+        var executor = Executors.newFixedThreadPool(2);
+        try {
+            List<Callable<Integer>> calls = List.of(
+                    () -> mockMvc.perform(as(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft(first, model, COMPLETE)))).andReturn().getResponse().getStatus(),
+                    () -> mockMvc.perform(as(jwt, jsonBody(post("/contracts").header("Idempotency-Key", UUID.randomUUID()), draft(second, model, COMPLETE)))).andReturn().getResponse().getStatus());
+            var results = executor.invokeAll(calls, 20, java.util.concurrent.TimeUnit.SECONDS);
+            assertThat(results).noneMatch(java.util.concurrent.Future::isCancelled);
+            assertThat(List.of(results.get(0).get(), results.get(1).get())).containsExactly(201, 201);
+        } finally { executor.shutdownNow(); }
+    }
+
     private long count(String table) {
         return jdbc.queryForObject("SELECT count(*) FROM " + table, Long.class);
     }
@@ -115,19 +185,19 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
     void templateCrudKeepsImmutableVersionsAndArchivesWhenUsed() throws Exception {
         String jwt = http.loginOwner(mockMvc);
         json(jwt, get("/contract-templates/fields"), 200);
-        json(jwt, jsonBody(post("/contract-templates"), "{\"name\":\"Inválido\",\"body\":\"Olá {{cliente.apelido}}\"}"), 400);
+        json(jwt, jsonBody(post("/contract-templates"), "{\"product\":\"MILES\",\"name\":\"Inválido\",\"body\":\"Olá {{cliente.apelido}}\"}"), 400);
 
         JsonNode created = template(jwt, BODY);
         String id = created.path("template").path("id").asText();
         assertThat(created.path("template").path("currentVersion").asInt()).isEqualTo(1);
         assertThat(created.path("usedFields").toString()).contains("cliente.nome", "contrato.valor");
 
-        String rename = "{\"name\":\"Assessoria renomeada\",\"body\":%s,\"expectedVersion\":1}".formatted(quote(BODY));
+        String rename = "{\"product\":\"MILES\",\"name\":\"Assessoria renomeada\",\"body\":%s,\"expectedVersion\":1}".formatted(quote(BODY));
         JsonNode renamed = json(jwt, jsonBody(patch("/contract-templates/" + id), rename), 200);
         assertThat(renamed.path("template").path("id").asText()).isEqualTo(id);
         assertThat(renamed.path("template").path("currentVersion").asInt()).isEqualTo(1);
 
-        String changed = "{\"name\":\"Assessoria renomeada\",\"body\":%s,\"expectedVersion\":2}".formatted(quote(BODY + "\nCláusula nova."));
+        String changed = "{\"product\":\"MILES\",\"name\":\"Assessoria renomeada\",\"body\":%s,\"expectedVersion\":2}".formatted(quote(BODY + "\nCláusula nova."));
         JsonNode versioned = json(jwt, jsonBody(patch("/contract-templates/" + id), changed), 200);
         assertThat(versioned.path("template").path("currentVersion").asInt()).isEqualTo(2);
         assertThat(versioned.path("versions").size()).isEqualTo(2);
@@ -343,7 +413,7 @@ class ContractIntegrationTest extends AbstractIntegrationTest {
         String person = customer(owner, "Equipe");
         String templateId = template(owner, BODY).path("template").path("id").asText();
 
-        json(agent, jsonBody(post("/contract-templates"), "{\"name\":\"Agente\",\"body\":\"Texto\"}"), 403);
+        json(agent, jsonBody(post("/contract-templates"), "{\"product\":\"MILES\",\"name\":\"Agente\",\"body\":\"Texto\"}"), 403);
         json(agent, delete("/contract-templates/" + templateId).param("expectedVersion", "1"), 403);
         assertThat(json(agent, get("/contract-templates"), 200).toString()).contains(templateId);
 
