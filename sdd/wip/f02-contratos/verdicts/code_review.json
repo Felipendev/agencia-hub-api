@@ -1,0 +1,12 @@
+{
+  "verdict": "APPROVED",
+  "skill": "sdd-code-reviewer",
+  "findings": {
+    "major": 0,
+    "minor": 0,
+    "critical": 0
+  },
+  "validation": "32 testes reais aprovados, PostgreSQL efemero e Flyway V1-V57; privacidade explicita; PDF imutavel; isolamento e concorrencia",
+  "files_reviewed": 22,
+  "timestamp": "2026-10-15T21:55:19.0212750Z"
+}
