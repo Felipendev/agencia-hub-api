@@ -27,6 +27,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check migration history and sequence
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+        run: |
+          git fetch origin "$BASE_BRANCH"
+          bash scripts/check-migrations.sh "origin/$BASE_BRANCH"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
