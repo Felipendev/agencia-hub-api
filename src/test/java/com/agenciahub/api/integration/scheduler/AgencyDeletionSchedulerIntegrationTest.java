@@ -106,6 +106,13 @@ class AgencyDeletionSchedulerIntegrationTest extends AbstractIntegrationTest {
         UUID person = customers.save(com.agenciahub.api.application.persistence.entity.CrmCustomer.builder()
                 .agency(agency).name("Pessoa com contrato").status(com.agenciahub.api.domain.CustomerStatus.ACTIVE).notes("").build()).getId();
         UUID template = UUID.randomUUID(), contract = UUID.randomUUID();
+        UUID savingsTrip = UUID.randomUUID(), savings = UUID.randomUUID();
+        jdbc.update("INSERT INTO trips(id,agency_id,customer_id,service_type,status) VALUES(?,?,?,'AEREO','COMPLETED')", savingsTrip, agencyId, person);
+        jdbc.update("INSERT INTO trip_savings(id,agency_id,trip_id,data,created_by) VALUES(?,?,?,'{}','Teste')", savings, agencyId, savingsTrip);
+        jdbc.update("INSERT INTO trip_savings_versions(id,savings_id,agency_id,version,data,author) VALUES(?,?,?,1,'{}','Teste')", UUID.randomUUID(), savings, agencyId);
+        jdbc.update("INSERT INTO trip_savings_evidence(id,savings_id,agency_id,filename,content_type,byte_size,content,author) VALUES(?,?,?,'teste.pdf','application/pdf',1,?,'Teste')", UUID.randomUUID(), savings, agencyId, new byte[]{1});
+        jdbc.update("INSERT INTO trip_savings_reports(id,agency_id,customer_id,options,content,author) VALUES(?,?,?,'{}','{}','Teste')", UUID.randomUUID(), agencyId, person);
+        jdbc.update("INSERT INTO trip_savings_audit(id,agency_id,resource_type,resource_id,trip_id,customer_id,action,detail,author) VALUES(?,?,'SAVINGS',?, ?,?,'SAVINGS_CREATED','{}','Teste')", UUID.randomUUID(), agencyId, savings, savingsTrip, person);
         jdbc.update("INSERT INTO contract_templates(id,agency_id,product,name,created_by) VALUES(?,?,'MILES','Modelo','Teste')", template, agencyId);
         jdbc.update("INSERT INTO contract_template_versions(id,template_id,agency_id,version,body,author) VALUES(?,?,?,1,'Texto','Teste')", UUID.randomUUID(), template, agencyId);
         jdbc.update("INSERT INTO contracts(id,agency_id,product,customer_id,template_id,template_version,title,created_by) VALUES(?,?,'MILES',?,?,1,'Contrato','Teste')", contract, agencyId, person, template);
@@ -133,5 +140,8 @@ class AgencyDeletionSchedulerIntegrationTest extends AbstractIntegrationTest {
             assertThat(jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE agency_id=?", Long.class, agencyId)).isZero();
         }
         assertThat(jdbc.queryForObject("SELECT count(*) FROM contract_templates WHERE id=?", Long.class, retainedTemplate)).isEqualTo(1);
+        for (String table : java.util.List.of("trip_savings_audit", "trip_savings_reports", "trip_savings_evidence", "trip_savings_versions", "trip_savings", "trips")) {
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM " + table + " WHERE agency_id=?", Long.class, agencyId)).isZero();
+        }
     }
 }
