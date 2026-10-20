@@ -1,0 +1,25 @@
+{
+  "tasks": [
+    {
+      "description": "V61, vínculo e versões, 27 testes backend aprovados",
+      "status": "completed",
+      "id": "api"
+    },
+    {
+      "description": "Cliente, filtros e planos no perfil, 123 testes aprovados",
+      "status": "completed",
+      "id": "ui"
+    },
+    {
+      "description": "Validação local aprovada: migração legada, CRUD, autoria, tenant, tipos, lint, build e visual",
+      "status": "completed",
+      "id": "validation"
+    },
+    {
+      "description": "Aguardar V59/V60, revalidar upgrade sequencial, conflitos compartilhados e prévia antes da publicação",
+      "status": "pending",
+      "id": "release"
+    }
+  ],
+  "feature": "TODO-052"
+}

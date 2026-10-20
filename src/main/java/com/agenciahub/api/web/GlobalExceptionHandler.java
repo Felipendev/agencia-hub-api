@@ -62,6 +62,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMostSpecificCause().getMessage();
+        if (msg != null && (msg.contains("accumulation_simulations_customer_id_fkey") || msg.contains("accumulation_simulation_versions_customer_id_fkey"))) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Esta pessoa possui planos de milhas ou versões vinculadas. Revise as simulações e o histórico antes de excluir; inative a pessoa quando precisar preservá-los.", "SIMULATION_CUSTOMER_HISTORY_EXISTS"));
+        }
         if (msg != null && msg.contains("trip_savings_reports_customer_id_fkey")) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Esta pessoa possui relatórios de economia. Exclua os relatórios quando apropriado ou inative a pessoa para preservar os documentos.", "SAVINGS_REPORT_HISTORY_EXISTS"));
         }

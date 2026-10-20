@@ -19,7 +19,10 @@ class AccumulationSimulationCrudIntegrationTest extends AbstractIntegrationTest 
         "scenarios":[{"program":"Smiles","bonusPercent":100}]}
         """;
     private String create(String jwt) throws Exception {
-        String response=mockMvc.perform(post("/accumulation-simulations").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content(INPUT))
+        String customer=mockMvc.perform(post("/customers").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Plano "+UUID.randomUUID()+"\",\"status\":\"ACTIVE\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String payload="{\"customerId\":\""+http.parse(customer).path("id").asText()+"\",\"assumptions\":"+INPUT+"}";
+        String response=mockMvc.perform(post("/accumulation-simulations").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content(payload))
             .andExpect(status().isCreated()).andExpect(jsonPath("$.version").value(1)).andReturn().getResponse().getContentAsString();
         return http.parse(response).path("id").asText();
     }
@@ -30,9 +33,9 @@ class AccumulationSimulationCrudIntegrationTest extends AbstractIntegrationTest 
         mockMvc.perform(patch("/accumulation-simulations/"+id).header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content(patch))
             .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id)).andExpect(jsonPath("$.version").value(2))
             .andExpect(jsonPath("$.result.basePoints").value(96000)).andExpect(jsonPath("$.result.scenarios[0].projectedMiles").value(192000));
-        // A retry after a lost response does not create a third version.
+        // A stale retry is a conflict, even when the numerical inputs happen to match.
         mockMvc.perform(patch("/accumulation-simulations/"+id).header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content(patch))
-            .andExpect(status().isOk()).andExpect(jsonPath("$.version").value(2));
+            .andExpect(status().isConflict());
         mockMvc.perform(get("/accumulation-simulations/"+id).header("Authorization","Bearer "+jwt)).andExpect(status().isOk()).andExpect(jsonPath("$.assumptions.title").value("Planejamento atualizado"));
         mockMvc.perform(get("/accumulation-simulations/"+id+"/history").header("Authorization","Bearer "+jwt)).andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2)).andExpect(jsonPath("$[0].version").value(2)).andExpect(jsonPath("$[0].author").isNotEmpty())

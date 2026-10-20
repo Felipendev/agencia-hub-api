@@ -49,6 +49,8 @@ public class AgencyDeletionScheduler {
         for (Agency agency : toDelete) {
             UUID agencyId = agency.getId();
             log.info("Starting hard-delete of agency {} scheduled for {}", agencyId, agency.getDeletionScheduledAt());
+            // Versões seguem a exclusão em cascata; remover planos antes das pessoas referenciadas.
+            jdbc.update("DELETE FROM accumulation_simulations WHERE agency_id=?", agencyId);
             for (String table : List.of("trip_savings_audit", "trip_savings_reports", "trip_savings_evidence",
                     "trip_savings_versions", "trip_savings")) {
                 jdbc.update("DELETE FROM " + table + " WHERE agency_id=?", agencyId);
