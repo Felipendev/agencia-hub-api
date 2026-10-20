@@ -81,7 +81,7 @@ class AgendaTest {
         Instant start = Instant.parse("2026-10-21T17:00:00Z");
         String ics = Agenda.ics(new IcsEvent(UUID.fromString("00000000-0000-0000-0000-000000000001"), "Revisão, milhas; ação",
                 "Linha 1\nLinha 2 " + "é".repeat(60), null, "https://meet.example/x", start, 60, true, start));
-        assertThat(ics).contains("DTSTART:20261021T170000Z", "DTEND:20261021T180000Z", "SUMMARY:Revisão\\, milhas\; ação",
+        assertThat(ics).contains("DTSTART:20261021T170000Z", "DTEND:20261021T180000Z", "SUMMARY:Revisão\\, milhas\\; ação",
                 "Linha 1\\nLinha 2", "STATUS:CANCELLED", "UID:00000000-0000-0000-0000-000000000001@agenciahub");
         for (String line : ics.split("\r\n")) assertThat(line.getBytes(StandardCharsets.UTF_8).length).isLessThanOrEqualTo(75);
     }
