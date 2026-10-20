@@ -5,3 +5,5 @@ API: 27 testes selecionados aprovados, PostgreSQL efêmero. UI: 123 testes em 34
 CRUD com cliente, versões/autor, associação legada, isolamento/papéis, concorrência, privacidade e descarte por agência cobertos. Não há criação de carteira, alteração de saldo ou financeiro/Viagens.
 
 O upgrade local V58→V61 não substitui V60→V61. Antes de publicar: integrar V59/V60, preservar ambos os blocos de privacidade/descarte/conflitos e atalhos do perfil, revalidar a sequência e ambiente próprio; API antes da UI. Originais com login/stash e branches F01 preservados.
+
+Integração após V60: 47 testes backend conjuntos aprovados e upgrade V60→V61 validado; merge preserva os três módulos. CI/prévia/publicação pendentes.
