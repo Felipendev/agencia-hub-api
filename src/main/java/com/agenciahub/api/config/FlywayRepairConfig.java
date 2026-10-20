@@ -6,10 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Spring Boot 3.4 não expõe {@code spring.flyway.repair-on-migrate}. Quando o checksum de uma
- * migração já aplicada deixa de bater com o ficheiro no classpath (ex.: V13 alterada após deploy),
- * o {@code migrate()} falha antes de arrancar o Tomcat. {@link org.flywaydb.core.Flyway#repair()}
- * realinha os checksums na tabela de histórico sem reexecutar SQL já aplicado.
+ * Compatibilidade para recuperação manual explícita. Desativado por padrão:
+ * inicialização normal valida o histórico e nunca realinha checksums automaticamente.
+ * Não habilitar para contornar divergências em migrations publicadas.
  */
 @Configuration
 public class FlywayRepairConfig {
@@ -19,7 +18,7 @@ public class FlywayRepairConfig {
             prefix = "agenciahub.flyway",
             name = "repair-before-migrate",
             havingValue = "true",
-            matchIfMissing = true)
+            matchIfMissing = false)
     FlywayMigrationStrategy flywayRepairThenMigrate() {
         return flyway -> {
             flyway.repair();

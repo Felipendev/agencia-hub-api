@@ -15,16 +15,17 @@ Atualizado em 20/10/2026. Autoridade única para reserva: Codex como integrador.
 | V56 | Claude / integração Codex | F02 contratos | Publicada, imutável |
 | V57 | Claude / integração Codex | F02 índices | Publicada, imutável |
 | V58 | Claude / integração Codex | F03 economia, `claude/f03-economia-cliente` | Publicada na API, imutável |
-| V59 | Claude | F07 agenda/atas, `claude/f07-agenda-atas` | Reservada, uma migration inicial |
+| V59 | Claude / integração Codex | F07 agenda/atas, `claude/f07-agenda-atas` | API #65/UI #58 em revisão; 26 testes API/127 UI, aguarda CI/prévia/publicação |
 | V60 | Codex | F01 checklists, `codex/f01-checklists` | Implementada, API #63/UI #56 em rascunho; aguarda V59 e validação do upgrade, não publicada |
 | V61 | Codex | TODO-052 simulações por cliente, `codex/f06-simulacoes-cliente` | Implementada, API #64/UI #57 em rascunho; aguarda V59/V60 e upgrade sequencial, não publicada |
+| V62 | Claude | TODO-050 extensão F10, `claude/f10-etapas-viagem` | Reservada, uma migration inicial; publicar após V61 |
 
-F08, F09, extensão F10, evolução F04/F06, F11 e F05: sem número autorizado por enquanto. Reservar aqui antes de criar migrations. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.
+F08, F09, evolução F04/F06, F11 e F05: sem número autorizado por enquanto. Reservar aqui antes de criar migrations. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.
 
 ## Fluxo de integração
 
 1. Cada agente usa banco de teste próprio e branch/PR isolados. Não apontar testes para produção.
-2. Desenvolver em paralelo, publicar em sequência V58 → V59 → V60 → V61. Versão maior aguarda as anteriores; sem `outOfOrder` ou ignore de validação.
+2. Desenvolver em paralelo, publicar em sequência V58 → V59 → V60 → V61 → V62. Versão maior aguarda as anteriores; sem `outOfOrder` ou ignore de validação.
 3. Antes de integrar, buscar main e comparar nomes/conteúdo das migrations publicadas. Não editar/renomear migrations executadas nem usar repair para mascarar divergências.
 4. Validar tanto banco novo quanto atualização da base anterior com dados representativos e preservação dos registros. CI de compilação não substitui esse teste.
 5. Validar inicialização da aplicação com as configurações reais de schema/pool na prévia; publicar API, confirmar migração e saúde, depois UI. Não mudar configuração de produção para resolver problema da prévia.
