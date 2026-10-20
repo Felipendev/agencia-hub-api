@@ -1,0 +1,23 @@
+{
+  "tasks": [
+    {
+      "id": "review",
+      "status": "completed"
+    },
+    {
+      "id": "integration",
+      "status": "completed"
+    },
+    {
+      "id": "validation",
+      "scope": "Local: 26 API, 127 UI, upgrade, build/lint e visual",
+      "status": "completed"
+    },
+    {
+      "id": "publication",
+      "scope": "CI, prévia e publicação API antes UI",
+      "status": "pending"
+    }
+  ],
+  "feature": "TODO-048"
+}

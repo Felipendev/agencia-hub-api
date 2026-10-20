@@ -9,7 +9,7 @@ class SimulationCustomerMigrationTest {
     @Test void migrationPreservesLegacyIdsResultsAuthorsAndUnlinkedVersions()throws Exception{
         try(EmbeddedPostgres pg=EmbeddedPostgres.builder().start()){
             String url=pg.getJdbcUrl("postgres","postgres");UUID id=UUID.randomUUID();
-            Flyway.configure().dataSource(url,"postgres","").target("58").load().migrate();
+            Flyway.configure().dataSource(url,"postgres","").target("60").load().migrate();
             try(var connection=pg.getPostgresDatabase().getConnection();var statement=connection.prepareStatement("INSERT INTO accumulation_simulations(id,agency_id,title,assumptions,created_by) SELECT ?,id,'Plano pessoal',?::jsonb,'autor-legado' FROM agencies LIMIT 1")){
                 statement.setObject(1,id);statement.setString(2,SimulationCustomerIntegrationTest.INPUT);statement.executeUpdate();
                 try(var version=connection.prepareStatement("INSERT INTO accumulation_simulation_versions(id,simulation_id,version,assumptions,author) VALUES(?,?,1,?::jsonb,'autor-legado')")){version.setObject(1,UUID.randomUUID());version.setObject(2,id);version.setString(3,SimulationCustomerIntegrationTest.INPUT);version.executeUpdate();}
