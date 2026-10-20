@@ -5,12 +5,12 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Local upgrade probe only: V59 must still be integrated and revalidated before publication. */
+/** Sequential upgrade from the integrated V59, preserving existing data. */
 class WorkMigrationUpgradeTest {
-    @Test void upgradingCurrentV58PreservesExistingDataAndCreatesTaskTables()throws Exception{
+    @Test void upgradingCurrentV59PreservesExistingDataAndCreatesTaskTables()throws Exception{
         try(EmbeddedPostgres pg=EmbeddedPostgres.builder().start()){
             String url=pg.getJdbcUrl("postgres","postgres");
-            Flyway.configure().dataSource(url,"postgres","").target("58").load().migrate();
+            Flyway.configure().dataSource(url,"postgres","").target("59").load().migrate();
             try(var c=pg.getPostgresDatabase().getConnection();var sql=c.createStatement()){
                 sql.execute("CREATE TABLE f01_upgrade_marker(value text)");sql.execute("INSERT INTO f01_upgrade_marker VALUES('preserved')");
             }

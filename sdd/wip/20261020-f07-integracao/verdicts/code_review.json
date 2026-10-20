@@ -1,0 +1,19 @@
+{
+  "verdict": "APPROVED",
+  "timestamp": "2026-10-20T22:09:35.3558207Z",
+  "findings": {
+    "minor": 0,
+    "critical": 0,
+    "major": 0
+  },
+  "method": "Revisão manual do domínio, serviço, API, persistência e fluxos de interface; executor de review indisponível",
+  "coverage": "Não medida",
+  "releaseReady": false,
+  "skill": "sdd-code-reviewer",
+  "releaseDependencies": [
+    "Upgrade V58→V59",
+    "CI dos heads finais",
+    "Saúde da prévia",
+    "API antes da UI"
+  ]
+}

@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.agenciahub.api.exception.AgendaHistoryException.class)
+    public ResponseEntity<ApiError> handleAgendaHistory(com.agenciahub.api.exception.AgendaHistoryException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "AGENDA_HISTORY_EXISTS"));
+    }
     @ExceptionHandler(com.agenciahub.api.exception.WalletConflictException.class)
     public ResponseEntity<ApiError> handleWalletConflict(com.agenciahub.api.exception.WalletConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "WALLET_CONFLICT"));
@@ -64,6 +68,12 @@ public class GlobalExceptionHandler {
         String msg = ex.getMostSpecificCause().getMessage();
         if (msg != null && (msg.contains("work_tasks_") || msg.contains("checklist_runs_customer_id_fkey") || msg.contains("work_task_events_customer_id_fkey"))) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Este registro possui tarefas ou execuções com histórico. Revise os vínculos e preserve os registros encerrados; para uma pessoa, use a inativação quando apropriado.", "WORK_HISTORY_EXISTS"));
+        }
+        if (msg != null && msg.contains("appointments_customer_id_fkey")) {
+            return handleAgendaHistory(new com.agenciahub.api.exception.AgendaHistoryException());
+        }
+        if (msg != null && msg.contains("appointments_responsible_id_fkey")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Este usuário é responsável por compromissos. Transfira os agendados antes de remover; para preservar atendimentos e atas anteriores, inative o usuário.", "AGENDA_RESPONSIBLE_HISTORY_EXISTS"));
         }
         if (msg != null && msg.contains("trip_savings_reports_customer_id_fkey")) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Esta pessoa possui relatórios de economia. Exclua os relatórios quando apropriado ou inative a pessoa para preservar os documentos.", "SAVINGS_REPORT_HISTORY_EXISTS"));
