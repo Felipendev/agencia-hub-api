@@ -20,6 +20,11 @@ class LibraryAndAccumulationIntegrationTest extends AbstractIntegrationTest {
          "exchangeDate":"2026-01-01","months":12,"passengers":2,"milesPerPassenger":40000,
          "destination":"Lisboa","scenarios":[{"program":"Smiles","bonusPercent":100},{"program":"LATAM","bonusPercent":30}]}
         """;
+    private String person(String jwt) throws Exception {
+        String response=mockMvc.perform(post("/customers").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Plano "+UUID.randomUUID()+"\",\"status\":\"ACTIVE\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        return http.parse(response).path("id").asText();
+    }
 
     @Test void defaultLinksCanBeEditedAndDeletedWithoutReturningOnReload() throws Exception {
         String jwt=http.loginOwner(mockMvc);
@@ -46,7 +51,7 @@ class LibraryAndAccumulationIntegrationTest extends AbstractIntegrationTest {
     }
     @Test void savedScenarioRecalculatesAndIsIsolatedFromOtherAgencies() throws Exception {
         String jwt=http.loginOwner(mockMvc);
-        String created=mockMvc.perform(post("/accumulation-simulations").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content(SCENARIO))
+        String created=mockMvc.perform(post("/accumulation-simulations").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content("{\"customerId\":\""+person(jwt)+"\",\"assumptions\":"+SCENARIO+"}"))
             .andExpect(status().isCreated()).andExpect(jsonPath("$.result.monthlyPoints").value(4000)).andExpect(jsonPath("$.result.basePoints").value(48000))
             .andExpect(jsonPath("$.result.goalMiles").value(80000)).andExpect(jsonPath("$.result.scenarios[0].projectedMiles").value(96000))
             .andExpect(jsonPath("$.result.scenarios[1].remainingMiles").value(17600)).andReturn().getResponse().getContentAsString();
@@ -62,9 +67,9 @@ class LibraryAndAccumulationIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/accumulation-simulations").header("Authorization","Bearer "+jwt)).andExpect(jsonPath("$[?(@.id == '%s')]".formatted(id)).isEmpty());
     }
     @Test void invalidExchangeAndPeriodsAreRejectedAndAuthenticationIsRequired() throws Exception {
-        String jwt=http.loginOwner(mockMvc);
+        String jwt=http.loginOwner(mockMvc),customer=person(jwt);
         for(String invalid:new String[]{SCENARIO.replace("\"exchangeRate\":5","\"exchangeRate\":0"),SCENARIO.replace("\"months\":12","\"months\":0"),SCENARIO.replace("\"bonusPercent\":100","\"bonusPercent\":-1")})
-            mockMvc.perform(post("/accumulation-simulations").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content(invalid)).andExpect(status().isBadRequest());
+            mockMvc.perform(post("/accumulation-simulations").header("Authorization","Bearer "+jwt).contentType(MediaType.APPLICATION_JSON).content("{\"customerId\":\""+customer+"\",\"assumptions\":"+invalid+"}")).andExpect(status().isBadRequest());
         mockMvc.perform(get("/accumulation-simulations")).andExpect(com.agenciahub.api.support.IntegrationHttpSupport.unauthenticated());
     }
 }

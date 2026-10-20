@@ -66,6 +66,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMostSpecificCause().getMessage();
+        if (msg != null && (msg.contains("accumulation_simulations_customer_id_fkey") || msg.contains("accumulation_simulation_versions_customer_id_fkey"))) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Esta pessoa possui planos de milhas ou versões vinculadas. Revise as simulações e o histórico antes de excluir; inative a pessoa quando precisar preservá-los.", "SIMULATION_CUSTOMER_HISTORY_EXISTS"));
+        }
         if (msg != null && (msg.contains("work_tasks_") || msg.contains("checklist_runs_customer_id_fkey") || msg.contains("work_task_events_customer_id_fkey"))) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Este registro possui tarefas ou execuções com histórico. Revise os vínculos e preserve os registros encerrados; para uma pessoa, use a inativação quando apropriado.", "WORK_HISTORY_EXISTS"));
         }

@@ -1,0 +1,19 @@
+{
+  "findings": {
+    "critical": 0,
+    "minor": 0,
+    "major": 0
+  },
+  "skill": "sdd-code-reviewer",
+  "coverage": "Não medida; não há alegação percentual",
+  "releaseDependencies": [
+    "V59/F07",
+    "V60/F01",
+    "Upgrade V60→V61 e prévia"
+  ],
+  "method": "manual fallback: revisão de segurança, CRUD, efeitos e regressões; executor de review não disponível",
+  "releaseReady": false,
+  "verdict": "APPROVED",
+  "timestamp": "2026-10-20T18:30:04.5968319Z",
+  "files_reviewed": 18
+}

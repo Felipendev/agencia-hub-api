@@ -15,8 +15,8 @@ Atualizado em 20/10/2026. Autoridade única para reserva: Codex como integrador.
 | V56 | Claude / integração Codex | F02 contratos | Publicada, imutável |
 | V57 | Claude / integração Codex | F02 índices | Publicada, imutável |
 | V58 | Claude / integração Codex | F03 economia, `claude/f03-economia-cliente` | Publicada na API, imutável |
-| V59 | Claude / integração Codex | F07 agenda/atas, `claude/f07-agenda-atas` | API #65/UI #58 em revisão; 26 testes API/127 UI, aguarda CI/prévia/publicação |
-| V60 | Codex | F01 checklists, `codex/f01-checklists` | Implementada, API #63/UI #56 em rascunho; aguarda V59 e validação do upgrade, não publicada |
+| V59 | Claude / integração Codex | F07 agenda/atas, `claude/f07-agenda-atas` | Publicada: API #65 3dca6dc, Railway a45d66e4 SUCCESS/V59; UI #58 615fda0, Vercel READY no domínio principal |
+| V60 | Codex | F01 checklists, `codex/f01-checklists` | API #63 atualizada com V59; upgrade V59→V60 e 32 testes aprovados; CI/prévia em andamento, não publicada |
 | V61 | Codex | TODO-052 simulações por cliente, `codex/f06-simulacoes-cliente` | Implementada, API #64/UI #57 em rascunho; aguarda V59/V60 e upgrade sequencial, não publicada |
 | V62 | Claude | TODO-050 extensão F10, `claude/f10-etapas-viagem` | Reservada, uma migration inicial; publicar após V61 |
 
