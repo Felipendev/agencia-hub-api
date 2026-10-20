@@ -1,0 +1,2 @@
+# Progresso
+API e interface implementadas com CRUD aplicável, histórico, idempotência e isolamento entre agências. Aprovados localmente 29 casos backend distintos, 122 frontend, tipos/build, lint sem erros novos e revisão visual desktop/celular. PRs permanecerão em rascunho enquanto aguardam V59/F07 do Claude e o teste de upgrade real V59 → V60. Não marcar feature concluída ou arquivar em features antes da publicação. Roteiro e contrato: docs/f01-checklists-2026-10-20.md.

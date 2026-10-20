@@ -62,6 +62,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMostSpecificCause().getMessage();
+        if (msg != null && (msg.contains("work_tasks_") || msg.contains("checklist_runs_customer_id_fkey") || msg.contains("work_task_events_customer_id_fkey"))) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Este registro possui tarefas ou execuções com histórico. Revise os vínculos e preserve os registros encerrados; para uma pessoa, use a inativação quando apropriado.", "WORK_HISTORY_EXISTS"));
+        }
         if (msg != null && msg.contains("trip_savings_reports_customer_id_fkey")) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Esta pessoa possui relatórios de economia. Exclua os relatórios quando apropriado ou inative a pessoa para preservar os documentos.", "SAVINGS_REPORT_HISTORY_EXISTS"));
         }
