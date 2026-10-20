@@ -98,10 +98,9 @@ app:
 # Rate limit por IP (Bucket4j em memória; por instância). Atrás de proxy confiável, ative TRUST_X_FORWARDED_FOR=true.
 agenciahub:
   flyway:
-    # Flyway.repair() antes de migrate: corrige checksum na flyway_schema_history quando o ficheiro
-    # de uma migração já aplicada mudou (merge/renomeação). Desative com AGENCIAHUB_FLYWAY_REPAIR_BEFORE_MIGRATE=false
-    # em todos os ambientes estáveis, se quiser detetar alterações acidentais a migrações antigas.
-    repair-before-migrate: ${AGENCIAHUB_FLYWAY_REPAIR_BEFORE_MIGRATE:true}
+    # Inicialização normal valida checksums; não reparar automaticamente o histórico publicado.
+    # A opção explícita existe apenas por compatibilidade com recuperação manual controlada.
+    repair-before-migrate: ${AGENCIAHUB_FLYWAY_REPAIR_BEFORE_MIGRATE:false}
   ratelimit:
     enabled: true
     trust-x-forwarded-for: ${TRUST_X_FORWARDED_FOR:false}

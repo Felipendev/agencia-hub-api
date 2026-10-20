@@ -69,6 +69,11 @@ public class ProcessDataDeletionRequest {
         if (excluir) {
             // Não declarar concluída uma anonimização que deixaria snapshots/anexos pessoais intactos.
             for (CrmCustomer customer : ownCustomers) {
+                Boolean hasAgenda = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM appointments WHERE agency_id=? AND customer_id=?) OR EXISTS(SELECT 1 FROM appointment_events WHERE agency_id=? AND customer_id=?)",
+                        Boolean.class, agencyId, customer.getId(), agencyId, customer.getId());
+                if (Boolean.TRUE.equals(hasAgenda)) {
+                    throw new IllegalStateException("Esta pessoa possui compromissos, atas ou histórico de agenda. A solicitação continua pendente para revisão dos textos e versões antes de concluir a anonimização.");
+                }
                 Boolean hasSavings = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM trip_savings_reports WHERE agency_id=? AND customer_id=?) OR EXISTS(SELECT 1 FROM trip_savings s JOIN trips t ON t.id=s.trip_id AND t.agency_id=s.agency_id WHERE s.agency_id=? AND t.customer_id=?)",
                         Boolean.class, agencyId, customer.getId(), agencyId, customer.getId());
                 if (Boolean.TRUE.equals(hasSavings)) {
