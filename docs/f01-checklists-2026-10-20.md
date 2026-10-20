@@ -42,3 +42,7 @@ Testes HTTP com PostgreSQL efêmero: CRUD, versão, auditoria, papéis/tenant, c
 Frontend: testes de edição pelo mesmo ID, confirmação após API, preservação de formulário em erro, chave idempotente em reenvio, aplicação/modelos/execuções, exclusão recusada e separação de produto. Build e lint sem erros novos; duas diretivas ESLint antigas em cotações permanecem fora de escopo. Evidências visuais com dados fictícios interceptados apenas no navegador local, sem chamada de negócio à API real. Desktop 1440×1000 e celular 390×844 sem rolagem horizontal global.
 
 Antes de publicar: integrar V59, atualizar esta branch com main, rodar teste do upgrade real e regressões, confirmar CI incluindo gate sequencial, validar prévia própria e só então publicar API e UI. Não promover a prévia de UI contra uma API de produção que ainda não possui `/work`.
+
+## Integração após F07
+
+API atualizada com main/V59 (PR #65). Conflitos resolvidos preservando os blocos de agenda e tarefas em privacidade, exclusão e descarte da agência. Teste de upgrade agora parte de V59 e aplica V60. Suíte sequencial: 32 testes aprovados com WorkIntegrationTest, WorkMigrationUpgradeTest, AgendaIntegrationTest, AgendaLifecycleIntegrationTest, FlywayRepairConfigTest, DataDeletionIntegrationTest, DataDeletionMultiTenancyIntegrationTest e AgencyDeletionSchedulerIntegrationTest. Repair automático permanece desativado. Publicação ainda aguarda CI e prévia saudável, API antes da UI.
