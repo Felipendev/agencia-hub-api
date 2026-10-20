@@ -142,7 +142,11 @@ public class AgendaService {
         if (existing.isPresent()) {
             AppointmentView a = existing.get();
             if (!a.customerId().equals(in.customerId()) || a.product() != in.product() || !a.title().equals(in.title())
-                    || !a.startsAt().toInstant().equals(in.startsAt().toInstant())) {
+                    || !a.startsAt().toInstant().equals(in.startsAt().toInstant())
+                    || a.durationMinutes() != in.durationMinutes() || !a.timeZone().equals(in.timeZone())
+                    || a.format() != in.format() || !a.responsibleId().equals(in.responsibleId())
+                    || !Objects.equals(a.tripId(), in.tripId()) || !Objects.equals(a.purpose(), in.purpose())
+                    || !Objects.equals(a.location(), in.location()) || !Objects.equals(a.meetingUrl(), in.meetingUrl())) {
                 throw new AgendaConflictException("A confirmação já foi utilizada para outro compromisso.");
             }
             return detail(a);
@@ -201,8 +205,8 @@ public class AgendaService {
     public Detail changeStatus(UUID id, StatusInput input) {
         AppointmentView before = find(id, true);
         if (input == null) invalid("Informe o novo estado.");
-        if (before.status() == input.status()) return detail(before);
         expectVersion(before.version(), input.expectedVersion());
+        if (before.status() == input.status()) return detail(before);
         Agenda.requireTransition(before.status(), input.status(), input.reason());
         if ((input.status() == Status.COMPLETED || input.status() == Status.NO_SHOW) && before.startsAt().toInstant().isAfter(Instant.now())) {
             invalid("Só é possível marcar como realizado ou não compareceu depois do horário de início.");
