@@ -83,6 +83,17 @@ class ReferralsLifecycleIntegrationTest extends AbstractIntegrationTest {
         }
     }
 
+    @Test void contactFromAnotherAgencyDoesNotGrantAccessToPrivacyRequest()throws Exception {
+        String jwt=http.loginOwner(mockMvc),email="foreign-referral-"+UUID.randomUUID()+"@example.test";
+        Agency other=agencies.save(Agency.builder().name("Indicações isoladas").status(AgencyStatus.ACTIVE).subscriptionStatus(SubscriptionStatus.TRIAL).build());
+        UUID person=customers.save(CrmCustomer.builder().agency(other).name("Indicador isolado").status(CustomerStatus.ACTIVE).notes("").build()).getId();
+        jdbc.update("INSERT INTO referrals(id,agency_id,product,referrer_customer_id,referred_name,referred_email,referred_on,channel,created_by) VALUES(?,?,'MILES',?,'Contato',?,current_date,'EVENT','Teste')",UUID.randomUUID(),other.getId(),person,email);
+        String request=call(jwt,body(post("/public/data-deletion-request"),"{\"email\":\""+email+"\"}"),201).path("requestId").asText();
+        call(jwt,body(post("/agency/data-deletion-requests/"+request+"/process"),"{\"acao\":\"EXCLUIR\"}"),404);
+        assertThat(jdbc.queryForObject("SELECT status FROM data_deletion_requests WHERE id=?::uuid",String.class,request)).isEqualTo("PENDING");
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM referrals WHERE agency_id=? AND referred_email=?",Long.class,other.getId(),email)).isEqualTo(1);
+    }
+
     @Test void agencyDeletionClearsReferralsAndHistoryButPreservesAnotherAgency() {
         Agency a=agencies.save(Agency.builder().name("Descarte indicações").status(AgencyStatus.DELETION_PENDING).subscriptionStatus(SubscriptionStatus.TRIAL).deletionScheduledAt(Instant.now().minusSeconds(20)).build());
         UUID person=customers.save(CrmCustomer.builder().agency(a).name("Pessoa").status(CustomerStatus.ACTIVE).notes("").build()).getId();
