@@ -42,6 +42,7 @@ public class ProcessDataDeletionRequest {
     private final EmailService emailService;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final com.agenciahub.api.application.services.referrals.ReferralHistory referralHistory;
+    private final com.agenciahub.api.application.services.stages.TripStageHistory stageHistory;
 
     @Transactional
     public void execute(UUID requestId, ProcessDataDeletionRequestDTO dto, PlatformAccount processor) {
@@ -76,6 +77,9 @@ public class ProcessDataDeletionRequest {
             for (CrmCustomer customer : ownCustomers) {
                 if (referralHistory.existsForCustomer(agencyId,customer.getId())) {
                     throw new IllegalStateException("Esta pessoa participa de indicações ou possui histórico preservado. A solicitação continua pendente para revisão dos textos e da auditoria antes de concluir a anonimização.");
+                }
+                if (stageHistory.existsForCustomer(agencyId, customer.getId())) {
+                    throw new IllegalStateException("Esta pessoa possui etapas de viagem ou histórico preservado. A solicitação continua pendente para revisão dos textos e da auditoria antes de concluir a anonimização.");
                 }
                 Boolean hasSimulations = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM accumulation_simulations WHERE agency_id=? AND customer_id=?) OR EXISTS(SELECT 1 FROM accumulation_simulation_versions v JOIN accumulation_simulations s ON s.id=v.simulation_id WHERE s.agency_id=? AND v.customer_id=?)",
                         Boolean.class, agencyId, customer.getId(), agencyId, customer.getId());

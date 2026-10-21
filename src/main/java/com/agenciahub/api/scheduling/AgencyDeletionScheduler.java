@@ -61,6 +61,9 @@ public class AgencyDeletionScheduler {
                     "trip_savings_versions", "trip_savings")) {
                 jdbc.update("DELETE FROM " + table + " WHERE agency_id=?", agencyId);
             }
+            for (String table : List.of("trip_stage_events", "trip_stage_links", "trip_stages")) {
+                jdbc.update("DELETE FROM " + table + " WHERE agency_id=?", agencyId);
+            }
             // Viagens devem sair antes das pessoas; versões/evidências seguem suas FKs.
             jdbc.update("DELETE FROM trips WHERE agency_id=?", agencyId);
             // Descarte autorizado da agência inclui todos os documentos; ordem respeita as FKs do F02.
