@@ -41,6 +41,7 @@ public class ProcessDataDeletionRequest {
     private final CrmCustomerRepository customerRepository;
     private final EmailService emailService;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final com.agenciahub.api.application.services.referrals.ReferralHistory referralHistory;
 
     @Transactional
     public void execute(UUID requestId, ProcessDataDeletionRequestDTO dto, PlatformAccount processor) {
@@ -59,7 +60,8 @@ public class ProcessDataDeletionRequest {
                 .map(List::of)
                 .orElseGet(List::of);
 
-        if (ownSubmissions.isEmpty() && ownCustomers.isEmpty()) {
+        boolean referralContact = referralHistory.existsForEmail(agencyId,request.getEmail());
+        if (ownSubmissions.isEmpty() && ownCustomers.isEmpty() && !referralContact) {
             // Este e-mail não tem dado nesta agência: não é um recurso desta agência.
             throw new ResourceNotFoundException("solicitação de exclusão não encontrada");
         }
@@ -67,8 +69,14 @@ public class ProcessDataDeletionRequest {
         boolean excluir = "EXCLUIR".equals(dto.acao());
 
         if (excluir) {
+            if (referralContact) {
+                throw new IllegalStateException("Este contato participa de indicações ou possui histórico preservado. A solicitação continua pendente para revisão dos contatos, textos e auditoria antes de concluir a anonimização.");
+            }
             // Não declarar concluída uma anonimização que deixaria snapshots/anexos pessoais intactos.
             for (CrmCustomer customer : ownCustomers) {
+                if (referralHistory.existsForCustomer(agencyId,customer.getId())) {
+                    throw new IllegalStateException("Esta pessoa participa de indicações ou possui histórico preservado. A solicitação continua pendente para revisão dos textos e da auditoria antes de concluir a anonimização.");
+                }
                 Boolean hasSimulations = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM accumulation_simulations WHERE agency_id=? AND customer_id=?) OR EXISTS(SELECT 1 FROM accumulation_simulation_versions v JOIN accumulation_simulations s ON s.id=v.simulation_id WHERE s.agency_id=? AND v.customer_id=?)",
                         Boolean.class, agencyId, customer.getId(), agencyId, customer.getId());
                 if (Boolean.TRUE.equals(hasSimulations)) {
