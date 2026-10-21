@@ -107,6 +107,7 @@ public class ReferralService {
 
     @Transactional(readOnly = true)
     public Summary summary(Product product, LocalDate from, LocalDate to) {
+        if (from != null && to != null && to.isBefore(from)) invalid("O fim do período não pode ser anterior ao início.");
         StringBuilder where = new StringBuilder(" WHERE r.agency_id = ?");
         List<Object> args = new ArrayList<>(List.of(agency()));
         if (product != null) { where.append(" AND r.product = ?"); args.add(product.name()); }
@@ -141,7 +142,10 @@ public class ReferralService {
             ReferralView r = existing.get();
             boolean same = r.product() == in.product() && r.referrerId().equals(in.referrerId()) && r.referredOn().equals(in.referredOn())
                     && Objects.equals(r.referredCustomerId(), in.referredCustomerId())
-                    && (in.referredCustomerId() != null || Objects.equals(r.referredName(), in.referredName()));
+                    && Objects.equals(r.referredName(), in.referredName()) && Objects.equals(r.referredPhone(), in.referredPhone())
+                    && Objects.equals(r.referredEmail(), in.referredEmail()) && r.channel() == in.channel()
+                    && Objects.equals(r.channelDetail(), in.channelDetail()) && Objects.equals(r.responsibleId(), in.responsibleId())
+                    && Objects.equals(r.notes(), in.notes());
             if (!same) throw new ReferralConflictException("A confirmação já foi utilizada para outra indicação.");
             return detailOf(r);
         }
@@ -157,7 +161,7 @@ public class ReferralService {
                 Referrals.phoneKey(in.referredPhone()), in.referredEmail(), in.referredOn(), in.channel().name(), in.channelDetail(),
                 in.responsibleId(), in.notes(), author());
         ReferralView created = find(requestKey, false);
-        event(created.id(), "CREATED", snapshot(created));
+        event(created, "CREATED", snapshot(created));
         return detailOf(created);
     }
 
@@ -195,7 +199,7 @@ public class ReferralService {
                 WHERE id = ? AND agency_id = ?""",
                 in.referrerId(), in.referredName(), in.referredPhone(), Referrals.phoneKey(in.referredPhone()), in.referredEmail(), in.referredOn(),
                 in.channel().name(), in.channelDetail(), in.responsibleId(), in.notes(), id, agency());
-        event(id, "UPDATED", changes);
+        event(before, "UPDATED", changes);
         return detailOf(find(id, false));
     }
 
@@ -203,9 +207,9 @@ public class ReferralService {
     public Detail changeStatus(UUID id, StatusInput input) {
         ReferralView before = find(id, true);
         if (input == null) invalid("Informe a nova situação.");
-        if (before.status() == input.status()) return detailOf(before);
         expectVersion(before.version(), input.expectedVersion());
         Referrals.requireTransition(before.status(), input, before.product(), before.referredCustomerId() != null, today(), before.referredOn());
+        if (before.status() == input.status()) return detailOf(before);
         Status to = input.status();
         if (to == Status.CONVERTED && input.saleId() != null) {
             Boolean belongs = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM sales WHERE id = ? AND agency_id = ? AND customer_id = ?)",
@@ -231,7 +235,7 @@ public class ReferralService {
             detail.put("previousConvertedOn", before.convertedOn() == null ? null : before.convertedOn().toString());
             detail.put("previousSaleId", before.saleId());
         }
-        event(id, "STATUS_" + to.name(), detail);
+        event(before, "STATUS_" + to.name(), detail);
         return detailOf(find(id, false));
     }
 
@@ -239,8 +243,8 @@ public class ReferralService {
     @Transactional
     public Detail linkReferred(UUID id, UUID customerId, Integer expectedVersion) {
         ReferralView before = find(id, true);
-        if (customerId.equals(before.referredCustomerId())) return detailOf(before);
         expectVersion(before.version(), expectedVersion);
+        if (customerId.equals(before.referredCustomerId())) return detailOf(before);
         if (before.status() == Status.CANCELLED) throw new ReferralConflictException("Reative a indicação antes de vincular a pessoa indicada.");
         if (before.referredCustomerId() != null) invalid("A indicação já está vinculada a outra pessoa.");
         if (customerId.equals(before.referrerId())) invalid("A pessoa indicada não pode ser a mesma que indicou.");
@@ -255,7 +259,7 @@ public class ReferralService {
         detail.put("previousName", before.referredName());
         detail.put("previousPhone", before.referredPhone());
         detail.put("previousEmail", before.referredEmail());
-        event(id, "REFERRED_LINKED", detail);
+        event(before, "REFERRED_LINKED", detail);
         return detailOf(find(id, false));
     }
 
@@ -266,7 +270,7 @@ public class ReferralService {
         expectVersion(before.version(), expectedVersion);
         if (before.everConverted()) throw new ReferralConflictException("Indicações que já foram convertidas não são excluídas. Cancele para preservar o histórico.");
         jdbc.update("DELETE FROM referrals WHERE id = ? AND agency_id = ?", id, agency());
-        event(id, "DELETED", snapshot(before));
+        event(before, "DELETED", snapshot(before));
     }
 
     // ------------------------------------------------------------------ apoio
@@ -310,6 +314,9 @@ public class ReferralService {
     }
 
     private void requireReferences(ReferralInput in) {
+        // Ordem estável evita corridas com exclusão de pessoas e serializa reenvios do mesmo formulário.
+        jdbc.queryForList("SELECT id FROM customers WHERE agency_id=? AND (id=? OR id=?) ORDER BY id FOR UPDATE",
+                agency(), in.referrerId(), in.referredCustomerId());
         requireCustomer(in.referrerId(), "Pessoa que indicou não encontrada.");
         if (in.referredCustomerId() != null) requireCustomer(in.referredCustomerId(), "Pessoa indicada não encontrada.");
         if (in.responsibleId() != null) {
@@ -366,9 +373,14 @@ public class ReferralService {
         changes.put(field, change);
     }
 
-    private void event(UUID referralId, String action, Object detail) {
+    private void event(ReferralView context, String action, Map<String, Object> detail) {
+        // Identidade necessária para revisão de privacidade mesmo depois de excluir ou editar a indicação.
+        Map<String, Object> audit = new LinkedHashMap<>(detail);
+        audit.put("participantReferrerId", context.referrerId());
+        audit.put("participantReferredId", context.referredCustomerId());
+        audit.put("participantEmail", context.referredEmail());
         jdbc.update("INSERT INTO referral_events(id, agency_id, referral_id, action, detail, author) VALUES (?, ?, ?, ?, ?::jsonb, ?)",
-                UUID.randomUUID(), agency(), referralId, action, json(detail), author());
+                UUID.randomUUID(), agency(), context.id(), action, json(audit), author());
     }
 
     private void expectVersion(int actual, Integer expected) {
