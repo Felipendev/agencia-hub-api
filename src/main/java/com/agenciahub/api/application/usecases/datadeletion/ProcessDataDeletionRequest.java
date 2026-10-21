@@ -41,6 +41,7 @@ public class ProcessDataDeletionRequest {
     private final CrmCustomerRepository customerRepository;
     private final EmailService emailService;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final com.agenciahub.api.application.services.stages.TripStageHistory stageHistory;
 
     @Transactional
     public void execute(UUID requestId, ProcessDataDeletionRequestDTO dto, PlatformAccount processor) {
@@ -69,6 +70,9 @@ public class ProcessDataDeletionRequest {
         if (excluir) {
             // Não declarar concluída uma anonimização que deixaria snapshots/anexos pessoais intactos.
             for (CrmCustomer customer : ownCustomers) {
+                if (stageHistory.existsForCustomer(agencyId, customer.getId())) {
+                    throw new IllegalStateException("Esta pessoa possui etapas de viagem ou histórico preservado. A solicitação continua pendente para revisão dos textos e da auditoria antes de concluir a anonimização.");
+                }
                 Boolean hasSimulations = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM accumulation_simulations WHERE agency_id=? AND customer_id=?) OR EXISTS(SELECT 1 FROM accumulation_simulation_versions v JOIN accumulation_simulations s ON s.id=v.simulation_id WHERE s.agency_id=? AND v.customer_id=?)",
                         Boolean.class, agencyId, customer.getId(), agencyId, customer.getId());
                 if (Boolean.TRUE.equals(hasSimulations)) {

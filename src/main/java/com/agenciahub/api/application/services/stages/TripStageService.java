@@ -78,7 +78,12 @@ public class TripStageService {
         Optional<Stage> existing = jdbc.query(STAGE_SQL + " AND id = ?", rowMapper(trip), agency(), tripId, requestKey).stream().findFirst();
         if (existing.isPresent()) {
             Stage s = existing.get();
-            if (s.kind() != in.kind() || !s.title().equals(in.title()) || !s.startsAt().toInstant().equals(in.startsAt().toInstant())) {
+            if (s.kind() != in.kind() || !s.title().equals(in.title()) || !s.startsAt().toInstant().equals(in.startsAt().toInstant())
+                    || !Objects.equals(s.endsAt() == null ? null : s.endsAt().toInstant(), in.endsAt() == null ? null : in.endsAt().toInstant())
+                    || !s.timeZone().equals(in.timeZone()) || !Objects.equals(s.provider(), in.provider())
+                    || !Objects.equals(s.confirmationCode(), in.confirmationCode()) || !Objects.equals(s.location(), in.location())
+                    || !Objects.equals(s.origin(), in.origin()) || !Objects.equals(s.destination(), in.destination())
+                    || !Objects.equals(s.people(), in.people()) || !Objects.equals(s.notes(), in.notes())) {
                 throw new TripStageConflictException("A confirmação já foi utilizada para outra etapa.");
             }
             return new StageDetail(trip, withLinks(s), events(tripId, s.id()));
@@ -126,6 +131,7 @@ public class TripStageService {
         if (rescheduled) {
             detail.put("previousStartsAt", before.startsAt().toString());
             detail.put("previousEndsAt", before.endsAt() == null ? null : before.endsAt().toString());
+            detail.put("previousTimeZone", before.timeZone());
         }
         event(tripId, id, rescheduled ? "RESCHEDULED" : "UPDATED", detail);
         return new StageDetail(trip, after, events(tripId, id));
@@ -136,9 +142,9 @@ public class TripStageService {
         TripRef trip = trip(tripId, false);
         Stage before = stage(trip, id, true);
         if (input == null) invalid("Informe a nova situação.");
-        if (before.status() == input.status()) return new StageDetail(trip, before, events(tripId, id));
         expectVersion(before.version(), input.expectedVersion());
         TripStages.requireTransition(before.status(), input.status(), input.reason());
+        if (before.status() == input.status()) return new StageDetail(trip, before, events(tripId, id));
         String reason = input.reason() == null || input.reason().isBlank() ? null : input.reason().strip();
         jdbc.update("UPDATE trip_stages SET status = ?, status_reason = ?, version = version + 1, updated_at = now() WHERE id = ? AND agency_id = ? AND trip_id = ?",
                 input.status().name(), reason, id, agency(), tripId);
@@ -285,9 +291,12 @@ public class TripStageService {
         return detail;
     }
 
-    private void event(UUID tripId, UUID stageId, String action, Object detail) {
+    private void event(UUID tripId, UUID stageId, String action, Map<String, Object> detail) {
+        // Mantém a identidade para revisão de privacidade mesmo após excluir ou reatribuir a viagem.
+        Map<String, Object> audit = new LinkedHashMap<>(detail);
+        audit.put("customerId", trip(tripId, false).customerId());
         jdbc.update("INSERT INTO trip_stage_events(id, agency_id, trip_id, stage_id, action, detail, author) VALUES (?, ?, ?, ?, ?, ?::jsonb, ?)",
-                UUID.randomUUID(), agency(), tripId, stageId, action, json(detail), author());
+                UUID.randomUUID(), agency(), tripId, stageId, action, json(audit), author());
     }
 
     private void expectVersion(int actual, Integer expected) {
