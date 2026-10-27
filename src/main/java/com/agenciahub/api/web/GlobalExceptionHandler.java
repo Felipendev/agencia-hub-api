@@ -22,6 +22,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.agenciahub.api.exception.ReferralHistoryException.class)
+    public ResponseEntity<ApiError> handleReferralHistory(com.agenciahub.api.exception.ReferralHistoryException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "REFERRAL_HISTORY_EXISTS"));
+    }
+
     @ExceptionHandler(com.agenciahub.api.exception.TripStageHistoryException.class)
     public ResponseEntity<ApiError> handleTripStageHistory(com.agenciahub.api.exception.TripStageHistoryException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "TRIP_STAGE_HISTORY_EXISTS"));
@@ -71,6 +76,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMostSpecificCause().getMessage();
+        if (msg != null && (msg.contains("referrals_referrer_customer_id_fkey") || msg.contains("referrals_referred_customer_id_fkey"))) {
+            return handleReferralHistory(new com.agenciahub.api.exception.ReferralHistoryException());
+        }
+        if (msg != null && msg.contains("referrals_responsible_id_fkey")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Este usuário é responsável por indicações. Transfira a responsabilidade ou inative o usuário para preservar o histórico.", "REFERRAL_RESPONSIBLE_HISTORY_EXISTS"));
+        }
         if (msg != null && (msg.contains("accumulation_simulations_customer_id_fkey") || msg.contains("accumulation_simulation_versions_customer_id_fkey"))) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Esta pessoa possui planos de milhas ou versões vinculadas. Revise as simulações e o histórico antes de excluir; inative a pessoa quando precisar preservá-los.", "SIMULATION_CUSTOMER_HISTORY_EXISTS"));
         }

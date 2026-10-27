@@ -20,6 +20,7 @@ public class DeleteCustomer implements DeleteCustomerUseCase {
     private final QuotationRepository quotationRepository;
     private final FinancialEntryRepository financialEntryRepository;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
+    private final com.agenciahub.api.application.services.referrals.ReferralHistory referralHistory;
     private final com.agenciahub.api.application.services.stages.TripStageHistory stageHistory;
 
     @Override
@@ -32,6 +33,9 @@ public class DeleteCustomer implements DeleteCustomerUseCase {
         UUID customerId = entity.getId();
         // O evento de exclusão também conserva dados pessoais, mesmo sem compromisso ativo.
         jdbc.queryForList("SELECT id FROM customers WHERE id=? AND agency_id=? FOR UPDATE", customerId, agencyId);
+        if (referralHistory.existsForCustomer(agencyId,customerId)) {
+            throw new com.agenciahub.api.exception.ReferralHistoryException();
+        }
         if (stageHistory.existsForCustomer(agencyId, customerId)) {
             throw new com.agenciahub.api.exception.TripStageHistoryException();
         }
