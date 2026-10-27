@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "REFERRAL_HISTORY_EXISTS"));
     }
 
+    @ExceptionHandler(com.agenciahub.api.exception.TripStageHistoryException.class)
+    public ResponseEntity<ApiError> handleTripStageHistory(com.agenciahub.api.exception.TripStageHistoryException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "TRIP_STAGE_HISTORY_EXISTS"));
+    }
+
     @ExceptionHandler(com.agenciahub.api.exception.AgendaHistoryException.class)
     public ResponseEntity<ApiError> handleAgendaHistory(com.agenciahub.api.exception.AgendaHistoryException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "AGENDA_HISTORY_EXISTS"));

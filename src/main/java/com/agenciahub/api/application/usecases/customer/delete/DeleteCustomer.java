@@ -21,6 +21,7 @@ public class DeleteCustomer implements DeleteCustomerUseCase {
     private final FinancialEntryRepository financialEntryRepository;
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final com.agenciahub.api.application.services.referrals.ReferralHistory referralHistory;
+    private final com.agenciahub.api.application.services.stages.TripStageHistory stageHistory;
 
     @Override
     @Transactional
@@ -34,6 +35,9 @@ public class DeleteCustomer implements DeleteCustomerUseCase {
         jdbc.queryForList("SELECT id FROM customers WHERE id=? AND agency_id=? FOR UPDATE", customerId, agencyId);
         if (referralHistory.existsForCustomer(agencyId,customerId)) {
             throw new com.agenciahub.api.exception.ReferralHistoryException();
+        }
+        if (stageHistory.existsForCustomer(agencyId, customerId)) {
+            throw new com.agenciahub.api.exception.TripStageHistoryException();
         }
         Boolean agendaHistory = jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM appointments WHERE agency_id=? AND customer_id=?) OR EXISTS(SELECT 1 FROM appointment_events WHERE agency_id=? AND customer_id=?)",
                 Boolean.class, agencyId, customerId, agencyId, customerId);
