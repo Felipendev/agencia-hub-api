@@ -62,8 +62,9 @@ public class WorkService {
             r.getObject("customer_id",UUID.class), r.getString("customer_name"),r.getString("title"),r.getString("notes"),
             r.getObject("due_on",LocalDate.class),r.getObject("responsible_id",UUID.class),r.getString("responsible_name"),
             r.getObject("trip_id",UUID.class),r.getObject("quotation_id",UUID.class),r.getObject("run_id",UUID.class),State.valueOf(r.getString("state")),
-            r.getInt("version"),r.getObject("state_by",UUID.class),r.getObject("state_at",OffsetDateTime.class),r.getString("state_reason"),r.getObject("deleted_at")!=null);
-    private static final String TASK_SELECT = "SELECT t.*, c.name customer_name, u.name responsible_name FROM work_tasks t JOIN customers c ON c.id=t.customer_id AND c.agency_id=t.agency_id LEFT JOIN users u ON u.id=t.responsible_id AND u.agency_id=t.agency_id ";
+            r.getInt("version"),r.getObject("state_by",UUID.class),r.getObject("state_at",OffsetDateTime.class),r.getString("state_reason"),r.getObject("deleted_at")!=null,
+            r.getObject("generation_id")!=null,r.getObject("simulation_id",UUID.class),r.getString("simulation_title"),r.getObject("simulation_source_id",UUID.class));
+    private static final String TASK_SELECT = "SELECT t.*, c.name customer_name, u.name responsible_name, stg.id generation_id,stg.simulation_id,stg.source_title simulation_title,stg.source_id simulation_source_id FROM work_tasks t JOIN customers c ON c.id=t.customer_id AND c.agency_id=t.agency_id LEFT JOIN users u ON u.id=t.responsible_id AND u.agency_id=t.agency_id LEFT JOIN simulation_task_links stl ON stl.task_id=t.id AND stl.agency_id=t.agency_id LEFT JOIN simulation_task_generations stg ON stg.id=stl.generation_id AND stg.agency_id=t.agency_id ";
     private RowMapper<Template> templateMapper() {
         return (r,n) -> new Template(r.getObject("id",UUID.class),Product.valueOf(r.getString("product")),r.getString("name"),
                 Frequency.valueOf(r.getString("frequency")),steps(r.getString("steps")),r.getInt("version"),r.getObject("deleted_at")!=null);
@@ -103,6 +104,10 @@ public class WorkService {
     }
     @Transactional(readOnly=true)
     public List<Task> tasks(Product product, UUID customerId, UUID responsibleId, State state, LocalDate dueBefore, UUID runId) {
+        return tasks(product,customerId,responsibleId,state,dueBefore,runId,null);
+    }
+    @Transactional(readOnly=true)
+    public List<Task> tasks(Product product, UUID customerId, UUID responsibleId, State state, LocalDate dueBefore, UUID runId, UUID simulationId) {
         StringBuilder sql=new StringBuilder(TASK_SELECT+"WHERE t.agency_id=? AND t.deleted_at IS NULL");
         List<Object> args=new ArrayList<>(); args.add(agency());
         if(product!=null){sql.append(" AND t.product=?");args.add(product.name());}
@@ -111,8 +116,13 @@ public class WorkService {
         if(state!=null){sql.append(" AND t.state=?");args.add(state.name());}
         if(dueBefore!=null){sql.append(" AND t.due_on<?");args.add(dueBefore);}
         if(runId!=null){sql.append(" AND t.run_id=?");args.add(runId);}
+        if(simulationId!=null){sql.append(" AND stg.source_id=?");args.add(simulationId);}
         sql.append(" ORDER BY t.due_on,t.id");
         return jdbc.query(sql.toString(),taskMapper,args.toArray());
+    }
+    @Transactional(readOnly=true)
+    public List<Task> generationTasks(UUID generationId) {
+        return jdbc.query(TASK_SELECT+"WHERE t.agency_id=? AND stg.id=? ORDER BY stl.position",taskMapper,agency(),generationId);
     }
     public Task task(UUID id) { return task(id,false,false); }
     private Task task(UUID id, boolean lock, boolean deleted) {
@@ -139,6 +149,7 @@ public class WorkService {
         Task old=task(id,true,false); version(old.version(),input.expectedVersion());
         if(old.state()!=State.OPEN) conflict("Reabra a tarefa antes de editar.");
         if(old.product()!=input.product()) bad("O produto da tarefa é preservado. Crie outra tarefa para o outro produto.");
+        if(old.fromSimulation() && !old.customerId().equals(input.customerId())) bad("A tarefa gerada preserva a pessoa do plano de origem. Edite os demais campos neste mesmo registro.");
         if(old.runId()!=null && (old.product()!=input.product() || !old.customerId().equals(input.customerId()))) bad("Pessoa e produto da execução são preservados.");
         links(input);
         jdbc.update("UPDATE work_tasks SET product=?,customer_id=?,title=?,notes=?,due_on=?,responsible_id=?,trip_id=?,quotation_id=?,version=version+1,updated_at=now() WHERE id=? AND agency_id=?",

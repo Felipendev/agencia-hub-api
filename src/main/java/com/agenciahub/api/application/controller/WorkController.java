@@ -26,7 +26,7 @@ public class WorkController {
     @GetMapping("/tasks") public List<Task> tasks(@RequestParam(required=false) Product product,
             @RequestParam(required=false) UUID customerId,@RequestParam(required=false) UUID responsibleId,
             @RequestParam(required=false) State state,@RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate dueBefore,
-            @RequestParam(required=false) UUID runId){return service.tasks(product,customerId,responsibleId,state,dueBefore,runId);}
+            @RequestParam(required=false) UUID runId,@RequestParam(required=false) UUID simulationId){return service.tasks(product,customerId,responsibleId,state,dueBefore,runId,simulationId);}
     @GetMapping("/tasks/{id}") public Task task(@PathVariable UUID id){return service.task(id);}
     @PostMapping("/tasks") @ResponseStatus(HttpStatus.CREATED)
     public Task create(@RequestHeader("Idempotency-Key") UUID key,@Valid @RequestBody TaskInput input){return service.create(key,input);}

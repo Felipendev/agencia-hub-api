@@ -23,7 +23,8 @@ public final class WorkModels {
             UUID responsibleId, UUID tripId, UUID quotationId, @Min(0) int expectedVersion) {}
     public record Task(UUID id, Product product, UUID customerId, String customerName, String title, String notes,
             LocalDate dueOn, UUID responsibleId, String responsibleName, UUID tripId, UUID quotationId, UUID runId,
-            State state, int version, UUID stateBy, OffsetDateTime stateAt, String stateReason, boolean deleted) {}
+            State state, int version, UUID stateBy, OffsetDateTime stateAt, String stateReason, boolean deleted,
+            boolean fromSimulation, UUID simulationId, String simulationTitle, UUID simulationSourceId) {}
     public record Transition(@NotNull State state, @Size(max=1000) String reason, @Min(1) int expectedVersion) {}
     public record ApplyInput(@NotNull UUID customerId, @NotNull LocalDate date, UUID responsibleId) {}
     public record Run(UUID id, Product product, UUID customerId, String customerName, UUID templateId,

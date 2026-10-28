@@ -53,6 +53,8 @@ public class AgencyDeletionScheduler {
             }
             log.info("Starting hard-delete of agency {} scheduled for {}", agencyId, agency.getDeletionScheduledAt());
             // Versões seguem a exclusão em cascata; remover planos antes das pessoas referenciadas.
+            jdbc.update("DELETE FROM simulation_task_links WHERE agency_id=?", agencyId);
+            jdbc.update("DELETE FROM simulation_task_generations WHERE agency_id=?", agencyId);
             jdbc.update("DELETE FROM accumulation_simulations WHERE agency_id=?", agencyId);
             for (String table : List.of("work_task_events", "work_tasks", "checklist_runs", "checklist_templates", "appointment_events", "appointment_minutes_versions", "appointment_minutes", "appointments")) {
                 jdbc.update("DELETE FROM " + table + " WHERE agency_id=?", agencyId);
