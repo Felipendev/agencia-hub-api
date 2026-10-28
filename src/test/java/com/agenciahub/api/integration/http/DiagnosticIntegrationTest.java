@@ -139,5 +139,3 @@ class DiagnosticIntegrationTest extends AbstractIntegrationTest {
         }finally{release.countDown();pool.shutdownNow();org.mockito.Mockito.reset(diagnosticHistory);}
     }
 }
-
-

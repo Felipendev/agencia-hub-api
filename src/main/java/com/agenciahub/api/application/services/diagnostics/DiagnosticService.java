@@ -99,4 +99,3 @@ public class DiagnosticService {
     @Transactional(readOnly=true)
     public List<Event> events(UUID id){get(id);return jdbc.query("SELECT * FROM miles_diagnostic_events WHERE agency_id=? AND diagnostic_id=? ORDER BY created_at,id",(r,n)->new Event(r.getString("action"),r.getObject("author_id",UUID.class),r.getString("reason"),read(r.getString("snapshot"),Object.class),r.getObject("created_at",OffsetDateTime.class)),agency(),id);}
 }
-
