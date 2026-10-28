@@ -60,6 +60,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
     public void initRules() {
         buckets.clear();
         List<Rule> rules = new ArrayList<>();
+        rules.add(new Rule("POST", "/public/miles-diagnostics/*", perMinute(properties.getPublicSubmitPerMinute()), "public-miles-submit"));
+        rules.add(new Rule("GET", "/public/miles-diagnostics/*", perMinute(properties.getPublicConfigGetPerMinute()), "public-miles-config"));
         rules.add(new Rule(
                 "POST",
                 "/public/solicitacao/submit",

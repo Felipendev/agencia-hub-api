@@ -15,6 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class RateLimitFilterTest {
+    @Test void diagnosticsThrottleGetAndPostPerIpAcrossDifferentLinks() throws Exception {
+        RateLimitProperties props=new RateLimitProperties();props.setEnabled(true);props.setTrustXForwardedFor(false);props.setPublicSubmitPerMinute(1);props.setPublicConfigGetPerMinute(1);
+        RateLimitFilter filter=new RateLimitFilter(props,new ObjectMapper());filter.initRules();FilterChain chain=mock(FilterChain.class);
+        for(String method:java.util.List.of("GET","POST")) {
+            for(int i=0;i<3;i++) {
+                MockHttpServletRequest req=new MockHttpServletRequest(method,"/public/miles-diagnostics/"+java.util.UUID.randomUUID());req.setServletPath(req.getRequestURI());req.setRemoteAddr(i==2?"203.0.113.11":"203.0.113.10");
+                MockHttpServletResponse res=new MockHttpServletResponse();filter.doFilter(req,res,chain);assertEquals(i==1?429:200,res.getStatus());
+            }
+        }
+    }
 
     private static MockHttpServletRequest postPublicSubmit(String ip) {
         MockHttpServletRequest req = new MockHttpServletRequest();

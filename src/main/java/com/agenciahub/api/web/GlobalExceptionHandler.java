@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.agenciahub.api.exception.DiagnosticHistoryException.class)
+    public ResponseEntity<ApiError> diagnosticHistory(com.agenciahub.api.exception.DiagnosticHistoryException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(),"DIAGNOSTIC_HISTORY"));
+    }
     @ExceptionHandler(com.agenciahub.api.exception.FollowupHistoryException.class)
     public ResponseEntity<ApiError> handleFollowupHistory(com.agenciahub.api.exception.FollowupHistoryException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "FOLLOWUP_HISTORY_EXISTS"));

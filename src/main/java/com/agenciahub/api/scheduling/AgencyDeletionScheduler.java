@@ -48,6 +48,13 @@ public class AgencyDeletionScheduler {
 
         for (Agency agency : toDelete) {
             UUID agencyId = agency.getId();
+            jdbc.update("DELETE FROM miles_diagnostic_events WHERE agency_id=?",agencyId);
+            jdbc.update("DELETE FROM miles_diagnostics WHERE agency_id=?",agencyId);
+            jdbc.update("DELETE FROM miles_diagnostic_configs WHERE agency_id=?",agencyId);
+            jdbc.update("DELETE FROM customer_miles_movements WHERE account_id IN (SELECT id FROM customer_miles_items WHERE agency_id=?)",agencyId);
+            for(String table:List.of("customer_miles_audit","customer_miles_items","customer_miles_profiles")) {
+                jdbc.update("DELETE FROM "+table+" WHERE agency_id=?",agencyId);
+            }
             for (String table : List.of("commercial_followup_events", "commercial_followups", "referral_events", "referrals")) {
                 jdbc.update("DELETE FROM " + table + " WHERE agency_id=?",agencyId);
             }

@@ -4,7 +4,9 @@ Atualizado em 28/10/2026. Autoridade única para reserva: Codex como integrador.
 
 ## Base confirmada
 
-- Produção atual em 28/10: API 33f8238ecc6e5d7caed30534d977d505a8aae865, Railway bd121bb3-2e1b-4051-a4dc-ca3afc10f9b1 ativo/V64; UI aff2b2bbd6c3319ddbc55c30e52a69916f8e13f1, Vercel dpl_5vGkBfekLX1DwrV3NdYJrViczZug READY no domínio principal. Registro: publicacao-follow-up-2026-10-28.md.
+- Produção vigente após TODO-053 em 28/10: API ef31e7b6d597b825cb0b062a3ed57dd19bf8592e, Railway 6ad7fb73-f08f-4a74-b632-2491c6495c0b ativo/V65; UI 68ea7124c37e88b6229f0f8a211a7b4408729310, Vercel dpl_9aLrTTQR24HCtAhBGNbm596nqrAW READY em www.agenciashub.com.br. V56–V65 imutáveis. UI atual após TODO-054: b3722b5, Vercel DzZnLAqn READY. V66 reservada abaixo.
+
+- Base anterior F08 em 28/10: API 33f8238ecc6e5d7caed30534d977d505a8aae865, Railway bd121bb3-2e1b-4051-a4dc-ca3afc10f9b1 ativo/V64; UI aff2b2bbd6c3319ddbc55c30e52a69916f8e13f1, Vercel dpl_5vGkBfekLX1DwrV3NdYJrViczZug READY no domínio principal. Registro: publicacao-follow-up-2026-10-28.md.
 
 - Base anterior em 27/10: API `7ef4ce81ce240abfed0bccad77872e90ea2386d6`, Railway `f3abd48b-2cb6-4d34-87e0-73aec7aa5439` ativo/V63; UI `082026434f8d2e31fa0cbbb0ac9c8324872661b6`, Vercel `dpl_GN4Z6tZQRGwjKGvuVg5zRH9dApJH` READY no domínio principal. Registros: publicacao-etapas-2026-10-27.md e publicacao-indicacoes-2026-10-27.md.
 
@@ -26,14 +28,16 @@ Atualizado em 28/10/2026. Autoridade única para reserva: Codex como integrador.
 | V62 | Claude / integração Codex | TODO-050 extensão F10, `claude/f10-etapas-viagem` | Publicada em 27/10: API #66 882b3f3, Railway 492b242c SUCCESS/V62; UI #59 8f6ade9, Vercel 3La2peo READY no domínio principal. Evidência em publicacao-etapas-2026-10-27.md |
 | V63 | Claude / integração Codex | TODO-049 F09 cadastro de indicações, `claude/f09-indicacoes` | Publicada em 27/10 após V62: API #67 7ef4ce8, Railway f3abd48b ativo/V63; UI #60 0820264, Vercel GN4Z6tZ READY. 61 testes API/173 UI repetidos no head integrado. Créditos seguem fora do escopo |
 | V64 | Codex | TODO-042 F08 follow-up comercial, `codex/f08-follow-up` | API publicada em 28/10: PR #68 merge 33f8238, Railway bd121bb3 ativo/V64. 70 testes API aprovados, banco novo e upgrade V63→V64. UI #61 merge aff2b2b publicada, Vercel 5vGkBfek READY no domínio principal. 185 testes UI aprovados. Imutável; ver publicacao-follow-up-2026-10-28.md |
-| V65 | Codex | TODO-053, subentrega TODO-043: plano → tarefas de Milhas, `codex/f04-diagnostico-integracoes` | Reservada em 28/10 antes do SQL, após V64 publicada. Uma migration para comprovante de geração e vínculos às tarefas F01; sem diagnóstico público nesta versão. Banco novo e upgrade V64→V65 obrigatórios. |
+| V65 | Codex | TODO-053, subentrega TODO-043: plano → tarefas de Milhas, `codex/f04-diagnostico-integracoes` | Publicada em 28/10: API #69 ef31e7b, Railway 6ad7fb73 ativo/V65; UI #62 68ea712, Vercel 9aLrTTQR READY no domínio principal. 38 testes API/200 UI aprovados; banco novo e V64→V65, startup e domínio confirmados. Imutável. Ver publicacao-plano-tarefas-2026-10-28.md. |
 
-Diagnóstico público/reaproveitamento de cartões F04/F06, F11 e F05: sem número autorizado por enquanto. F08/V64 está publicada e imutável. Não ocupar número alheio nem criar migrations vazias para liberar a fila.
+| V66 | Codex | TODO-055 diagnóstico público de Milhas, `codex/f04-diagnostico-publico` | Reservada em 28/10 antes do SQL; configuração de link, declarações revisáveis, versões e comprovante de incorporação. Base V65, banco novo e upgrade V65→V66 obrigatórios. |
+
+Cartões TODO-054 não exigiram migration. F11 e F05 seguem sem número autorizado. V56–V65 publicadas e imutáveis. Não ocupar número alheio nem criar migrations vazias para liberar a fila.
 
 ## Fluxo de integração
 
 1. Cada agente usa banco de teste próprio e branch/PR isolados. Não apontar testes para produção.
-2. Desenvolver em paralelo, publicar em sequência V58 → V59 → V60 → V61 → V62 → V63 → V64. Versão maior aguarda as anteriores; sem `outOfOrder` ou ignore de validação.
+2. Desenvolver em paralelo, publicar em sequência V58 → V59 → V60 → V61 → V62 → V63 → V64 → V65 → V66. Versão maior aguarda as anteriores; sem `outOfOrder` ou ignore de validação.
 3. Antes de integrar, buscar main e comparar nomes/conteúdo das migrations publicadas. Não editar/renomear migrations executadas nem usar repair para mascarar divergências.
 4. Validar tanto banco novo quanto atualização da base anterior com dados representativos e preservação dos registros. CI de compilação não substitui esse teste.
 5. Validar inicialização da aplicação com as configurações reais de schema/pool na prévia; publicar API, confirmar migração e saúde, depois UI. Não mudar configuração de produção para resolver problema da prévia.
