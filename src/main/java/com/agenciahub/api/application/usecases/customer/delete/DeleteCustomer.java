@@ -23,6 +23,7 @@ public class DeleteCustomer implements DeleteCustomerUseCase {
     private final com.agenciahub.api.application.services.referrals.ReferralHistory referralHistory;
     private final com.agenciahub.api.application.services.stages.TripStageHistory stageHistory;
     private final com.agenciahub.api.application.services.followups.FollowupHistory followupHistory;
+    private final com.agenciahub.api.application.services.diagnostics.DiagnosticHistory diagnosticHistory;
 
     @Override
     @Transactional
@@ -34,6 +35,9 @@ public class DeleteCustomer implements DeleteCustomerUseCase {
         UUID customerId = entity.getId();
         // O evento de exclusão também conserva dados pessoais, mesmo sem compromisso ativo.
         jdbc.queryForList("SELECT id FROM customers WHERE id=? AND agency_id=? FOR UPDATE", customerId, agencyId);
+        if(diagnosticHistory.customer(agencyId,customerId)) {
+            throw new com.agenciahub.api.exception.DiagnosticHistoryException();
+        }
         if (followupHistory.existsForCustomer(agencyId,customerId)) {
             throw new com.agenciahub.api.exception.FollowupHistoryException();
         }

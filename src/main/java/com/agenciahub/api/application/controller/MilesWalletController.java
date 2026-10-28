@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
+
 import java.util.UUID;
 
 @RestController @RequiredArgsConstructor
@@ -26,16 +26,16 @@ public class MilesWalletController {
         return new com.agenciahub.api.exception.ApiError("Revise os campos da carteira: pontos e dias devem ser números inteiros, datas devem ser válidas e o tipo do registro deve ser informado.","INVALID_WALLET_INPUT");
     }
     @GetMapping public View get(@PathVariable UUID customerId) {return service.view(customerId);}
-    @PutMapping("/profile") public ProfileRow saveProfile(@PathVariable UUID customerId,@Valid @RequestBody ProfileInput input,Principal principal) {return service.saveProfile(customerId,input,principal.getName());}
+    @PutMapping("/profile") public ProfileRow saveProfile(@PathVariable UUID customerId,@Valid @RequestBody ProfileInput input) {return service.saveProfile(customerId,input,com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
     @DeleteMapping("/profile") @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void archiveProfile(@PathVariable UUID customerId,@RequestParam int expectedVersion,Principal principal) {service.archiveProfile(customerId,expectedVersion,principal.getName());}
+    public void archiveProfile(@PathVariable UUID customerId,@RequestParam int expectedVersion) {service.archiveProfile(customerId,expectedVersion,com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
     @PostMapping("/items") @ResponseStatus(HttpStatus.CREATED)
-    public Item create(@PathVariable UUID customerId,@RequestHeader("Idempotency-Key") UUID key,@Valid @RequestBody ItemInput input,Principal principal) {return service.create(customerId,key,input,principal.getName());}
-    @PatchMapping("/items/{id}") public Item update(@PathVariable UUID customerId,@PathVariable UUID id,@Valid @RequestBody ItemInput input,Principal principal) {return service.update(customerId,id,input,principal.getName());}
+    public Item create(@PathVariable UUID customerId,@RequestHeader("Idempotency-Key") UUID key,@Valid @RequestBody ItemInput input) {return service.create(customerId,key,input,com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
+    @PatchMapping("/items/{id}") public Item update(@PathVariable UUID customerId,@PathVariable UUID id,@Valid @RequestBody ItemInput input) {return service.update(customerId,id,input,com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
     @DeleteMapping("/items/{id}") @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void remove(@PathVariable UUID customerId,@PathVariable UUID id,@RequestParam int expectedVersion,Principal principal) {service.remove(customerId,id,expectedVersion,principal.getName());}
-    @PostMapping("/items/{id}/restore") public Item restore(@PathVariable UUID customerId,@PathVariable UUID id,@RequestParam int expectedVersion,Principal principal) {return service.restore(customerId,id,expectedVersion,principal.getName());}
+    public void remove(@PathVariable UUID customerId,@PathVariable UUID id,@RequestParam int expectedVersion) {service.remove(customerId,id,expectedVersion,com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
+    @PostMapping("/items/{id}/restore") public Item restore(@PathVariable UUID customerId,@PathVariable UUID id,@RequestParam int expectedVersion) {return service.restore(customerId,id,expectedVersion,com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
     @PostMapping("/accounts/{id}/movements") @ResponseStatus(HttpStatus.CREATED)
-    public Movement move(@PathVariable UUID customerId,@PathVariable UUID id,@Valid @RequestBody MovementInput input,Principal principal) {return service.addMovement(customerId,id,input,principal.getName());}
-    @PostMapping("/movements/{id}/reverse") public Movement reverse(@PathVariable UUID customerId,@PathVariable UUID id,@Valid @RequestBody ReversalInput input,Principal principal) {return service.reverse(customerId,id,input.reason(),principal.getName());}
+    public Movement move(@PathVariable UUID customerId,@PathVariable UUID id,@Valid @RequestBody MovementInput input) {return service.addMovement(customerId,id,input,com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
+    @PostMapping("/movements/{id}/reverse") public Movement reverse(@PathVariable UUID customerId,@PathVariable UUID id,@Valid @RequestBody ReversalInput input) {return service.reverse(customerId,id,input.reason(),com.agenciahub.api.security.SecurityContextUsers.requireUserId().toString());}
 }

@@ -44,6 +44,7 @@ public class ProcessDataDeletionRequest {
     private final com.agenciahub.api.application.services.referrals.ReferralHistory referralHistory;
     private final com.agenciahub.api.application.services.stages.TripStageHistory stageHistory;
     private final com.agenciahub.api.application.services.followups.FollowupHistory followupHistory;
+    private final com.agenciahub.api.application.services.diagnostics.DiagnosticHistory diagnosticHistory;
 
     @Transactional
     public void execute(UUID requestId, ProcessDataDeletionRequestDTO dto, PlatformAccount processor) {
@@ -63,7 +64,8 @@ public class ProcessDataDeletionRequest {
                 .orElseGet(List::of);
 
         boolean referralContact = referralHistory.existsForEmail(agencyId,request.getEmail());
-        if (ownSubmissions.isEmpty() && ownCustomers.isEmpty() && !referralContact) {
+        boolean diagnosticContact=diagnosticHistory.email(agencyId,request.getEmail());
+        if (ownSubmissions.isEmpty() && ownCustomers.isEmpty() && !referralContact && !diagnosticContact) {
             // Este e-mail não tem dado nesta agência: não é um recurso desta agência.
             throw new ResourceNotFoundException("solicitação de exclusão não encontrada");
         }
@@ -71,12 +73,18 @@ public class ProcessDataDeletionRequest {
         boolean excluir = "EXCLUIR".equals(dto.acao());
 
         if (excluir) {
+            if(diagnosticContact||ownCustomers.stream().anyMatch(c->diagnosticHistory.customer(agencyId,c.getId()))) {
+                throw new IllegalStateException("Este contato possui diagnóstico de milhas ou versões preservadas. A solicitação continua pendente para revisão das declarações, comprovantes e auditoria antes de concluir a anonimização.");
+            }
             if (referralContact) {
                 throw new IllegalStateException("Este contato participa de indicações ou possui histórico preservado. A solicitação continua pendente para revisão dos contatos, textos e auditoria antes de concluir a anonimização.");
             }
             // Não declarar concluída uma anonimização que deixaria snapshots/anexos pessoais intactos.
             for (CrmCustomer customer : ownCustomers) {
                 jdbc.queryForList("SELECT id FROM customers WHERE id=? AND agency_id=? FOR UPDATE",customer.getId(),agencyId);
+                if(diagnosticHistory.customer(agencyId,customer.getId())) {
+                    throw new IllegalStateException("Esta pessoa possui diagnóstico de milhas incorporado. A solicitação continua pendente para revisão das declarações, comprovantes e auditoria antes de concluir a anonimização.");
+                }
                 if (followupHistory.existsForCustomer(agencyId,customer.getId())) {
                     throw new IllegalStateException("Esta pessoa possui acompanhamento comercial ou histórico. A solicitação continua pendente para revisão dos textos e da auditoria antes de concluir a anonimização.");
                 }
