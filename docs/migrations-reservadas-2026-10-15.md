@@ -1,10 +1,12 @@
 # Registro de migrations — Codex e Claude
 
-Atualizado em 21/10/2026. Autoridade única para reserva: Codex como integrador. Ler antes de escrever SQL; nunca escolher a próxima versão apenas olhando a própria branch. Este registro substitui a instrução anterior de números provisórios.
+Atualizado em 27/10/2026. Autoridade única para reserva: Codex como integrador. Ler antes de escrever SQL; nunca escolher a próxima versão apenas olhando a própria branch. Este registro substitui a instrução anterior de números provisórios.
 
 ## Base confirmada
 
-- Produção confirmada em 20/10: API `a9932f8691518ef93dc3ee41328f64d3fe664bd4`, Railway `b603ff5f-acfd-4141-b7f6-cfa052b56bb4` SUCCESS. Schema public em V61, após upgrades sequenciais V58→V59→V60→V61 e inicialização confirmada em cada etapa.
+- Produção atual em 27/10: API `7ef4ce81ce240abfed0bccad77872e90ea2386d6`, Railway `f3abd48b-2cb6-4d34-87e0-73aec7aa5439` ativo/V63; UI `082026434f8d2e31fa0cbbb0ac9c8324872661b6`, Vercel `dpl_GN4Z6tZQRGwjKGvuVg5zRH9dApJH` READY no domínio principal. Registros: publicacao-etapas-2026-10-27.md e publicacao-indicacoes-2026-10-27.md.
+
+- Base histórica publicada em 20/10: API `a9932f8691518ef93dc3ee41328f64d3fe664bd4`, Railway `b603ff5f-acfd-4141-b7f6-cfa052b56bb4` SUCCESS. Schema public em V61, após upgrades sequenciais V58→V59→V60→V61 e inicialização confirmada em cada etapa.
 - Interface `a3b67c8a634939a6c77cca093da200b2674734d0`, Vercel `dpl_DBbTbgb8vrswnQ6vms4KJrmhhTm8` READY em www.agenciashub.com.br. Site e OpenAPI HTTP 200; rotas protegidas da API sem sessão HTTP 403.
 - V56 a V61 publicadas e imutáveis. Registros: publicacao-agenda-2026-10-20.md, publicacao-checklists-2026-10-20.md e publicacao-simulacoes-cliente-2026-10-20.md.
 - A prévia `agencia-hub-api-pr-62` pertence ao incidente histórico de 15/10. O ajuste manual descrito naquele runbook não é mais pré-requisito para a entrega: a API já foi integrada e publicada. Não reaplicar configurações da prévia à produção nem tentar recuperar aquele histórico para encaixar outra numeração.
@@ -19,10 +21,12 @@ Atualizado em 21/10/2026. Autoridade única para reserva: Codex como integrador.
 | V59 | Claude / integração Codex | F07 agenda/atas, `claude/f07-agenda-atas` | Publicada: API #65 3dca6dc, Railway a45d66e4 SUCCESS/V59; UI #58 615fda0, Vercel READY no domínio principal |
 | V60 | Codex | F01 checklists, `codex/f01-checklists` | Publicada: API #63 9f7f224, Railway 1f607de2 SUCCESS/V60; UI #56 04f903b, Vercel READY no domínio principal |
 | V61 | Codex | TODO-052 simulações por cliente, `codex/f06-simulacoes-cliente` | Publicada: API #64 a9932f8, Railway b603ff5f SUCCESS/V61; UI #57 a3b67c8, Vercel READY no domínio principal |
-| V62 | Claude / integração Codex | TODO-050 extensão F10, `claude/f10-etapas-viagem` | API #66/UI #59 em revisão e integração Codex; uma migration V62 existente, ainda não publicada |
-| V63 | Claude | TODO-049 F09 cadastro de indicações, `claude/f09-indicacoes` | Reservada para uma migration inicial do cadastro, sem créditos automáticos; publicar após V62 |
+| V62 | Claude / integração Codex | TODO-050 extensão F10, `claude/f10-etapas-viagem` | Publicada em 27/10: API #66 882b3f3, Railway 492b242c SUCCESS/V62; UI #59 8f6ade9, Vercel 3La2peo READY no domínio principal. Evidência em publicacao-etapas-2026-10-27.md |
+| V63 | Claude / integração Codex | TODO-049 F09 cadastro de indicações, `claude/f09-indicacoes` | Publicada em 27/10 após V62: API #67 7ef4ce8, Railway f3abd48b ativo/V63; UI #60 0820264, Vercel GN4Z6tZ READY. 61 testes API/173 UI repetidos no head integrado. Créditos seguem fora do escopo |
 
-F08, evolução F04/F06, F11 e F05: sem número autorizado por enquanto. Reservar aqui antes de criar migrations. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.
+| V64 | Codex | TODO-042 F08 follow-up comercial, `codex/f08-follow-up` | Reservada em 27/10 após V63 publicada; uma migration, registros e auditoria próprios; banco novo e upgrade V63→V64 obrigatórios |
+
+Evolução F04/F06, F11 e F05: sem número autorizado por enquanto. F08 tem somente V64 reservada. Se precisar de mais de um arquivo, combinar previamente a revisão das reservas; não ocupar número alheio. Não criar migrations vazias para liberar a fila.
 
 ## Fluxo de integração
 

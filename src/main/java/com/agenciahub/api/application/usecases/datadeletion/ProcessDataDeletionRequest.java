@@ -43,6 +43,7 @@ public class ProcessDataDeletionRequest {
     private final org.springframework.jdbc.core.JdbcTemplate jdbc;
     private final com.agenciahub.api.application.services.referrals.ReferralHistory referralHistory;
     private final com.agenciahub.api.application.services.stages.TripStageHistory stageHistory;
+    private final com.agenciahub.api.application.services.followups.FollowupHistory followupHistory;
 
     @Transactional
     public void execute(UUID requestId, ProcessDataDeletionRequestDTO dto, PlatformAccount processor) {
@@ -75,6 +76,10 @@ public class ProcessDataDeletionRequest {
             }
             // Não declarar concluída uma anonimização que deixaria snapshots/anexos pessoais intactos.
             for (CrmCustomer customer : ownCustomers) {
+                jdbc.queryForList("SELECT id FROM customers WHERE id=? AND agency_id=? FOR UPDATE",customer.getId(),agencyId);
+                if (followupHistory.existsForCustomer(agencyId,customer.getId())) {
+                    throw new IllegalStateException("Esta pessoa possui acompanhamento comercial ou histórico. A solicitação continua pendente para revisão dos textos e da auditoria antes de concluir a anonimização.");
+                }
                 if (referralHistory.existsForCustomer(agencyId,customer.getId())) {
                     throw new IllegalStateException("Esta pessoa participa de indicações ou possui histórico preservado. A solicitação continua pendente para revisão dos textos e da auditoria antes de concluir a anonimização.");
                 }
