@@ -10,6 +10,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RestControllerAdvice(assignableTypes=FollowupController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class FollowupExceptionHandler {
+    @ExceptionHandler({org.springframework.web.bind.ServletRequestBindingException.class,
+            org.springframework.beans.TypeMismatchException.class,
+            org.springframework.http.converter.HttpMessageNotReadableException.class,
+            jakarta.validation.ConstraintViolationException.class})
+    public ResponseEntity<ApiError> invalidInput(){return ResponseEntity.badRequest().body(new ApiError("Revise o produto, os filtros, as datas e os identificadores informados.","FOLLOWUP_INVALID_INPUT"));}
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiError> error(ResponseStatusException ex){return ResponseEntity.status(ex.getStatusCode()).body(new ApiError(ex.getReason(),"FOLLOWUP_"+ex.getStatusCode().value()));}
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
