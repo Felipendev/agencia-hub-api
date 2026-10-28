@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(com.agenciahub.api.exception.FollowupHistoryException.class)
+    public ResponseEntity<ApiError> handleFollowupHistory(com.agenciahub.api.exception.FollowupHistoryException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "FOLLOWUP_HISTORY_EXISTS"));
+    }
     @ExceptionHandler(com.agenciahub.api.exception.ReferralHistoryException.class)
     public ResponseEntity<ApiError> handleReferralHistory(com.agenciahub.api.exception.ReferralHistoryException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError(ex.getMessage(), "REFERRAL_HISTORY_EXISTS"));
@@ -76,6 +80,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex) {
         String msg = ex.getMostSpecificCause().getMessage();
+        if (msg != null && msg.contains("commercial_followups_responsible_id_fkey")) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("Este usuário é responsável por ações comerciais. Transfira a responsabilidade ou inative o usuário para preservar o histórico.", "FOLLOWUP_RESPONSIBLE_HISTORY_EXISTS"));
+        }
+        if (msg != null && (msg.contains("commercial_followups_customer_id_fkey") || msg.contains("commercial_followup_events_customer_id_fkey"))) {
+            return handleFollowupHistory(new com.agenciahub.api.exception.FollowupHistoryException());
+        }
         if (msg != null && (msg.contains("referrals_referrer_customer_id_fkey") || msg.contains("referrals_referred_customer_id_fkey"))) {
             return handleReferralHistory(new com.agenciahub.api.exception.ReferralHistoryException());
         }
