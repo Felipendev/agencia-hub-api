@@ -1,0 +1,20 @@
+{
+  "feature": "TODO-044",
+  "tasks": [
+    {
+      "id": "H1",
+      "title": "Projeção API/CSV segura e filtros",
+      "status": "completed"
+    },
+    {
+      "id": "H2",
+      "title": "Interface dos dois produtos e integração",
+      "status": "completed"
+    },
+    {
+      "id": "H3",
+      "title": "Testes/revisão/QA e PRs draft; sem merge/deploy",
+      "status": "in_progress"
+    }
+  ]
+}
