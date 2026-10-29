@@ -56,7 +56,14 @@ public class SupplierController {
     @PatchMapping("/{id}")
     public SupplierResponse patch(@PathVariable UUID id, @RequestBody UpdateSupplierRequest request) {
         Supplier supplier = findCurrentAgency(id);
-        if (request.name() != null) supplier.setName(request.name().strip());
+        if (request.name() != null) {
+            String name = request.name().strip();
+            if (name.isEmpty()) throw new IllegalArgumentException("Informe o nome do fornecedor.");
+            supplierRepository.findFirstByAgency_IdAndNameIgnoreCase(TenantContext.requireAgencyId(), name)
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> { throw new IllegalArgumentException("Já existe um fornecedor com este nome."); });
+            supplier.setName(name);
+        }
         if (request.contactName() != null) supplier.setContactName(blankToNull(request.contactName()));
         if (request.email() != null) supplier.setEmail(blankToNull(request.email()));
         if (request.phone() != null) supplier.setPhone(blankToNull(request.phone()));
